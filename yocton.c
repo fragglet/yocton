@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "yocton.h"
@@ -16,17 +17,126 @@ enum token_type {
 	TOKEN_OPEN_BRACE,
 	TOKEN_CLOSE_BRACE,
 	TOKEN_EOF,
+	TOKEN_ERROR,
 };
 
 struct yocton_instream {
 	FILE *file;
-	char *buf;
+	char *buf, *string;
+	size_t buf_len, buf_size;
+	size_t string_len, string_size;
+	unsigned int buf_offset;
 	struct yocton_object *root;
 };
 
-static enum token_type read_next_token(struct yocton_instream *f)
+static int peek_next_char(struct yocton_instream *s, char *c)
 {
-	// TODO
+	if (s->buf_offset >= s->buf_len) {
+		s->buf_len = fread(s->buf, sizeof(char), s->buf_size, s->file);
+		if (s->buf_len == 0) {
+			return 0;
+		}
+		s->buf_offset = 0;
+	}
+	*c = s->buf[s->buf_offset];
+	return 1;
+}
+
+static int read_next_char(struct yocton_instream *s, char *c)
+{
+	if (!peek_next_char(s, c)) {
+		return 0;
+	}
+	++s->buf_offset;
+	return 1;
+}
+
+static int is_bare_string_char(int c)
+{
+       return isalnum(c) || strchr("_-+.", c) != NULL;
+}
+
+static int append_string_char(struct yocton_instream *s, char c)
+{
+	char *new_stringbuf;
+	if (s->string_len + 1 >= s->string_size) {
+		s->string_size = s->string_size == 0 ? 64 : s->string_size * 2;
+		new_stringbuf = realloc(s->string, s->string_size);
+		if (new_stringbuf == NULL) {
+			return 0;
+		}
+		s->string = new_stringbuf;
+	}
+	s->string[s->string_len] = c;
+	s->string[s->string_len + 1] = '\0';
+	++s->string_len;
+	return 1;
+}
+
+static int unescape_string_char(char *c) {
+	switch (*c) {
+		case 'a':  *c = '\a'; return 1;
+		case 'b':  *c = '\b'; return 1;
+		case 'n':  *c = '\n'; return 1;
+		case 'r':  *c = '\r'; return 1;
+		case 't':  *c = '\b'; return 1;
+		case '\\': *c = '\\'; return 1;
+		case '\'': *c = '\''; return 1;
+		case '"':  *c = '\"'; return 1;
+		default: return 0;
+		// TODO: \x, \u etc.
+	}
+}
+
+// Read quote-delimited "C style" string.
+static enum token_type read_string(struct yocton_instream *s)
+{
+	char c;
+	s->string_len = 0;
+	for (;;) {
+		CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
+		if (c == '"') {
+			return TOKEN_STRING;
+		} else if (c == '\\') {
+			CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
+			CHECK_OR_GOTO_FAIL(unescape_string_char(&c));
+		}
+		CHECK_OR_GOTO_FAIL(append_string_char(s, c));
+	}
+fail:
+	// TODO: More detailed error reporting
+	return TOKEN_ERROR;
+}
+
+static enum token_type read_next_token(struct yocton_instream *s)
+{
+	char c;
+	do {
+		if (!read_next_char(s, &c)) {
+			return TOKEN_EOF;
+		}
+	} while (isspace(c));
+	s->string_len = 0;
+	CHECK_OR_GOTO_FAIL(append_string_char(s, c));
+	switch (c) {
+		case ':':  return TOKEN_COLON;
+		case '{':  return TOKEN_OPEN_BRACE;
+		case '}':  return TOKEN_CLOSE_BRACE;
+		case '\"': return read_string(s);
+		default:   break;
+	}
+	CHECK_OR_GOTO_FAIL(is_bare_string_char(c));
+	for (;;) {
+		if (!peek_next_char(s, &c) || !is_bare_string_char(c)) {
+			break;
+		}
+		CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
+		CHECK_OR_GOTO_FAIL(append_string_char(s, c));
+	}
+	return TOKEN_STRING;
+fail:
+	// TODO: More detailed error reporting
+	return TOKEN_ERROR;
 }
 
 struct yocton_object {
@@ -66,6 +176,19 @@ static void free_obj(struct yocton_object *obj)
 	free(obj);
 }
 
+static void free_instream(struct yocton_instream *instream)
+{
+	if (instream == NULL) {
+		return;
+	}
+	free(instream->buf);
+	free(instream->string);
+	if (instream->file != NULL) {
+		fclose(instream->file);
+	}
+	free(instream);
+}
+
 struct yocton_object *yocton_open(const char *filename)
 {
 	FILE *file = NULL;
@@ -80,18 +203,25 @@ struct yocton_object *yocton_open(const char *filename)
 	obj = calloc(1, sizeof(struct yocton_object));
 	CHECK_OR_GOTO_FAIL(obj != NULL);
 
-	instream->root = obj;
-	instream->file = file;
-	instream->buf = NULL;  // TODO
 	obj->instream = instream;
 	obj->field = NULL;
 	obj->done = 0;
 
+	instream->root = obj;
+	instream->file = file;
+	instream->buf_size = 256;
+	instream->buf_len = 0;
+	instream->buf_offset = 0;
+	instream->buf = calloc(instream->buf_size, sizeof(char));
+	CHECK_OR_GOTO_FAIL(instream->buf != NULL);
+	instream->string_size = 0;
+	instream->string = NULL;
+
 	return obj;
 
 fail:
-	free(instream);
-	free(obj);
+	free_instream(instream);
+	free_obj(obj);
 	if (file != NULL) {
 		fclose(file);
 	}
@@ -104,8 +234,7 @@ void yocton_close(struct yocton_object *obj)
 		return;
 	}
 
-	free(obj->instream->buf);
-	fclose(obj->instream->file);
+	free_instream(obj->instream);
 	free_obj(obj);
 }
 
@@ -128,12 +257,11 @@ static void skip_forward(struct yocton_object *obj)
 static struct yocton_field *next_field(struct yocton_object *obj)
 {
 	struct yocton_field *f = NULL;
-	enum token_type tt;
 
 	f = calloc(1, sizeof(struct yocton_field));
 	CHECK_OR_GOTO_FAIL(f != NULL);
 	obj->field = f;
-	f->name = strdup(obj->instream->buf);
+	f->name = strdup(obj->instream->string);
 	CHECK_OR_GOTO_FAIL(f->name != NULL);
 
 	switch (read_next_token(obj->instream)) {
@@ -142,7 +270,7 @@ static struct yocton_field *next_field(struct yocton_object *obj)
 			f->type = YOCTON_FIELD_STRING;
 			CHECK_OR_GOTO_FAIL(
 				read_next_token(obj->instream) == TOKEN_STRING);
-			f->value = strdup(obj->instream->buf);
+			f->value = strdup(obj->instream->string);
 			CHECK_OR_GOTO_FAIL(f->value != NULL);
 			return f;
 		case TOKEN_OPEN_BRACE:
