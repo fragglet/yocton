@@ -305,6 +305,7 @@ struct yocton_field *yocton_next_field(struct yocton_object *obj)
 		case TOKEN_STRING:
 			return next_field(obj);
 		case TOKEN_CLOSE_BRACE:
+			CHECK_OR_GOTO_FAIL(obj != obj->instream->root);
 			obj->done = 1;
 			return NULL;
 		case TOKEN_EOF:
@@ -318,6 +319,9 @@ struct yocton_field *yocton_next_field(struct yocton_object *obj)
 			assert(0);
 			return NULL;
 	}
+fail:
+	assert(0);
+	return NULL;
 }
 
 enum yocton_field_type yocton_field_type(struct yocton_field *f)
