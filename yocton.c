@@ -183,20 +183,13 @@ static void free_instream(struct yocton_instream *instream)
 	}
 	free(instream->buf);
 	free(instream->string);
-	if (instream->file != NULL) {
-		fclose(instream->file);
-	}
 	free(instream);
 }
 
-struct yocton_object *yocton_open(const char *filename)
+struct yocton_object *yocton_read_from(FILE *fstream)
 {
-	FILE *file = NULL;
 	struct yocton_instream *instream = NULL;
 	struct yocton_object *obj = NULL;
-
-	file = fopen(filename, "r");
-	CHECK_OR_GOTO_FAIL(file != NULL);
 
 	instream = calloc(1, sizeof(struct yocton_instream));
 	CHECK_OR_GOTO_FAIL(instream != NULL);
@@ -208,7 +201,7 @@ struct yocton_object *yocton_open(const char *filename)
 	obj->done = 0;
 
 	instream->root = obj;
-	instream->file = file;
+	instream->file = fstream;
 	instream->buf_size = 256;
 	instream->buf_len = 0;
 	instream->buf_offset = 0;
@@ -222,13 +215,10 @@ struct yocton_object *yocton_open(const char *filename)
 fail:
 	free_instream(instream);
 	free_obj(obj);
-	if (file != NULL) {
-		fclose(file);
-	}
 	return NULL;
 }
 
-void yocton_close(struct yocton_object *obj)
+void yocton_free(struct yocton_object *obj)
 {
 	if (obj != obj->instream->root) {
 		return;

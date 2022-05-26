@@ -7,8 +7,8 @@ enum yocton_field_type {
 struct yocton_object;
 struct yocton_field;
 
-struct yocton_object *yocton_open(const char *filename);
-void yocton_close(struct yocton_object *obj);
+struct yocton_object *yocton_read_from(FILE *fstream);
+void yocton_free(struct yocton_object *obj);
 
 struct yocton_field *yocton_next_field(struct yocton_object *obj);
 

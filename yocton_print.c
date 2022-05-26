@@ -1,6 +1,9 @@
 // Basic example program that reads a .yocton file and prints the contents.
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 #include "yocton.h"
 
@@ -33,9 +36,17 @@ void print_object(struct yocton_object *obj, int indent)
 
 int main(int argc, char *argv[])
 {
+	FILE *fstream;
 	struct yocton_object *obj;
-	obj = yocton_open(argv[1]);
+	fstream = fopen(argv[1], "r");
+	if (fstream == NULL) {
+		fprintf(stderr, "Error opening %s: %s\n",
+		        argv[1], strerror(errno));
+		exit(1);
+	}
+	obj = yocton_read_from(fstream);
 	print_object(obj, 0);
-	yocton_close(obj);
+	yocton_free(obj);
+	fclose(fstream);
 }
 
