@@ -38,6 +38,13 @@ my_list {
 }
 ```
 
+## API
+
+The Yocton API is a "pull parser" that is designed to work nicely for
+statically compiled languages like C.
+
+/* TODO: Code example here. */
+
 ## What Yocton doesn't have
 
 Compared with JSON:
