@@ -21,7 +21,8 @@ enum token_type {
 };
 
 struct yocton_instream {
-	FILE *file;
+	yocton_read callback;
+	void *callback_handle;
 	char *buf, *string;
 	size_t buf_len, buf_size;
 	size_t string_len, string_size;
@@ -32,7 +33,8 @@ struct yocton_instream {
 static int peek_next_char(struct yocton_instream *s, char *c)
 {
 	if (s->buf_offset >= s->buf_len) {
-		s->buf_len = fread(s->buf, sizeof(char), s->buf_size, s->file);
+		s->buf_len = s->callback(s->buf, s->buf_size,
+		                         s->callback_handle);
 		if (s->buf_len == 0) {
 			return 0;
 		}
@@ -186,7 +188,17 @@ static void free_instream(struct yocton_instream *instream)
 	free(instream);
 }
 
+static size_t fread_wrapper(void *buf, size_t buf_size, void *handle)
+{
+	return fread(buf, 1, buf_size, (FILE *) handle);
+}
+
 struct yocton_object *yocton_read_from(FILE *fstream)
+{
+	return yocton_read_with(fread_wrapper, fstream);
+}
+
+struct yocton_object *yocton_read_with(yocton_read callback, void *handle)
 {
 	struct yocton_instream *instream = NULL;
 	struct yocton_object *obj = NULL;
@@ -201,7 +213,8 @@ struct yocton_object *yocton_read_from(FILE *fstream)
 	obj->done = 0;
 
 	instream->root = obj;
-	instream->file = fstream;
+	instream->callback = callback;
+	instream->callback_handle = handle;
 	instream->buf_size = 256;
 	instream->buf_len = 0;
 	instream->buf_offset = 0;

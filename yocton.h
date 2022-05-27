@@ -1,4 +1,6 @@
 
+typedef size_t (*yocton_read)(void *buf, size_t buf_size, void *handle);
+
 enum yocton_field_type {
 	YOCTON_FIELD_STRING,
 	YOCTON_FIELD_OBJECT,
@@ -7,6 +9,7 @@ enum yocton_field_type {
 struct yocton_object;
 struct yocton_field;
 
+struct yocton_object *yocton_read_with(yocton_read callback, void *handle);
 struct yocton_object *yocton_read_from(FILE *fstream);
 void yocton_free(struct yocton_object *obj);
 
