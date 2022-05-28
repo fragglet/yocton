@@ -145,6 +145,10 @@ static enum token_type read_string(struct yocton_instream *s)
 				input_error(s, "unknown string escape: \\%c", c);
 				return TOKEN_ERROR;
 			}
+		} else if (c < 0x80 && !isprint(c)) {
+			input_error(s, "control character not allowed inside "
+			            "string (ASCII char 0x%02x)", c);
+			return TOKEN_ERROR;
 		}
 		CHECK_OR_GOTO_FAIL(append_string_char(s, c));
 	}
