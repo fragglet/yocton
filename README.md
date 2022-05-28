@@ -21,7 +21,8 @@ Strings have two representations:
    characters, underscore, plus, minus, period.
 
 Taking into account the above two representations, here is another example:
-```
+```c
+// This is a comment
 my_integer: 12345
 my_float: 1.234e-10
 my_boolean: true

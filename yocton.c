@@ -177,7 +177,7 @@ fail:
 
 static enum token_type read_next_token(struct yocton_instream *s)
 {
-	char c;
+	char c, c2;
 	if (strlen(s->error_buf) > 0) {
 		return TOKEN_ERROR;
 	}
@@ -187,6 +187,14 @@ static enum token_type read_next_token(struct yocton_instream *s)
 			return TOKEN_EOF;
 		}
 		CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
+		// If we encounter a comment we skip past it. Note that
+		// ending with EOF is also okay.
+		if (c == '/' && peek_next_char(s, &c2) && c2 =='/') {
+			while (peek_next_char(s, &c) && c != '\n') {
+				CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
+			}
+			c = ' ';
+		}
 	} while (isspace(c));
 
 	switch (c) {

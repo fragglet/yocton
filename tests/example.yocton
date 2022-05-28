@@ -1,8 +1,9 @@
+// this is a comment
 my_integer:12345
 my_float: 1.234e-10
 my_boolean: true
 error: EAGAIN
-temperature_map {
+temperature_map {// comments can also be at the end of lines
   "ice cream": -18C
   "room temperature": 20C
 }
