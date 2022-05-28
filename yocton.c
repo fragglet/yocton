@@ -1,11 +1,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
 
 #include "yocton.h"
+
+#define ERROR_BUF_SIZE 100
 
 #define ERROR_ALLOC "memory allocation failure"
 #define ERROR_EOF   "unexpected EOF"
@@ -34,16 +37,22 @@ struct yocton_instream {
 	// string contains the last string token read.
 	char *string;
 	size_t string_len, string_size;
-	// error is non-NULL if an error occurs during parsing.
-	char *error;
+	// error_buf is non-empty if an error occurs during parsing.
+	char *error_buf;
 	int lineno;
 	struct yocton_object *root;
 };
 
 static void input_error(struct yocton_instream *s, char *fmt, ...)
 {
-	// TODO
-	s->error = "error";
+	va_list args;
+
+	// We only store the first error.
+	if (strlen(s->error_buf) > 0) {
+		return;
+	}
+	va_start(args, fmt);
+	vsnprintf(s->error_buf, ERROR_BUF_SIZE, fmt, args);
 }
 
 // Assign the result of an allocation, storing an error if result == NULL.
@@ -165,7 +174,7 @@ fail:
 static enum token_type read_next_token(struct yocton_instream *s)
 {
 	char c;
-	if (s->error != NULL) {
+	if (strlen(s->error_buf) > 0) {
 		return TOKEN_ERROR;
 	}
 	// Skip past any spaces. Reaching EOF is not always an error.
@@ -230,6 +239,7 @@ static void free_instream(struct yocton_instream *instream)
 		return;
 	}
 	free(instream->buf);
+	free(instream->error_buf);
 	free(instream->string);
 	free(instream);
 }
@@ -261,11 +271,13 @@ struct yocton_object *yocton_read_with(yocton_read callback, void *handle)
 	instream->root = obj;
 	instream->callback = callback;
 	instream->callback_handle = handle;
-	instream->error = NULL;
 	instream->lineno = 1;
 	instream->buf_len = 0;
 	instream->buf_offset = 0;
 	instream->buf_size = 256;
+	CHECK_OR_GOTO_FAIL(
+	    assign_alloc(&instream->error_buf, instream,
+	        calloc(ERROR_BUF_SIZE, 1)));
 	CHECK_OR_GOTO_FAIL(
 	    assign_alloc(&instream->buf, instream,
 	        calloc(instream->buf_size, sizeof(char))));
@@ -351,7 +363,7 @@ fail:
 
 struct yocton_field *yocton_next_field(struct yocton_object *obj)
 {
-	if (obj->done) {
+	if (obj->done || strlen(obj->instream->error_buf) > 0) {
 		return NULL;
 	}
 
