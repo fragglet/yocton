@@ -205,7 +205,7 @@ struct yocton_object {
 struct yocton_field {
 	enum yocton_field_type type;
 	char *name, *value;
-	struct yocton_object *child;
+	struct yocton_object *parent, *child;
 };
 
 static void free_obj(struct yocton_object *obj);
@@ -326,6 +326,7 @@ static struct yocton_field *next_field(struct yocton_object *obj)
 	    assign_alloc(&f, obj->instream,
 	        calloc(1, sizeof(struct yocton_field))));
 	obj->field = f;
+	f->parent = obj;
 	CHECK_OR_GOTO_FAIL(
 	    assign_alloc(&f->name, obj->instream,
 	        strdup(obj->instream->string)));
@@ -363,7 +364,7 @@ fail:
 
 struct yocton_field *yocton_next_field(struct yocton_object *obj)
 {
-	if (obj->done || strlen(obj->instream->error_buf) > 0) {
+	if (obj == NULL || obj->done || strlen(obj->instream->error_buf) > 0) {
 		return NULL;
 	}
 
@@ -409,14 +410,21 @@ const char *yocton_field_name(struct yocton_field *f)
 
 const char *yocton_field_value(struct yocton_field *f)
 {
-	// TODO: Error if type != YOCTON_FIELD_STRING
+	if (f->type != YOCTON_FIELD_STRING) {
+		input_error(f->parent->instream, "field '%s' has object, "
+		            "not value type", f->name);
+		return "";
+	}
 	return f->value;
 }
 
 struct yocton_object *yocton_field_inner(struct yocton_field *f)
 {
-	// TODO: Error if type != YOCTON_FIELD_OBJECT
+	if (f->type != YOCTON_FIELD_OBJECT) {
+		input_error(f->parent->instream, "field '%s' has value, "
+		            "not object type", f->name);
+		return NULL;
+	}
 	return f->child;
 }
-
 
