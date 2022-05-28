@@ -292,6 +292,21 @@ fail:
 	return NULL;
 }
 
+int yocton_have_error(struct yocton_object *obj, int *lineno,
+                      const char **error_msg)
+{
+	if (strlen(obj->instream->error_buf) == 0) {
+		return 0;
+	}
+	if (lineno != NULL) {
+		*lineno = obj->instream->lineno;
+	}
+	if (error_msg != NULL) {
+		*error_msg = obj->instream->error_buf;
+	}
+	return 1;
+}
+
 void yocton_free(struct yocton_object *obj)
 {
 	if (obj != obj->instream->root) {

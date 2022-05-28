@@ -38,6 +38,9 @@ int main(int argc, char *argv[])
 {
 	FILE *fstream;
 	struct yocton_object *obj;
+	const char *error;
+	int error_lineno;
+
 	fstream = fopen(argv[1], "r");
 	if (fstream == NULL) {
 		fprintf(stderr, "Error opening %s: %s\n",
@@ -46,6 +49,9 @@ int main(int argc, char *argv[])
 	}
 	obj = yocton_read_from(fstream);
 	print_object(obj, 0);
+	if (yocton_have_error(obj, &error_lineno, &error)) {
+		fprintf(stderr, "%d: %s\n", error_lineno, error);
+	}
 	yocton_free(obj);
 	fclose(fstream);
 }
