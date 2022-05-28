@@ -1,0 +1,14 @@
+my_integer:12345
+my_float: 1.234e-10
+my_boolean: true
+error: EAGAIN
+temperature_map {
+  "ice cream": -18C
+  "room temperature": 20C
+}
+ip_address: 192.168.4.10
+my_list {
+  element: 123
+  element: 456
+  element: 789
+}

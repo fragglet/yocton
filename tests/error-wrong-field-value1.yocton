@@ -1,0 +1,5 @@
+field1: "value"
+inner: {
+  this: wrong
+}
+

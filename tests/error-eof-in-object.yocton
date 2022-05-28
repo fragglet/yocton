@@ -1,0 +1,4 @@
+field1: "value"
+inner {
+  field2: "another"
+
