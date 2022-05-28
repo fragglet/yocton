@@ -374,6 +374,7 @@ static struct yocton_field *next_field(struct yocton_object *obj)
 	}
 fail:
 	free_field(f);
+	obj->field = NULL;
 	return NULL;
 }
 
