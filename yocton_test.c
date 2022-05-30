@@ -178,11 +178,15 @@ static int run_test(char *filename)
 
 	for (i = -1; i < 50; ++i) {
 		test_success = run_test_with_limit(filename, i);
+		success = success && test_success;
+		// The first time we encounter an error, don't run the test
+		// again. There's no point in spamming stderr for a single
+		// file.
 		if (!test_success) {
 			fprintf(stderr, "%s: test failed with limit=%d\n",
 			        filename, i);
+			break;
 		}
-		success = success && test_success;
 	}
 	return success;
 }
