@@ -1,0 +1,5 @@
+//| error_message: "field 'read_as_value' has object, not value type"
+//| error_lineno: 3
+read_as_value {
+  we_dont_get_this_far = true
+}

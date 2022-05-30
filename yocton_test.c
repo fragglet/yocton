@@ -76,14 +76,23 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 void evaluate_obj(struct yocton_object *obj)
 {
 	struct yocton_field *field;
+	enum yocton_field_type ft;
+	const char *name;
 
 	for (;;) {
 		field = yocton_next_field(obj);
 		if (field == NULL) {
 			return;
 		}
-		assert(yocton_field_name(field) != NULL);
-		if (yocton_field_type(field) == YOCTON_FIELD_OBJECT) {
+		name = yocton_field_name(field);
+		assert(name != NULL);
+		ft = yocton_field_type(field);
+		if (!strcmp(name, "read_as_object")) {
+			ft = YOCTON_FIELD_OBJECT;
+		} else if (!strcmp(name, "read_as_value")) {
+			ft = YOCTON_FIELD_STRING;
+		}
+		if (ft == YOCTON_FIELD_OBJECT) {
 			evaluate_obj(yocton_field_inner(field));
 		} else {
 			assert(yocton_field_value(field) != NULL);
@@ -121,6 +130,7 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	}
 
 	evaluate_obj(obj);
+	fclose(fstream);
 
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
 	if (alloc_limit != -1 && !strcmp(error_msg, ERROR_ALLOC)) {

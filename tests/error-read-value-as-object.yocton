@@ -1,0 +1,3 @@
+//| error_message: "field 'read_as_object' has value, not object type"
+//| error_lineno: 3
+read_as_object: 1234
