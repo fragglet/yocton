@@ -291,12 +291,10 @@ struct yocton_object *yocton_read_with(yocton_read callback, void *handle)
 	instream->buf_len = 0;
 	instream->buf_offset = 0;
 	instream->buf_size = 256;
-	CHECK_OR_GOTO_FAIL(
-	    assign_alloc(&instream->error_buf, instream,
-	        calloc(ERROR_BUF_SIZE, 1)));
-	CHECK_OR_GOTO_FAIL(
-	    assign_alloc(&instream->buf, instream,
-	        calloc(instream->buf_size, sizeof(char))));
+	instream->error_buf = calloc(ERROR_BUF_SIZE, 1);
+	CHECK_OR_GOTO_FAIL(instream->error_buf != NULL);
+	instream->buf = calloc(instream->buf_size, sizeof(char));
+	CHECK_OR_GOTO_FAIL(instream->buf != NULL);
 	instream->string_size = 0;
 	instream->string = NULL;
 
