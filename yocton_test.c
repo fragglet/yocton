@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "alloc-testing.h"
 #include "yocton.h"
 
 struct error_data {
@@ -119,14 +120,22 @@ int run_test(char *filename)
 			fprintf(stderr, "%s: wrong error message, want '%s', "
 			        "got '%s'\n", filename,
 			        error_data.error_message, error_msg);
+			success = 0;
 		}
 		if (lineno != error_data.error_lineno) {
 			fprintf(stderr, "%s: wrong error lineno, want %d, "
 			        "got %d\n", filename, error_data.error_lineno,
 			        lineno);
+			success = 0;
 		}
 	}
 	yocton_free(obj);
+
+	if (alloc_test_get_allocated() != 0) {
+		fprintf(stderr, "%s: %d bytes still allocated after test\n",
+		        filename, alloc_test_get_allocated());
+		success = 0;
+	}
 
 	return success;
 }

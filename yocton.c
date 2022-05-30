@@ -8,6 +8,10 @@
 
 #include "yocton.h"
 
+#ifdef ALLOC_TESTING
+#include "alloc-testing.h"
+#endif
+
 #define ERROR_BUF_SIZE 100
 
 #define ERROR_ALLOC "memory allocation failure"
