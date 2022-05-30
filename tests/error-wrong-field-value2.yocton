@@ -1,3 +1,4 @@
+//| error_message: "string expected to follow ':'"
 field1: "value"
 foo::
 

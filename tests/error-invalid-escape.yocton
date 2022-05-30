@@ -1,2 +1,3 @@
+//| error_message: "unknown string escape: \\&"
 field1: "value"
 field2: "\&value2"

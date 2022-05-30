@@ -1,2 +1,3 @@
+//| error_message: "unknown token: not valid bare-string character"
 field1: "value"
 start_is_ok_but_then%oops

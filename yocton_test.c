@@ -5,6 +5,67 @@
 
 #include "yocton.h"
 
+struct error_data {
+	char *error_message;
+};
+
+size_t read_from_comment(void *buf, size_t buf_size, void *handle)
+{
+	FILE *fstream = (FILE *) handle;
+	int linelen;
+	char linebuf[128];
+
+	for (;;) {
+		if (fgets(linebuf, sizeof(linebuf), fstream) == NULL) {
+			assert(feof(fstream));
+			break;
+		}
+		if (strncmp(linebuf, "//|", 3) != 0) {
+			continue;
+		}
+		linelen = strlen(linebuf + 3);
+		assert(linelen < buf_size);
+		memcpy(buf, linebuf + 3, linelen);
+		return linelen;
+	}
+	return 0;
+}
+
+void read_error_data(struct error_data *data, struct yocton_object *obj)
+{
+	struct yocton_field *field;
+	const char *name;
+
+	for (;;) {
+		field = yocton_next_field(obj);
+		if (field == NULL) {
+			return;
+		}
+		name = yocton_field_name(field);
+		if (!strcmp(name, "error_message")) {
+			data->error_message = strdup(yocton_field_value(field));
+			assert(data->error_message != NULL);
+		}
+	}
+}
+
+int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
+{
+	struct yocton_object *obj;
+	const char *error_msg;
+	int success = 1;
+
+	obj = yocton_read_with(read_from_comment, fstream);
+	read_error_data(data, obj);
+	if (yocton_have_error(obj, NULL, &error_msg)) {
+		fprintf(stderr, "%s: error in test data: %s\n", filename, error_msg);
+		success = 0;
+	}
+	yocton_free(obj);
+	rewind(fstream);
+	return success;
+}
+
 void evaluate_obj(struct yocton_object *obj)
 {
 	struct yocton_field *field;
@@ -25,28 +86,34 @@ void evaluate_obj(struct yocton_object *obj)
 
 int run_test(char *filename)
 {
+	struct error_data error_data = {NULL};
 	struct yocton_object *obj;
 	FILE *fstream;
-	const char *error_msg;
+	const char *error_msg, *want_error_msg;
 	int have_error, lineno, success;
 
 	fstream = fopen(filename, "r");
 	assert(fstream != NULL);
+	assert(read_error_data_from(filename, fstream, &error_data));
 	obj = yocton_read_from(fstream);
 	evaluate_obj(obj);
 
 	success = 1;
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
-	if (strstr(filename, "/error-") != NULL) {
-		if (!have_error) {
-			fprintf(stderr, "expected error when evaluating "
-			        "'%s'; got none\n", filename);
+	if (error_data.error_message == NULL) {
+		if (have_error) {
+			fprintf(stderr, "%s: error when parsing: %s\n",
+				filename, error_msg);
 			success = 0;
 		}
-	} else if (have_error) {
-		fprintf(stderr, "error when parsing %s: %s\n",
-		        filename, error_msg);
+	} else if (!have_error) {
+		fprintf(stderr, "%s: expected error '%s', got none\n",
+		        filename, error_data.error_message);
 		success = 0;
+	} else if (strcmp(error_msg, error_data.error_message) != 0) {
+		fprintf(stderr, "%s: wrong error message, want '%s', "
+		        "got '%s'\n", filename,
+		        error_data.error_message, error_msg);
 	}
 	yocton_free(obj);
 

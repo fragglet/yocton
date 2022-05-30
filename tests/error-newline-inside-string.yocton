@@ -1,3 +1,4 @@
+//| error_message: "control character not allowed inside string (ASCII char 0x0a)"
 field1: "value"
 field2: "multiline strings
 are not allowed."

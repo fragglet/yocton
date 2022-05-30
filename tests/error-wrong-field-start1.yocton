@@ -1,2 +1,3 @@
+//| error_message: "expected start of next field"
 field1: "value"
 :

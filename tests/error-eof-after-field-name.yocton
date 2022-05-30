@@ -1,2 +1,3 @@
+//| error_message: "':' or '{' expected to follow field name"
 field1: "value"
 field2
