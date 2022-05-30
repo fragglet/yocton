@@ -1,0 +1,4 @@
+// Very long strings that trigger reallocation of
+// internal buffers to accomodate.
+foo: "a very long string. this is a very long string that triggers reallocation"
+bar: a-very-long-string-this-is-a-very-long-string-that-triggers-reallocation-but-this-time-its-a-bare-string-and-the-string-is-even-longer-at-least-twice-the-length-of-the-previous-string-wow
