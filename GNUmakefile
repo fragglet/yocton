@@ -16,6 +16,7 @@ yocton_test : yocton.test.o yocton_test.test.o alloc-testing.test.o
 	$(CC) -c $(TEST_CFLAGS) $< -o $@
 
 clean:
-	rm yocton_print yocton_test \
-	   yocton.o yocton_print.o yocton_test.o
+	rm -f yocton_print yocton_test \
+	   yocton.o yocton_print.o \
+	   yocton_test.test.o yocton_test.test.o alloc-testing.test.o
 
