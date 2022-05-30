@@ -1,0 +1,5 @@
+//| error_message: "field 'read_as_string' has object, not string type"
+//| error_lineno: 3
+read_as_string {
+  we_dont_get_this_far = true
+}

@@ -89,7 +89,7 @@ void evaluate_obj(struct yocton_object *obj)
 		ft = yocton_field_type(field);
 		if (!strcmp(name, "read_as_object")) {
 			ft = YOCTON_FIELD_OBJECT;
-		} else if (!strcmp(name, "read_as_value")) {
+		} else if (!strcmp(name, "read_as_string")) {
 			ft = YOCTON_FIELD_STRING;
 		}
 		if (ft == YOCTON_FIELD_OBJECT) {

@@ -442,7 +442,7 @@ const char *yocton_field_value(struct yocton_field *f)
 {
 	if (f->type != YOCTON_FIELD_STRING) {
 		input_error(f->parent->instream, "field '%s' has object, "
-		            "not value type", f->name);
+		            "not string type", f->name);
 		return "";
 	}
 	return f->value;
@@ -451,7 +451,7 @@ const char *yocton_field_value(struct yocton_field *f)
 struct yocton_object *yocton_field_inner(struct yocton_field *f)
 {
 	if (f->type != YOCTON_FIELD_OBJECT) {
-		input_error(f->parent->instream, "field '%s' has value, "
+		input_error(f->parent->instream, "field '%s' has string, "
 		            "not object type", f->name);
 		return NULL;
 	}
