@@ -18,5 +18,5 @@ yocton_test : yocton.test.o yocton_test.test.o alloc-testing.test.o
 clean:
 	rm -f yocton_print yocton_test \
 	   yocton.o yocton_print.o \
-	   yocton_test.test.o yocton_test.test.o alloc-testing.test.o
+	   yocton.test.o yocton_test.test.o alloc-testing.test.o
 
