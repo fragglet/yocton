@@ -1,3 +1,4 @@
 //| error_message: "control character not allowed inside string (ASCII char 0x02)"
+//| error_lineno: 4
 field1: "value"
 contains-a-backspace: "here it comes:"

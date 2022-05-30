@@ -1,3 +1,4 @@
 //| error_message: "string expected to follow ':'"
+//| error_lineno: 5
 field1: "value"
 field2:

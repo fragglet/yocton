@@ -1,3 +1,4 @@
 //| error_message: "':' or '{' expected to follow field name"
+//| error_lineno: 4
 field1: "value"
 field2 }

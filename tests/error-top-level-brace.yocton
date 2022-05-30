@@ -1,3 +1,4 @@
 //| error_message: "closing brace '}' not expected at top level"
+//| error_lineno: 4
 field1: "value"
 }

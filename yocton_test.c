@@ -7,6 +7,7 @@
 
 struct error_data {
 	char *error_message;
+	int error_lineno;
 };
 
 size_t read_from_comment(void *buf, size_t buf_size, void *handle)
@@ -45,6 +46,9 @@ void read_error_data(struct error_data *data, struct yocton_object *obj)
 		if (!strcmp(name, "error_message")) {
 			data->error_message = strdup(yocton_field_value(field));
 			assert(data->error_message != NULL);
+		} else if (!strcmp(name, "error_lineno")) {
+			data->error_lineno = atoi(yocton_field_value(field));
+			assert(data->error_lineno > 0);
 		}
 	}
 }
@@ -110,10 +114,17 @@ int run_test(char *filename)
 		fprintf(stderr, "%s: expected error '%s', got none\n",
 		        filename, error_data.error_message);
 		success = 0;
-	} else if (strcmp(error_msg, error_data.error_message) != 0) {
-		fprintf(stderr, "%s: wrong error message, want '%s', "
-		        "got '%s'\n", filename,
-		        error_data.error_message, error_msg);
+	} else {
+		if (strcmp(error_msg, error_data.error_message) != 0) {
+			fprintf(stderr, "%s: wrong error message, want '%s', "
+			        "got '%s'\n", filename,
+			        error_data.error_message, error_msg);
+		}
+		if (lineno != error_data.error_lineno) {
+			fprintf(stderr, "%s: wrong error lineno, want %d, "
+			        "got %d\n", filename, error_data.error_lineno,
+			        lineno);
+		}
 	}
 	yocton_free(obj);
 
