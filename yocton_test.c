@@ -11,6 +11,8 @@ struct error_data {
 	int error_lineno;
 };
 
+#define ERROR_ALLOC "memory allocation failure"
+
 size_t read_from_comment(void *buf, size_t buf_size, void *handle)
 {
 	FILE *fstream = (FILE *) handle;
@@ -89,7 +91,7 @@ void evaluate_obj(struct yocton_object *obj)
 	}
 }
 
-int run_test(char *filename)
+int run_test_with_limit(char *filename, int alloc_limit)
 {
 	struct error_data error_data = {NULL};
 	struct yocton_object *obj;
@@ -97,15 +99,33 @@ int run_test(char *filename)
 	const char *error_msg;
 	int have_error, lineno, success;
 
+	assert(alloc_test_get_allocated() == 0);
+	alloc_test_set_limit(-1);
+
 	fstream = fopen(filename, "r");
 	assert(fstream != NULL);
 	assert(read_error_data_from(filename, fstream, &error_data));
-	obj = yocton_read_from(fstream);
-	evaluate_obj(obj);
+
+	alloc_test_set_limit(alloc_limit);
 
 	success = 1;
+	obj = yocton_read_from(fstream);
+	if (obj == NULL) {
+		if (alloc_limit == -1) {
+			fprintf(stderr, "%s: yocton_read_from failed\n",
+			        filename);
+			success = 0;
+		}
+		free(error_data.error_message);
+		return success;
+	}
+
+	evaluate_obj(obj);
+
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
-	if (error_data.error_message == NULL) {
+	if (alloc_limit != -1 && !strcmp(error_msg, ERROR_ALLOC)) {
+		// Perfectly normal to get a memory alloc error.
+	} else if (error_data.error_message == NULL) {
 		if (have_error) {
 			fprintf(stderr, "%s: error when parsing: %s\n",
 				filename, error_msg);
@@ -138,6 +158,22 @@ int run_test(char *filename)
 		success = 0;
 	}
 
+	return success;
+}
+
+static int run_test(char *filename)
+{
+	int i;
+	int success = 1, test_success;
+
+	for (i = -1; i < 50; ++i) {
+		test_success = run_test_with_limit(filename, i);
+		if (!test_success) {
+			fprintf(stderr, "%s: test failed with limit=%d\n",
+			        filename, i);
+		}
+		success = success && test_success;
+	}
 	return success;
 }
 
