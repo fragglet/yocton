@@ -1,5 +1,5 @@
 CFLAGS = -Wall
-TEST_CFLAGS = $(CFLAGS) -DALLOC_TESTING
+TEST_CFLAGS = $(CFLAGS) -g -DALLOC_TESTING
 
 all: yocton_print yocton_test
 
