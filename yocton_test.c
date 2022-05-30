@@ -94,7 +94,7 @@ int run_test(char *filename)
 	struct error_data error_data = {NULL};
 	struct yocton_object *obj;
 	FILE *fstream;
-	const char *error_msg, *want_error_msg;
+	const char *error_msg;
 	int have_error, lineno, success;
 
 	fstream = fopen(filename, "r");
@@ -130,6 +130,7 @@ int run_test(char *filename)
 		}
 	}
 	yocton_free(obj);
+	free(error_data.error_message);
 
 	if (alloc_test_get_allocated() != 0) {
 		fprintf(stderr, "%s: %d bytes still allocated after test\n",
