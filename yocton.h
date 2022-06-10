@@ -14,6 +14,8 @@ struct yocton_object *yocton_read_from(FILE *fstream);
 int yocton_have_error(struct yocton_object *obj, int *lineno,
                       const char **error_msg);
 void yocton_free(struct yocton_object *obj);
+void yocton_check(struct yocton_object *obj, const char *error_msg,
+                  int normally_true);
 
 struct yocton_field *yocton_next_field(struct yocton_object *obj);
 

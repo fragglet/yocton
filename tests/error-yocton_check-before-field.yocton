@@ -1,0 +1,6 @@
+//| error_message: "failed before any field was read"
+//| error_lineno: 4
+field1: "value"
+special.fail_before_any_field {
+  we_never_get: "here"
+}

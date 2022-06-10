@@ -321,6 +321,19 @@ int yocton_have_error(struct yocton_object *obj, int *lineno,
 	return 1;
 }
 
+void yocton_check(struct yocton_object *obj, const char *error_msg,
+                  int normally_true)
+{
+	if (!normally_true) {
+		if (obj->field != NULL) {
+			input_error(obj->instream, "field '%s': %s",
+			            obj->field->name, error_msg);
+		} else {
+			input_error(obj->instream, "%s", error_msg);
+		}
+	}
+}
+
 void yocton_free(struct yocton_object *obj)
 {
 	if (obj != obj->instream->root) {

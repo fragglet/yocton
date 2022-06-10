@@ -13,3 +13,4 @@ my_list {
   element: 456
   element: 789
 }
+special.parse_as_int: 1234

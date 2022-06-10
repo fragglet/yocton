@@ -86,6 +86,15 @@ void evaluate_obj(struct yocton_object *obj)
 		}
 		name = yocton_field_name(field);
 		assert(name != NULL);
+		if (!strcmp(name, "special.fail_before_any_field")) {
+			yocton_check(yocton_field_inner(field),
+			             "failed before any field was read", 0);
+		} else if (!strcmp(name, "special.parse_as_int")) {
+			int throwaway;
+			yocton_check(obj, "failed to parse as integer",
+			    1 == sscanf(yocton_field_value(field), "%d",
+			                &throwaway));
+		}
 		ft = yocton_field_type(field);
 		if (!strcmp(name, "read_as_object")) {
 			ft = YOCTON_FIELD_OBJECT;
@@ -96,6 +105,10 @@ void evaluate_obj(struct yocton_object *obj)
 			evaluate_obj(yocton_field_inner(field));
 		} else {
 			assert(yocton_field_value(field) != NULL);
+		}
+		if (!strcmp(name, "special.fail_after_last_field")) {
+			yocton_check(yocton_field_inner(field),
+			             "failed after last field was read", 0);
 		}
 	}
 }
