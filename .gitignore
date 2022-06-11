@@ -1,0 +1,7 @@
+.gitignore
+*.gcda
+*.gcno
+*.o
+*.exe
+yocton_print
+yocton_test
