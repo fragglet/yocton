@@ -1,3 +1,9 @@
+#ifndef YOCTON_H
+#define YOCTON_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef size_t (*yocton_read)(void *buf, size_t buf_size, void *handle);
 
@@ -23,4 +29,10 @@ enum yocton_field_type yocton_field_type(struct yocton_field *f);
 const char *yocton_field_name(struct yocton_field *f);
 const char *yocton_field_value(struct yocton_field *f);
 struct yocton_object *yocton_field_inner(struct yocton_field *f);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* #ifndef YOCTON_H */
 
