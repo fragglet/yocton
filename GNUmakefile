@@ -6,6 +6,11 @@ all: yocton_print yocton_test
 check: yocton_test
 	./yocton_test tests/*
 
+docs: html/index.html
+
+html/index.html: yocton.h yoctonw.h
+	doxygen
+
 yocton_print : yocton.o yocton_print.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
