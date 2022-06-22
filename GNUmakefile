@@ -1,4 +1,4 @@
-CFLAGS = -Wall
+CFLAGS = -Wall -Wc++-compat
 TEST_CFLAGS = $(CFLAGS) -g -DALLOC_TESTING
 
 all: yocton_print yocton_test

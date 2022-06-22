@@ -316,9 +316,10 @@ struct yocton_object *yocton_read_with(yocton_read callback, void *handle)
 	struct yocton_instream *instream = NULL;
 	struct yocton_object *obj = NULL;
 
-	instream = calloc(1, sizeof(struct yocton_instream));
+	instream = (struct yocton_instream *)
+	    calloc(1, sizeof(struct yocton_instream));
 	CHECK_OR_GOTO_FAIL(instream != NULL);
-	obj = calloc(1, sizeof(struct yocton_object));
+	obj = (struct yocton_object *) calloc(1, sizeof(struct yocton_object));
 	CHECK_OR_GOTO_FAIL(obj != NULL);
 
 	obj->instream = instream;
@@ -332,9 +333,10 @@ struct yocton_object *yocton_read_with(yocton_read callback, void *handle)
 	instream->buf_len = 0;
 	instream->buf_offset = 0;
 	instream->buf_size = 256;
-	instream->error_buf = calloc(ERROR_BUF_SIZE, 1);
+	instream->error_buf = (char *) calloc(ERROR_BUF_SIZE, 1);
 	CHECK_OR_GOTO_FAIL(instream->error_buf != NULL);
-	instream->buf = calloc(instream->buf_size, sizeof(uint8_t));
+	instream->buf =
+	    (uint8_t *) calloc(instream->buf_size, sizeof(uint8_t));
 	CHECK_OR_GOTO_FAIL(instream->buf != NULL);
 	instream->string_size = 0;
 	instream->string.data = NULL;

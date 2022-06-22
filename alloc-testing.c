@@ -90,7 +90,7 @@ static void alloc_test_overwrite(void *ptr, size_t length,
 	unsigned char b;
 	size_t i;
 
-	byte_ptr = ptr;
+	byte_ptr = (unsigned char *) ptr;
 
 	for (i=0; i<length; ++i) {
 		pattern_seq = (int) (i & 3);
@@ -115,7 +115,7 @@ void *alloc_test_malloc(size_t bytes)
 	/* Allocate the requested block with enough room for the block header
 	 * as well. */
 
-	header = malloc(sizeof(BlockHeader) + bytes);
+	header = (BlockHeader *) malloc(sizeof(BlockHeader) + bytes);
 
 	if (header == NULL) {
 		return NULL;
@@ -240,7 +240,7 @@ char *alloc_test_strdup(const char *string)
 {
 	char *result;
 
-	result = alloc_test_malloc(strlen(string) + 1);
+	result = (char *) alloc_test_malloc(strlen(string) + 1);
 
 	if (result == NULL) {
 		return NULL;
