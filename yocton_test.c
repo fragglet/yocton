@@ -164,12 +164,12 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	fclose(fstream);
 
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
-	if (alloc_limit != -1 && !strcmp(error_msg, ERROR_ALLOC)) {
+	if (alloc_limit != -1 && strstr(error_msg, ERROR_ALLOC) != NULL) {
 		// Perfectly normal to get a memory alloc error.
 	} else if (error_data.error_message == NULL) {
 		if (have_error) {
-			fprintf(stderr, "%s: error when parsing: %s\n",
-				filename, error_msg);
+			fprintf(stderr, "%s:%d: error when parsing: %s\n",
+				filename, lineno, error_msg);
 			success = 0;
 		}
 	} else if (!have_error) {
