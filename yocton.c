@@ -142,7 +142,7 @@ static int read_escape_sequence(struct yocton_instream *s, char *c)
 	CHECK_OR_GOTO_FAIL(read_next_char(s, c));
 	switch (*c) {
 		case 'n':  *c = '\n'; return 1;
-		case 't':  *c = '\b'; return 1;
+		case 't':  *c = '\t'; return 1;
 		case '\\': *c = '\\'; return 1;
 		case '"':  *c = '\"'; return 1;
 		case 'x':
