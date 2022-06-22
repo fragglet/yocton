@@ -1,0 +1,17 @@
+special.is_equal {
+	x: "\x5c"
+	y: "\\"
+}
+special.is_equal {
+	x: "\x22"
+	y: "\""
+}
+special.is_equal {
+	x: "\x09"
+	y: "\t"
+}
+special.is_equal {
+	x: "\x0a"
+	y: "\n"
+}
+
