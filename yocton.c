@@ -136,15 +136,33 @@ fail:
 	return 0;
 }
 
-static int unescape_string_char(char *c) {
+static int read_escape_sequence(struct yocton_instream *s, char *c)
+{
+	char xcs[3];
+	CHECK_OR_GOTO_FAIL(read_next_char(s, c));
 	switch (*c) {
 		case 'n':  *c = '\n'; return 1;
 		case 't':  *c = '\b'; return 1;
 		case '\\': *c = '\\'; return 1;
 		case '"':  *c = '\"'; return 1;
-		default: return 0;
-		// TODO: \x, \u etc.
+		case 'x':
+			CHECK_OR_GOTO_FAIL(read_next_char(s, &xcs[0])
+			                && read_next_char(s, &xcs[1]));
+			if (!isxdigit(xcs[0]) || !isxdigit(xcs[1])) {
+				input_error(s, "\\x sequence must have "
+				            "hexadecimal argument");
+				return 0;
+			}
+			xcs[2] = '\0';
+			*c = (char) strtoul(xcs, NULL, 16);
+			return 1;
+		default:
+			input_error(s, "unknown string escape: \\%c", *c);
+			return 0;
 	}
+fail:
+	input_error(s, "error when reading escape sequence");
+	return 0;
 }
 
 // Read quote-delimited "C style" string.
@@ -157,9 +175,7 @@ static enum token_type read_string(struct yocton_instream *s)
 		if (c == '"') {
 			return TOKEN_STRING;
 		} else if (c == '\\') {
-			CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
-			if (!unescape_string_char(&c)) {
-				input_error(s, "unknown string escape: \\%c", c);
+			if (!read_escape_sequence(s, &c)) {
 				return TOKEN_ERROR;
 			}
 		} else if (c < 0x80 && !isprint(c)) {

@@ -1,0 +1,4 @@
+//| error_message: "\\x sequence must have hexadecimal argument"
+//| error_lineno: 4
+field1: "value"
+bad-escape: "this isn't using hexadecimal characters: \xaz"
