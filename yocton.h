@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#include <inttypes.h>
+
 /**
  * @file yocton.h
  *
@@ -59,6 +61,11 @@ enum yocton_field_type {
 
 struct yocton_object;
 struct yocton_field;
+
+struct yocton_buffer {
+	uint8_t *data;
+	size_t len;
+};
 
 #ifdef __DOXYGEN__
 
@@ -156,6 +163,16 @@ struct yocton_field *yocton_next_field(struct yocton_object *obj);
 enum yocton_field_type yocton_field_type(struct yocton_field *f);
 
 /**
+ * Get the raw bytes of the name of a @ref yocton_field.
+ *
+ * @param f          The field.
+ * @return           Name of the field. The returned buffer is owned by
+ *                   the field and only valid for the lifetime of the
+ *                   field itself.
+ */
+const struct yocton_buffer *yocton_field_name_bytes(struct yocton_field *f);
+
+/**
  * Get the name of a @ref yocton_field. Multiple fields of the same object
  * may have the same name.
  *
@@ -177,6 +194,18 @@ const char *yocton_field_name(struct yocton_field *f);
  *                   itself.
  */
 const char *yocton_field_value(struct yocton_field *f);
+
+/**
+ * Get raw bytes of a @ref yocton_field of type
+ * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
+ * is not of this type.
+ *
+ * @param f          The field.
+ * @return           Buffer containing raw bytes. The returned buffer is
+ *                   owned by the field and only valid for the lifetime
+ *                   of the field itself.
+ */
+const struct yocton_buffer *yocton_field_value_bytes(struct yocton_field *f);
 
 /**
  * Get the inner object associated with a @ref yocton_field of type

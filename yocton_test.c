@@ -91,12 +91,26 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 	return success;
 }
 
+static struct yocton_buffer buffer_dup(struct yocton_object *obj,
+                                       const struct yocton_buffer *from)
+{
+	struct yocton_buffer result = {NULL, 0};
+	result.data = malloc(from->len);
+	yocton_check(obj, ERROR_ALLOC, result.data != NULL);
+	if (result.data == NULL) {
+		return result;
+	}
+	memcpy(result.data, from->data, from->len);
+	result.len = from->len;
+	return result;
+}
+
 int evaluate_is_equal(struct yocton_object *obj)
 {
 	struct yocton_field *field;
 	const char *name;
 	int result;
-	char *x = NULL, *y = NULL;
+	struct yocton_buffer x = {NULL, 0}, y = {NULL, 0};
 
 	for (;;) {
 		field = yocton_next_field(obj);
@@ -105,17 +119,15 @@ int evaluate_is_equal(struct yocton_object *obj)
 		}
 		name = yocton_field_name(field);
 		if (!strcmp(name, "x")) {
-			x = strdup(yocton_field_value(field));
-			yocton_check(obj, ERROR_ALLOC, x != NULL);
+			x = buffer_dup(obj, yocton_field_value_bytes(field));
 		} else if (!strcmp(name, "y")) {
-			y = strdup(yocton_field_value(field));
-			yocton_check(obj, ERROR_ALLOC, y != NULL);
+			y = buffer_dup(obj, yocton_field_value_bytes(field));
 		}
 	}
 
-	result = x != NULL && y != NULL && !strcmp(x, y);
-	free(x);
-	free(y);
+	result = x.len == y.len && !memcmp(x.data, y.data, x.len);
+	free(x.data);
+	free(y.data);
 	return result;
 }
 

@@ -39,6 +39,21 @@ my_list {
 }
 ```
 
+## Unicode
+
+Yocton is "UTF-8 friendly" but does not have any special support for
+Unicode. This is in keeping with its typeless format - strings are really
+just arbitrary sequences of bytes which can contain any kind of binary data
+(UTF-8, ASCII with extended code pages, or even other Unicode encodings).
+This also means that it can be used to contain any arbitrary binary data,
+such as image files, encrypted data, or Doom WAD files.
+
+However, Yocton is intended for encoding text data and UTF-8 is the
+recommended encoding to use to use for this purpose. You will find that it
+fits naturally with the format - simply encode the input file as UTF-8 and
+interpret any strings returned from the API as UTF-8, and you will find
+that everything should work as intended.
+
 ## API
 
 The Yocton API is a "pull parser" that is designed to work nicely for

@@ -1,0 +1,8 @@
+//| error_message: "field 'special.is_equal': values not equal"
+//| error_lineno: 8
+
+// NUL values are preserved correctly in byte strings:
+special.is_equal {
+	x: "same string?"
+	y: "same string?\x00!"
+}
