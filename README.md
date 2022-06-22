@@ -1,4 +1,12 @@
 
+Yocton is a minimalist, typeless object notation, intended to fit nicely
+with the C programming language and intended for situations where the features
+of other formats such as JSON or protocol buffers are not necessary.
+
+![Captain Yocton](cpt-yocton.png)
+
+The mascot for Yocton is Captain Yocton, the tiny alien superhero.
+
 ## Data model
 
 A Yocton document consists of an object. Every object has a number of fields.
