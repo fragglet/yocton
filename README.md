@@ -16,7 +16,7 @@ Strings have two representations:
 
 1. The first is the traditional C-style syntax, with surrounding double-quotes
    and backslash-escaping for special characters.
-1. The second is "bare string" syntax. The surrounding quotes can be omitted
+1. The second is "symbol" format. The surrounding quotes can be omitted
    if the string consists entirely of the following characters: alphanumeric
    characters, underscore, plus, minus, period.
 
@@ -54,13 +54,13 @@ Compared with JSON:
   with any particular name, repeated values can be represented as repeated
   fields with the same name.
 * Number types: strings can be used to store a representation of a number.
-  The set of characters allowed in bare strings includes alphanumeric
+  The set of characters allowed in symbols includes alphanumeric
   characters, period, plus and minus, allowing natural representation of
   numbers in almost any format - integer, decimal, hexadecimal,
   exponential/scientific, etc. without the need for quotes.
-* Booleans: strings can be used to store "true" or "false". The bare string
-  syntax allows a natural representation.
-* Null: strings can be used to store "null". The bare string syntax allows a
+* Booleans: strings can be used to store "true" or "false". The symbol format
+  allows a natural representation.
+* Null: strings can be used to store "null". The symbol format allows a
   natural representation.
 
 ## What's with the name?

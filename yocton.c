@@ -115,7 +115,7 @@ static int read_next_char(struct yocton_instream *s, char *c)
 	return 1;
 }
 
-static int is_bare_string_char(int c)
+static int is_symbol_char(int c)
 {
        return isalnum(c) || strchr("_-+.", c) != NULL;
 }
@@ -189,17 +189,17 @@ fail:
 	return TOKEN_ERROR;
 }
 
-static enum token_type read_bare_string(struct yocton_instream *s, char first)
+static enum token_type read_symbol(struct yocton_instream *s, char first)
 {
 	char c;
-	if (!is_bare_string_char(first)) {
-		input_error(s, "unknown token: not valid bare-string character");
+	if (!is_symbol_char(first)) {
+		input_error(s, "unknown token: not valid symbol character");
 		return TOKEN_ERROR;
 	}
 	s->string_len = 0;
 	CHECK_OR_GOTO_FAIL(append_string_char(s, first));
 	// Reaching EOF in the middle of the string is explicitly okay here:
-	while (peek_next_char(s, &c) && is_bare_string_char(c)) {
+	while (peek_next_char(s, &c) && is_symbol_char(c)) {
 		CHECK_OR_GOTO_FAIL(read_next_char(s, &c));
 		CHECK_OR_GOTO_FAIL(append_string_char(s, c));
 	}
@@ -235,7 +235,7 @@ static enum token_type read_next_token(struct yocton_instream *s)
 		case '{':  return TOKEN_OPEN_BRACE;
 		case '}':  return TOKEN_CLOSE_BRACE;
 		case '\"': return read_string(s);
-		default:   return read_bare_string(s, c);
+		default:   return read_symbol(s, c);
 	}
 fail:
 	return TOKEN_ERROR;

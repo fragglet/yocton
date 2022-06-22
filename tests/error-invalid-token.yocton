@@ -1,4 +1,4 @@
-//| error_message: "unknown token: not valid bare-string character"
+//| error_message: "unknown token: not valid symbol character"
 //| error_lineno: 4
 field1: "value"
 (hi?)
