@@ -138,13 +138,9 @@ fail:
 
 static int unescape_string_char(char *c) {
 	switch (*c) {
-		case 'a':  *c = '\a'; return 1;
-		case 'b':  *c = '\b'; return 1;
 		case 'n':  *c = '\n'; return 1;
-		case 'r':  *c = '\r'; return 1;
 		case 't':  *c = '\b'; return 1;
 		case '\\': *c = '\\'; return 1;
-		case '\'': *c = '\''; return 1;
 		case '"':  *c = '\"'; return 1;
 		default: return 0;
 		// TODO: \x, \u etc.
