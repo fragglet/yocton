@@ -86,6 +86,13 @@ typedef struct yocton_object yocton_object;
  */
 typedef struct yocton_field yocton_field;
 
+/**
+ * A buffer contains the raw bytes associated with a string value. This
+ * returned by @ref yocton_field_name_bytes and
+ * @ref yocton_field_value_bytes.
+ */
+typedef struct yocton_buffer yocton_buffer.
+
 #endif
 
 /**
@@ -145,53 +152,52 @@ void yocton_check(struct yocton_object *obj, const char *error_msg,
 /**
  * Read the next field of an object.
  *
- * @param obj        @ref yocton_object to read from.
- * @return           @ref yocton_field or NULL if there are no more fields
- *                   to be read. NULL is also returned if an error occurs
- *                   in parsing the input; @ref yocton_have_error should
- *                   be used to distinguish the two. If a field is returned,
- *                   it is only valid until the next field is read.
+ * @param obj  @ref yocton_object to read from.
+ * @return     @ref yocton_field or NULL if there are no more fields to be
+ *             read. NULL is also returned if an error occurs in parsing
+ *             the input; @ref yocton_have_error should be used to
+ *             distinguish the two. If a field is returned, it is only
+ *             valid until the next field is read from the same object.
  */
 struct yocton_field *yocton_next_field(struct yocton_object *obj);
 
 /**
  * Get the type of a @ref yocton_field.
  *
- * @param f          The field.
- * @return           Type of the field.
+ * @param f  The field.
+ * @return   Type of the field.
  */
 enum yocton_field_type yocton_field_type(struct yocton_field *f);
 
 /**
- * Get the raw bytes of the name of a @ref yocton_field.
- *
- * @param f          The field.
- * @return           Name of the field. The returned buffer is owned by
- *                   the field and only valid for the lifetime of the
- *                   field itself.
- */
-const struct yocton_buffer *yocton_field_name_bytes(struct yocton_field *f);
-
-/**
  * Get the name of a @ref yocton_field. Multiple fields of the same object
- * may have the same name.
+ * may have the same name. Encoding of the name depends on the encoding of
+ * the input file.
  *
- * @param f          The field.
- * @return           Name of the field. The returned string is only valid
- *                   for the lifetime of the field itself.
+ * @param f  The field.
+ * @return   Name of the field. The returned string is only valid for the
+ *           lifetime of the field itself.
  */
 const char *yocton_field_name(struct yocton_field *f);
 
 /**
+ * Get the raw bytes of the name of a @ref yocton_field.
+ *
+ * @param f  The field.
+ * @return   Name of the field. The returned buffer is owned by the field
+ *           and only valid for the lifetime of the field itself.
+ */
+const struct yocton_buffer *yocton_field_name_bytes(struct yocton_field *f);
+
+/**
  * Get the string value of a @ref yocton_field of type
  * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
- * is not of this type.
+ * is not of this type. Encoding of the string depends on the input file.
  *
- * @param f          The field.
- * @return           String value of this field, or NULL if it is not a
- *                   field of type @ref YOCTON_FIELD_STRING. The returned
- *                   string is only valid for the lifetime of the field
- *                   itself.
+ * @param f  The field.
+ * @return   String value of this field, or NULL if it is not a field of
+ *           type @ref YOCTON_FIELD_STRING. The returned string is only
+ *           valid for the lifetime of the field itself.
  */
 const char *yocton_field_value(struct yocton_field *f);
 
@@ -200,10 +206,9 @@ const char *yocton_field_value(struct yocton_field *f);
  * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
  * is not of this type.
  *
- * @param f          The field.
- * @return           Buffer containing raw bytes. The returned buffer is
- *                   owned by the field and only valid for the lifetime
- *                   of the field itself.
+ * @param f  The field.
+ * @return   Buffer containing raw bytes. The returned buffer is owned by
+ *           the field and only valid for the lifetime of the field itself.
  */
 const struct yocton_buffer *yocton_field_value_bytes(struct yocton_field *f);
 
@@ -212,10 +217,10 @@ const struct yocton_buffer *yocton_field_value_bytes(struct yocton_field *f);
  * @ref YOCTON_FIELD_OBJECT. It is an error to call this for a field that
  * is not of this type.
  *
- * @param f          The field.
- * @return           Inner @ref yocton_object, or NULL if the field is not
- *                   of type @ref YOCTON_FIELD_OBJECT. The returned object is
- *                   only only valid for the lifetime of the field itself.
+ * @param f  The field.
+ * @return   Inner @ref yocton_object, or NULL if the field is not of type
+ *           @ref YOCTON_FIELD_OBJECT. The returned object is only only
+ *           valid for the lifetime of the field itself.
  */
 struct yocton_object *yocton_field_inner(struct yocton_field *f);
 
