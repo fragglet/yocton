@@ -34,8 +34,8 @@
 #define ERROR_ALLOC "memory allocation failure"
 #define ERROR_EOF   "unexpected EOF"
 
-#define CHECK_OR_GOTO_FAIL(condition) \
-	if (!(condition)) { goto fail; }
+#define CHECK_OR_RETURN(condition, value) \
+	if (!(condition)) { return value; }
 
 enum token_type {
 	TOKEN_STRING,
@@ -90,14 +90,12 @@ static int assign_alloc(void *ptr, struct yocton_instream *s, void *result)
 static int buffer_dup(struct yocton_instream *s, struct yocton_buffer *to,
                       const struct yocton_buffer *from)
 {
-	CHECK_OR_GOTO_FAIL(
-	    assign_alloc(&to->data, s, malloc(from->len + 1)));
+	CHECK_OR_RETURN(
+	    assign_alloc(&to->data, s, malloc(from->len + 1)), 0);
 	memcpy(to->data, from->data, from->len);
 	to->data[from->len] = '\0';
 	to->len = from->len;
 	return 1;
-fail:
-	return 0;
 }
 
 static int peek_next_byte(struct yocton_instream *s, uint8_t *c)
@@ -137,29 +135,35 @@ static int append_string_byte(struct yocton_instream *s, uint8_t c)
 {
 	if (s->string.len + 1 >= s->string_size) {
 		s->string_size = s->string_size == 0 ? 64 : s->string_size * 2;
-		CHECK_OR_GOTO_FAIL(
+		CHECK_OR_RETURN(
 		    assign_alloc(&s->string.data, s,
-		        realloc(s->string.data, s->string_size)));
+		        realloc(s->string.data, s->string_size)), 0);
 	}
 	s->string.data[s->string.len] = c;
 	++s->string.len;
 	return 1;
-fail:
-	return 0;
 }
 
 static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 {
 	uint8_t xcs[3];
-	CHECK_OR_GOTO_FAIL(read_next_byte(s, c));
+	if (!read_next_byte(s, c)) {
+		input_error(s, "\\ escape must be followed by character "
+		               "indicating escape type");
+		return 0;
+	}
 	switch (*c) {
 		case 'n':  *c = '\n'; return 1;
 		case 't':  *c = '\t'; return 1;
 		case '\\': *c = '\\'; return 1;
 		case '"':  *c = '\"'; return 1;
 		case 'x':
-			CHECK_OR_GOTO_FAIL(read_next_byte(s, &xcs[0])
-			                && read_next_byte(s, &xcs[1]));
+			if (!read_next_byte(s, &xcs[0])
+			 || !read_next_byte(s, &xcs[1])) {
+				input_error(s, "\\x sequence must be followed "
+				            "by two hexadecimal characters");
+				return 0;
+			}
 			if (!isxdigit(xcs[0]) || !isxdigit(xcs[1])) {
 				input_error(s, "\\x sequence must have "
 				            "hexadecimal argument");
@@ -172,9 +176,6 @@ static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 			input_error(s, "unknown string escape: \\%c", *c);
 			return 0;
 	}
-fail:
-	input_error(s, "error when reading escape sequence");
-	return 0;
 }
 
 // Read quote-delimited "C style" string.
@@ -183,7 +184,7 @@ static enum token_type read_string(struct yocton_instream *s)
 	uint8_t c;
 	s->string.len = 0;
 	for (;;) {
-		CHECK_OR_GOTO_FAIL(read_next_byte(s, &c));
+		CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
 		if (c == '"') {
 			return TOKEN_STRING;
 		} else if (c == '\\') {
@@ -195,10 +196,8 @@ static enum token_type read_string(struct yocton_instream *s)
 			            "string (ASCII char 0x%02x)", c);
 			return TOKEN_ERROR;
 		}
-		CHECK_OR_GOTO_FAIL(append_string_byte(s, c));
+		CHECK_OR_RETURN(append_string_byte(s, c), TOKEN_ERROR);
 	}
-fail:
-	return TOKEN_ERROR;
 }
 
 static enum token_type read_symbol(struct yocton_instream *s, uint8_t first)
@@ -209,15 +208,13 @@ static enum token_type read_symbol(struct yocton_instream *s, uint8_t first)
 		return TOKEN_ERROR;
 	}
 	s->string.len = 0;
-	CHECK_OR_GOTO_FAIL(append_string_byte(s, first));
+	CHECK_OR_RETURN(append_string_byte(s, first), TOKEN_ERROR);
 	// Reaching EOF in the middle of the string is explicitly okay here:
 	while (peek_next_byte(s, &c) && is_symbol_byte(c)) {
-		CHECK_OR_GOTO_FAIL(read_next_byte(s, &c));
-		CHECK_OR_GOTO_FAIL(append_string_byte(s, c));
+		CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
+		CHECK_OR_RETURN(append_string_byte(s, c), TOKEN_ERROR);
 	}
 	return TOKEN_STRING;
-fail:
-	return TOKEN_ERROR;
 }
 
 static enum token_type read_next_token(struct yocton_instream *s)
@@ -231,12 +228,13 @@ static enum token_type read_next_token(struct yocton_instream *s)
 		if (!peek_next_byte(s, &c)) {
 			return TOKEN_EOF;
 		}
-		CHECK_OR_GOTO_FAIL(read_next_byte(s, &c));
+		CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
 		// If we encounter a comment we skip past it. Note that
 		// ending with EOF is also okay.
 		if (c == '/' && peek_next_byte(s, &c2) && c2 =='/') {
 			while (peek_next_byte(s, &c) && c != '\n') {
-				CHECK_OR_GOTO_FAIL(read_next_byte(s, &c));
+				CHECK_OR_RETURN(read_next_byte(s, &c),
+				                TOKEN_ERROR);
 			}
 			c = ' ';
 		}
@@ -249,8 +247,6 @@ static enum token_type read_next_token(struct yocton_instream *s)
 		case '\"': return read_string(s);
 		default:   return read_symbol(s, c);
 	}
-fail:
-	return TOKEN_ERROR;
 }
 
 struct yocton_object {
@@ -301,6 +297,41 @@ static void free_instream(struct yocton_instream *instream)
 	free(instream);
 }
 
+static int init_instream(struct yocton_instream *instream)
+{
+	instream->lineno = 1;
+	instream->buf_len = 0;
+	instream->buf_offset = 0;
+	instream->buf_size = 256;
+	instream->error_buf = (char *) calloc(ERROR_BUF_SIZE, 1);
+	CHECK_OR_RETURN(instream->error_buf != NULL, 0);
+	instream->buf =
+	    (uint8_t *) calloc(instream->buf_size, sizeof(uint8_t));
+	CHECK_OR_RETURN(instream->buf != NULL, 0);
+	instream->string_size = 0;
+	instream->string.data = NULL;
+
+	return 1;
+}
+
+static struct yocton_instream *new_instream(yocton_read callback, void *handle)
+{
+	struct yocton_instream *instream = NULL;
+
+	instream = (struct yocton_instream *)
+	    calloc(1, sizeof(struct yocton_instream));
+	CHECK_OR_RETURN(instream != NULL, NULL);
+
+	if (!init_instream(instream)) {
+		free_instream(instream);
+		return NULL;
+	}
+
+	instream->callback = callback;
+	instream->callback_handle = handle;
+	return instream;
+}
+
 static size_t fread_wrapper(void *buf, size_t buf_size, void *handle)
 {
 	return fread(buf, 1, buf_size, (FILE *) handle);
@@ -313,40 +344,22 @@ struct yocton_object *yocton_read_from(FILE *fstream)
 
 struct yocton_object *yocton_read_with(yocton_read callback, void *handle)
 {
-	struct yocton_instream *instream = NULL;
 	struct yocton_object *obj = NULL;
 
-	instream = (struct yocton_instream *)
-	    calloc(1, sizeof(struct yocton_instream));
-	CHECK_OR_GOTO_FAIL(instream != NULL);
 	obj = (struct yocton_object *) calloc(1, sizeof(struct yocton_object));
-	CHECK_OR_GOTO_FAIL(obj != NULL);
+	CHECK_OR_RETURN(obj != NULL, NULL);
 
-	obj->instream = instream;
+	obj->instream = new_instream(callback, handle);
+	if (obj->instream == NULL) {
+		free_obj(obj);
+		return NULL;
+	}
+
 	obj->field = NULL;
 	obj->done = 0;
-
-	instream->root = obj;
-	instream->callback = callback;
-	instream->callback_handle = handle;
-	instream->lineno = 1;
-	instream->buf_len = 0;
-	instream->buf_offset = 0;
-	instream->buf_size = 256;
-	instream->error_buf = (char *) calloc(ERROR_BUF_SIZE, 1);
-	CHECK_OR_GOTO_FAIL(instream->error_buf != NULL);
-	instream->buf =
-	    (uint8_t *) calloc(instream->buf_size, sizeof(uint8_t));
-	CHECK_OR_GOTO_FAIL(instream->buf != NULL);
-	instream->string_size = 0;
-	instream->string.data = NULL;
+	obj->instream->root = obj;
 
 	return obj;
-
-fail:
-	free_instream(instream);
-	free_obj(obj);
-	return NULL;
 }
 
 int yocton_have_error(struct yocton_object *obj, int *lineno,
@@ -403,18 +416,8 @@ static void skip_forward(struct yocton_object *obj)
 	obj->field->child = NULL;
 }
 
-static struct yocton_field *next_field(struct yocton_object *obj)
+static int parse_next_field(struct yocton_object *obj, struct yocton_field *f)
 {
-	struct yocton_field *f = NULL;
-
-	CHECK_OR_GOTO_FAIL(
-	    assign_alloc(&f, obj->instream,
-	        calloc(1, sizeof(struct yocton_field))));
-	obj->field = f;
-	f->parent = obj;
-	CHECK_OR_GOTO_FAIL(
-	    buffer_dup(obj->instream, &f->name, &obj->instream->string));
-
 	switch (read_next_token(obj->instream)) {
 		case TOKEN_COLON:
 			// This is the string:string case.
@@ -422,29 +425,45 @@ static struct yocton_field *next_field(struct yocton_object *obj)
 			if (read_next_token(obj->instream) != TOKEN_STRING) {
 				input_error(obj->instream, "string expected "
 				            "to follow ':'");
-				goto fail;
+				return 0;
 			}
-			CHECK_OR_GOTO_FAIL(
+			CHECK_OR_RETURN(
 			    buffer_dup(obj->instream, &f->value,
-			               &obj->instream->string));
-			return f;
+			               &obj->instream->string), 0);
+			return 1;
 		case TOKEN_OPEN_BRACE:
 			f->type = YOCTON_FIELD_OBJECT;
-			CHECK_OR_GOTO_FAIL(
+			CHECK_OR_RETURN(
 			    assign_alloc(&f->child, obj->instream,
-			        calloc(1, sizeof(struct yocton_object))));
+			        calloc(1, sizeof(struct yocton_object))), 0);
 			f->child->instream = obj->instream;
 			f->child->done = 0;
-			return f;
+			return 1;
 		default:
 			input_error(obj->instream, "':' or '{' expected to "
 			            "follow field name");
-			goto fail;
+			return 0;
 	}
-fail:
-	free_field(f);
-	obj->field = NULL;
-	return NULL;
+}
+
+static struct yocton_field *next_field(struct yocton_object *obj)
+{
+	struct yocton_field *f = NULL;
+
+	CHECK_OR_RETURN(
+	    assign_alloc(&f, obj->instream,
+	        calloc(1, sizeof(struct yocton_field))), NULL);
+	obj->field = f;
+	f->parent = obj;
+
+	if (!buffer_dup(obj->instream, &f->name, &obj->instream->string)
+	 || !parse_next_field(obj, f)) {
+		free_field(f);
+		obj->field = NULL;
+		return NULL;
+	}
+
+	return f;
 }
 
 struct yocton_field *yocton_next_field(struct yocton_object *obj)
