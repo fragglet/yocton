@@ -53,7 +53,7 @@ numbers, IP addresses or even temperatures.
 
 ## Unicode
 
-Yocton is "UTF-8 friendly" but does not have any special support for
+Yocton is "UTF-8 friendly" but does not include special support for
 Unicode. This is in keeping with its typeless format - strings are really
 just arbitrary sequences of bytes which can contain any kind of binary data
 (UTF-8, ASCII with extended code pages, or even other Unicode encodings).
@@ -63,8 +63,10 @@ such as image files, encrypted data, or Doom WAD files.
 However, Yocton is intended mainly for encoding textual data and UTF-8 is
 the recommended encoding to use to use for this purpose. You will find that
 it fits naturally with the format - simply encode the input file as UTF-8
-and interpret any strings returned from the API as UTF-8, and you will find
-that everything should work as intended.
+and interpret any strings returned from the API as UTF-8, and everything
+should work as intended. Yocton also recognizes (and ignores) the UTF-8
+[BOM](https://en.wikipedia.org/wiki/Byte_order_mark), ensuring that any
+valid UTF-8 input file should be parsed correctly.
 
 ## API
 

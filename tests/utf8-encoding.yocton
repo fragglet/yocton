@@ -1,5 +1,7 @@
+﻿
 // While there is no \u escape for encoding Unicode data, we support \x for
 // arbitrary data and this can be used to contain UTF-8.
+// This file starts with a UTF-8 BOM which should be silently ignored.
 
 // ASCII
 special.is_equal {

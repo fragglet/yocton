@@ -64,6 +64,8 @@ struct yocton_instream {
 	struct yocton_object *root;
 };
 
+static const uint8_t utf8_bom[] = { 0xef, 0xbb, 0xbf };
+
 static void input_error(struct yocton_instream *s, char *fmt, ...)
 {
 	va_list args;
@@ -219,7 +221,7 @@ static enum token_type read_symbol(struct yocton_instream *s, uint8_t first)
 
 static enum token_type read_next_token(struct yocton_instream *s)
 {
-	uint8_t c, c2;
+	uint8_t c, c2, c3;
 	if (strlen(s->error_buf) > 0) {
 		return TOKEN_ERROR;
 	}
@@ -236,6 +238,12 @@ static enum token_type read_next_token(struct yocton_instream *s)
 				CHECK_OR_RETURN(read_next_byte(s, &c),
 				                TOKEN_ERROR);
 			}
+			c = ' ';
+		} else if (c == utf8_bom[0]) {
+			CHECK_OR_RETURN(
+			    read_next_byte(s, &c2) && c2 == utf8_bom[1]
+			 && read_next_byte(s, &c3) && c3 == utf8_bom[2],
+			    TOKEN_ERROR);
 			c = ' ';
 		}
 	} while (isspace(c));
