@@ -59,6 +59,10 @@ int main(int argc, char *argv[])
 	const char *error;
 	int error_lineno;
 
+	if (argc < 2) {
+		printf("Usage: %s <filename>\n", argv[0]);
+		exit(1);
+	}
 	fstream = fopen(argv[1], "r");
 	if (fstream == NULL) {
 		fprintf(stderr, "Error opening %s: %s\n",
