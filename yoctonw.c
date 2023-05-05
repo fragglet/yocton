@@ -32,15 +32,6 @@ struct yoctonw_writer {
 	int error;
 };
 
-static void free_writer(struct yoctonw_writer *writer)
-{
-	if (writer == NULL) {
-		return;
-	}
-	free(writer->buf);
-	free(writer);
-}
-
 struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle)
 {
 	struct yoctonw_writer *writer = NULL;
