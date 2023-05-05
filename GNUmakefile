@@ -1,4 +1,4 @@
-LIB_OBJS = yocton.o
+LIB_OBJS = yocton.o yoctonw.o
 TEST_OBJS = yocton.test.o yocton_test.test.o alloc-testing.test.o
 GCOV_OBJS = $(subst .test.o,.gcov.o,$(TEST_OBJS))
 

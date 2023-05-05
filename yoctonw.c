@@ -26,7 +26,7 @@
 struct yoctonw_writer {
 	yoctonw_write callback;
 	void *callback_handle;
-	char *buf;
+	uint8_t *buf;
 	size_t buf_len, buf_size;
 	int indent_level;
 	int error;
@@ -36,7 +36,8 @@ struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle)
 {
 	struct yoctonw_writer *writer = NULL;
 
-	writer = calloc(1, sizeof(struct yoctonw_writer));
+	writer = (struct yoctonw_writer *) calloc(
+		1, sizeof(struct yoctonw_writer));
 	if (writer == NULL) {
 		return NULL;
 	}
@@ -46,7 +47,7 @@ struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle)
 	writer->error = 0;
 	writer->buf_size = 256;
 	writer->buf_len = 0;
-	writer->buf = calloc(writer->buf_size, sizeof(char));
+	writer->buf = (uint8_t *) calloc(writer->buf_size, sizeof(char));
 	if (writer->buf == NULL) {
 		free(writer);
 		return NULL;
