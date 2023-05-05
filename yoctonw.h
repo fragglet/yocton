@@ -16,6 +16,13 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#ifndef YOCTONW_H
+#define YOCTONW_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <inttypes.h>
 
 /**
@@ -130,4 +137,10 @@ void yoctonw_end(struct yoctonw_writer *w);
  *            callback function returned zero).
  */
 int yoctonw_have_error(struct yoctonw_writer *w);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* #ifndef YOCTONW_H */
 
