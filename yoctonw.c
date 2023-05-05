@@ -23,69 +23,45 @@
 
 #include "yoctonw.h"
 
-#define CHECK_OR_GOTO_FAIL(condition) \
-	if (!(condition)) { goto fail; }
-
-struct yoctonw_outstream {
+struct yoctonw_writer {
 	yoctonw_write callback;
 	void *callback_handle;
 	char *buf;
 	size_t buf_len, buf_size;
-	struct yoctonw_object *root;
+	int indent_level;
+	int error;
 };
 
-struct yoctonw_object {
-	struct yoctonw_outstream *outstream;
-	struct yoctonw_object *inner;
-	int nesting_level;
-};
-
-static int is_bare_string(const char *s)
+static void free_writer(struct yoctonw_writer *writer)
 {
-	int i;
-
-	for (i = 0; s[i] != '\0'; i++) {
-		if (!isalnum(s[i]) && strchr("_-+.", s[i]) == NULL) {
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-static void free_outstream(struct yoctonw_outstream *outstream)
-{
-	if (outstream == NULL) {
+	if (writer == NULL) {
 		return;
 	}
-	free(outstream->buf);
-	free(outstream);
+	free(writer->buf);
+	free(writer);
 }
 
-struct yoctonw_object *yoctonw_write_with(yoctonw_write callback, void *handle)
+struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle)
 {
-	struct yoctonw_object *obj = NULL;
-	struct yoctonw_outstream *outstream = NULL;
+	struct yoctonw_writer *writer = NULL;
 
-	outstream = calloc(1, sizeof(struct yoctonw_outstream));
-	CHECK_OR_GOTO_FAIL(outstream != NULL);
-	outstream->callback = callback;
-	outstream->callback_handle = handle;
-	outstream->buf_size = 256;
-	outstream->buf_len = 0;
-	outstream->buf = calloc(outstream->buf_size, sizeof(char));
-	CHECK_OR_GOTO_FAIL(outstream->buf != NULL);
+	writer = calloc(1, sizeof(struct yoctonw_writer));
+	if (writer == NULL) {
+		return NULL;
+	}
+	writer->callback = callback;
+	writer->callback_handle = handle;
+	writer->indent_level = 0;
+	writer->error = 0;
+	writer->buf_size = 256;
+	writer->buf_len = 0;
+	writer->buf = calloc(writer->buf_size, sizeof(char));
+	if (writer->buf == NULL) {
+		free(writer);
+		return NULL;
+	}
 
-	obj = calloc(1, sizeof(struct yoctonw_object));
-	CHECK_OR_GOTO_FAIL(obj != NULL);
-	obj->outstream = outstream;
-	outstream->root = obj;
-
-	return obj;
-fail:
-	free(outstream);
-	free(obj);
-	return NULL;
+	return writer;
 }
 
 static int fwrite_wrapper(void *buf, size_t nbytes, void *handle)
@@ -93,40 +69,167 @@ static int fwrite_wrapper(void *buf, size_t nbytes, void *handle)
 	return fwrite(buf, 1, nbytes, (FILE *) handle) == nbytes;
 }
 
-struct yoctonw_object *yoctonw_write_to(FILE *fstream)
+struct yoctonw_writer *yoctonw_write_to(FILE *fstream)
 {
 	return yoctonw_write_with(fwrite_wrapper, fstream);
 }
 
-void yoctonw_free(struct yoctonw_object *obj)
+void yoctonw_free(struct yoctonw_writer *writer)
 {
-	if (obj->outstream->root != obj) {
+	free(writer->buf);
+	free(writer);
+}
+
+static void do_flush(struct yoctonw_writer *w)
+{
+	int success;
+
+	if (w->buf_len == 0) {
 		return;
 	}
-	free_outstream(obj->outstream);
-	free(obj);
+	if (w->error) {
+		w->buf_len = 0;
+		return;
+	}
+	success = w->callback(w->buf, w->buf_len, w->callback_handle);
+	if (!success) {
+		w->error = 1;
+	}
+	w->buf_len = 0;
 }
 
-void yoctonw_write_value(struct yoctonw_object *obj, const char *name,
-                         const char *value)
+static inline void insert_char(struct yoctonw_writer *w, uint8_t c)
 {
+	if (w->buf_len >= w->buf_size) {
+		do_flush(w);
+	}
+	w->buf[w->buf_len] = c;
+	++w->buf_len;
 }
 
-struct yoctonw_object *yoctonw_write_inner(struct yoctonw_object *obj,
-                                           const char *name)
+static int is_bare_string(const struct yoctonw_buffer *buf)
 {
-	struct yoctonw_object *inner = NULL;
-	inner = calloc(1, sizeof(struct yoctonw_object));
-	CHECK_OR_GOTO_FAIL(inner != NULL);
-	inner->outstream = obj->outstream;
-	inner->nesting_level = obj->nesting_level + 1;
-	obj->inner = inner;
-	// TODO: write "...name {" to output
-	return inner;
-fail:
-	// TODO: log error
-	free(inner);
-	return NULL;
+	int i;
+
+	for (i = 0; i < buf->len; i++) {
+		if (!isalnum(buf->data[i])
+		 && strchr("_-+.", buf->data[i]) == NULL) {
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
+static void write_string(struct yoctonw_writer *w,
+                         const struct yoctonw_buffer *buf)
+{
+	int i, c;
+	char hex[3];
 
+	if (is_bare_string(buf)) {
+		for (i = 0; i < buf->len; ++i) {
+			insert_char(w, buf->data[i]);
+		}
+		return;
+	}
+
+	// Some characters need escaping:
+	insert_char(w, '"');
+	for (i = 0; i < buf->len; i++) {
+		c = buf->data[i];
+		switch (c) {
+		case '\n': insert_char(w, '\\'); insert_char(w, 'n'); break;
+		case '\t': insert_char(w, '\\'); insert_char(w, 't'); break;
+		case '\\': insert_char(w, '\\'); insert_char(w, '\\'); break;
+		case '\"': insert_char(w, '\\'); insert_char(w, '\"'); break;
+		default:
+			if (c >= 0x20 && c < 0x7f) {
+				insert_char(w, c);
+				break;
+			}
+			snprintf(hex, sizeof(hex), "%02x", c);
+			insert_char(w, '\\');
+			insert_char(w, 'x');
+			insert_char(w, hex[0]);
+			insert_char(w, hex[1]);
+			break;
+		}
+	}
+	insert_char(w, '"');
+}
+
+static void write_indent(struct yoctonw_writer *w)
+{
+	int i;
+	for (i = 0; i < w->indent_level; i++) {
+		insert_char(w, '\t');
+	}
+}
+
+void yoctonw_field_bytes(struct yoctonw_writer *w,
+                         const struct yoctonw_buffer *name,
+                         const struct yoctonw_buffer *value)
+{
+	if (w->error) {
+		return;
+	}
+	write_indent(w);
+	write_string(w, name);
+	insert_char(w, ':');
+	insert_char(w, ' ');
+	write_string(w, value);
+	insert_char(w, '\n');
+	// We flush after every top-level def is completed; this means
+	// output will always have been flushed before writer is freed.
+	if (w->indent_level == 0) {
+		do_flush(w);
+	}
+}
+
+void yoctonw_field(struct yoctonw_writer *w, const char *name,
+                   const char *value)
+{
+	struct yoctonw_buffer namebuf = {(uint8_t *) name, strlen(name)},
+	                      valbuf = {(uint8_t *) value, strlen(value)};
+	yoctonw_field_bytes(w, &namebuf, &valbuf);
+}
+
+void yoctonw_subobject_bytes(struct yoctonw_writer *w,
+                             const struct yoctonw_buffer *name)
+{
+	if (w->error) {
+		return;
+	}
+	write_indent(w);
+	write_string(w, name);
+	insert_char(w, ' ');
+	insert_char(w, '{');
+	insert_char(w, '\n');
+	++w->indent_level;
+}
+
+void yoctonw_subobject(struct yoctonw_writer *w, const char *name)
+{
+	struct yoctonw_buffer buf = {(uint8_t *) name, strlen(name)};
+	yoctonw_subobject_bytes(w, &buf);
+}
+
+void yoctonw_end(struct yoctonw_writer *w)
+{
+	if (w->indent_level == 0) {
+		return;
+	}
+	--w->indent_level;
+	write_indent(w);
+	insert_char(w, '}');
+	insert_char(w, '\n');
+	if (w->indent_level == 0) {
+		do_flush(w);
+	}
+}
+
+int yoctonw_have_error(struct yoctonw_writer *w)
+{
+	return w->error;
+}

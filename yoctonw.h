@@ -16,17 +16,29 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#include <inttypes.h>
 
 typedef int (*yoctonw_write)(void *buf, size_t nbytes, void *handle);
 
-struct yoctonw_object;
+struct yoctonw_buffer {
+	const uint8_t *data;
+	size_t len;
+};
 
-struct yoctonw_object *yoctonw_write_with(yoctonw_write callback, void *handle);
-struct yoctonw_object *yoctonw_write_to(FILE *fstream);
-void yoctonw_free(struct yoctonw_object *obj);
+struct yoctonw_writer;
 
-void yoctonw_write_value(struct yoctonw_object *obj, const char *name,
-                         const char *value);
-struct yoctonw_object *yoctonw_write_inner(struct yoctonw_object *obj,
-                                           const char *name);
+struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle);
+struct yoctonw_writer *yoctonw_write_to(FILE *fstream);
+void yoctonw_free(struct yoctonw_writer *w);
+
+void yoctonw_field_bytes(struct yoctonw_writer *w,
+                         const struct yoctonw_buffer *name,
+                         const struct yoctonw_buffer *value);
+void yoctonw_field(struct yoctonw_writer *w, const char *name,
+                   const char *value);
+void yoctonw_subobject_bytes(struct yoctonw_writer *w,
+                             const struct yoctonw_buffer *name);
+void yoctonw_subobject(struct yoctonw_writer *w, const char *name);
+void yoctonw_end(struct yoctonw_writer *w);
+int yoctonw_have_error(struct yoctonw_writer *w);
 
