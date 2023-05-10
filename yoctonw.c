@@ -99,13 +99,12 @@ static inline void insert_char(struct yoctonw_writer *w, uint8_t c)
 	++w->buf_len;
 }
 
-static int is_bare_string(const struct yoctonw_buffer *buf)
+static int is_bare_string(const char *s)
 {
 	int i;
 
-	for (i = 0; i < buf->len; i++) {
-		if (!isalnum(buf->data[i])
-		 && strchr("_-+.", buf->data[i]) == NULL) {
+	for (i = 0; s[i] != '\0'; i++) {
+		if (!isalnum(s[i]) && strchr("_-+.", s[i]) == NULL) {
 			return 0;
 		}
 	}
@@ -113,23 +112,22 @@ static int is_bare_string(const struct yoctonw_buffer *buf)
 	return 1;
 }
 
-static void write_string(struct yoctonw_writer *w,
-                         const struct yoctonw_buffer *buf)
+static void write_string(struct yoctonw_writer *w, const char *s)
 {
 	int i, c;
 	char hex[3];
 
-	if (is_bare_string(buf)) {
-		for (i = 0; i < buf->len; ++i) {
-			insert_char(w, buf->data[i]);
+	if (is_bare_string(s)) {
+		for (i = 0; s[i] != '\0'; ++i) {
+			insert_char(w, s[i]);
 		}
 		return;
 	}
 
 	// Some characters need escaping:
 	insert_char(w, '"');
-	for (i = 0; i < buf->len; i++) {
-		c = buf->data[i];
+	for (i = 0; s[i] != '\0'; i++) {
+		c = s[i];
 		switch (c) {
 		case '\n': insert_char(w, '\\'); insert_char(w, 'n'); break;
 		case '\t': insert_char(w, '\\'); insert_char(w, 't'); break;
@@ -159,9 +157,8 @@ static void write_indent(struct yoctonw_writer *w)
 	}
 }
 
-void yoctonw_field_bytes(struct yoctonw_writer *w,
-                         const struct yoctonw_buffer *name,
-                         const struct yoctonw_buffer *value)
+void yoctonw_field(struct yoctonw_writer *w, const char *name,
+                   const char *value)
 {
 	if (w->error) {
 		return;
@@ -179,16 +176,7 @@ void yoctonw_field_bytes(struct yoctonw_writer *w,
 	}
 }
 
-void yoctonw_field(struct yoctonw_writer *w, const char *name,
-                   const char *value)
-{
-	struct yoctonw_buffer namebuf = {(uint8_t *) name, strlen(name)},
-	                      valbuf = {(uint8_t *) value, strlen(value)};
-	yoctonw_field_bytes(w, &namebuf, &valbuf);
-}
-
-void yoctonw_subobject_bytes(struct yoctonw_writer *w,
-                             const struct yoctonw_buffer *name)
+void yoctonw_subobject(struct yoctonw_writer *w, const char *name)
 {
 	if (w->error) {
 		return;
@@ -199,12 +187,6 @@ void yoctonw_subobject_bytes(struct yoctonw_writer *w,
 	insert_char(w, '{');
 	insert_char(w, '\n');
 	++w->indent_level;
-}
-
-void yoctonw_subobject(struct yoctonw_writer *w, const char *name)
-{
-	struct yoctonw_buffer buf = {(uint8_t *) name, strlen(name)};
-	yoctonw_subobject_bytes(w, &buf);
 }
 
 void yoctonw_end(struct yoctonw_writer *w)

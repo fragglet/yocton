@@ -80,18 +80,6 @@ struct yoctonw_writer *yoctonw_write_to(FILE *fstream);
 void yoctonw_free(struct yoctonw_writer *w);
 
 /**
- * Write a new field and value to the output. The name and value can be
- * any arbitrary byte sequence.
- *
- * @param w       Writer.
- * @param name    Field name.
- * @param value   Field value.
- */
-void yoctonw_field_bytes(struct yoctonw_writer *w,
-                         const struct yoctonw_buffer *name,
-                         const struct yoctonw_buffer *value);
-
-/**
  * Write a new field and value to the output.
  *
  * @param w       Writer.
@@ -100,18 +88,6 @@ void yoctonw_field_bytes(struct yoctonw_writer *w,
  */
 void yoctonw_field(struct yoctonw_writer *w, const char *name,
                    const char *value);
-
-/**
- * Start writing a new subobject.
- *
- * The @ref yoctonw_end function should be called to end the subobject.
- * The field name can be any arbitrary byte sequence.
- *
- * @param w       Writer.
- * @param name    Field name for subobject.
- */
-void yoctonw_subobject_bytes(struct yoctonw_writer *w,
-                             const struct yoctonw_buffer *name);
 
 /**
  * Start writing a new subobject.

@@ -181,15 +181,6 @@ enum yocton_field_type yocton_field_type(struct yocton_field *f);
 const char *yocton_field_name(struct yocton_field *f);
 
 /**
- * Get the raw bytes of the name of a @ref yocton_field.
- *
- * @param f  The field.
- * @return   Name of the field. The returned buffer is owned by the field
- *           and only valid for the lifetime of the field itself.
- */
-const struct yocton_buffer *yocton_field_name_bytes(struct yocton_field *f);
-
-/**
  * Get the string value of a @ref yocton_field of type
  * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
  * is not of this type. Encoding of the string depends on the input file.
@@ -200,17 +191,6 @@ const struct yocton_buffer *yocton_field_name_bytes(struct yocton_field *f);
  *           valid for the lifetime of the field itself.
  */
 const char *yocton_field_value(struct yocton_field *f);
-
-/**
- * Get raw bytes of a @ref yocton_field of type
- * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
- * is not of this type.
- *
- * @param f  The field.
- * @return   Buffer containing raw bytes. The returned buffer is owned by
- *           the field and only valid for the lifetime of the field itself.
- */
-const struct yocton_buffer *yocton_field_value_bytes(struct yocton_field *f);
 
 /**
  * Get the inner object associated with a @ref yocton_field of type

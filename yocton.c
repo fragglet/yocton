@@ -525,28 +525,14 @@ const char *yocton_field_name(struct yocton_field *f)
 	return (const char *) f->name.data;
 }
 
-const struct yocton_buffer *yocton_field_name_bytes(struct yocton_field *f)
+const char *yocton_field_value(struct yocton_field *f)
 {
-	return &f->name;
-}
-
-const struct yocton_buffer *yocton_field_value_bytes(struct yocton_field *f)
-{
-	static uint8_t empty_bytes = {0};
-	static struct yocton_buffer empty_result = {&empty_bytes, 0};
 	if (f->type != YOCTON_FIELD_STRING) {
 		input_error(f->parent->instream, "field '%s' has object, "
 		            "not string type", f->name.data);
-		return &empty_result;
+		return "";
 	}
-	return &f->value;
-}
-
-const char *yocton_field_value(struct yocton_field *f)
-{
-	const struct yocton_buffer *result;
-	result = yocton_field_value_bytes(f);
-	return (const char *) result->data;
+	return (const char *) f->value.data;
 }
 
 struct yocton_object *yocton_field_inner(struct yocton_field *f)
