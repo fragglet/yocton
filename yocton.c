@@ -160,15 +160,10 @@ static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 		case '\\': *c = '\\'; return 1;
 		case '"':  *c = '\"'; return 1;
 		case 'x':
-			if (!read_next_byte(s, &xcs[0])
-			 || !read_next_byte(s, &xcs[1])) {
+			if (!read_next_byte(s, &xcs[0]) || !isxdigit(xcs[0])
+			 || !read_next_byte(s, &xcs[1]) || !isxdigit(xcs[1])) {
 				input_error(s, "\\x sequence must be followed "
 				            "by two hexadecimal characters");
-				return 0;
-			}
-			if (!isxdigit(xcs[0]) || !isxdigit(xcs[1])) {
-				input_error(s, "\\x sequence must have "
-				            "hexadecimal argument");
 				return 0;
 			}
 			xcs[2] = '\0';
