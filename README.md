@@ -55,16 +55,22 @@ numbers, IP addresses or even temperatures.
 
 Yocton is "UTF-8 friendly" but does not include special support for
 Unicode. This is in keeping with its typeless format - strings are really
-just arbitrary sequences of bytes which can contain any kind of binary data
-(UTF-8, ASCII with extended code pages, or even other Unicode encodings).
-This also means that it can be used to contain any arbitrary binary data,
-such as image files, encrypted data, or Doom WAD files.
+just arbitrary sequences of bytes. The encoding ought to be UTF-8 nowadays,
+but could also be a different encoding like ISO-8859-1 (although not
+some multi-byte formats like Shift-JIS unfortunately, for
+[technical reasons](https://en.wikipedia.org/wiki/Shift_JIS#Description:~:text=0x5C%20byte%20will%20cause%20problems)).
+There isn't any validation of the input encoding that forces you to use UTF-8
+or any other format, though UTF-8 is strongly recommended.
 
-However, Yocton is intended mainly for encoding textual data and UTF-8 is
-the recommended encoding to use to use for this purpose. You will find that
-it fits naturally with the format - simply encode the input file as UTF-8
-and interpret any strings returned from the API as UTF-8, and everything
-should work as intended. Yocton also recognizes (and ignores) the UTF-8
+As a result, Yocton does not include any special support for Unicode; most
+notably it does not include support for the `\u` or `\U` escape sequences that
+JSON has. This is deliberate; simply encode your file as UTF-8 and put the
+characters that you want in the file. These days it is reasonable to assume
+UTF-8 as an encoding, all modern text editors support it, and there is no need
+to encode everything in plain ASCII.
+
+The one minor piece of special handling for UTF-8 is that Yocton recognizes
+(and ignores) the UTF-8
 [BOM](https://en.wikipedia.org/wiki/Byte_order_mark), ensuring that any
 valid UTF-8 input file should be parsed correctly.
 

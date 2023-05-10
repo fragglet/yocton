@@ -173,6 +173,11 @@ static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 			}
 			xcs[2] = '\0';
 			*c = (uint8_t) strtoul((const char *) xcs, NULL, 16);
+			if (*c == 0) {
+				input_error(s, "NUL byte not allowed in "
+				            "\\x escape sequence.");
+				return 0;
+			}
 			return 1;
 		default:
 			input_error(s, "unknown string escape: \\%c", *c);
