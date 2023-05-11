@@ -26,6 +26,7 @@
 
 struct error_data {
 	char *error_message;
+	char *expected_output;
 	int error_lineno;
 };
 
@@ -88,6 +89,22 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 	}
 	yocton_free(obj);
 	rewind(fstream);
+
+	// Read expected output from //> lines.
+	data->expected_output = strdup("");
+	while (!feof(fstream)) {
+		char buf[128];
+		fgets(buf, sizeof(buf), fstream);
+		if (!strncmp(buf, "//> ", 4)) {
+			data->expected_output = (char *) realloc(
+				data->expected_output,
+				strlen(data->expected_output)
+				+ strlen(buf + 4) + 1);
+			strcat(data->expected_output, buf + 4);
+		}
+	}
+	rewind(fstream);
+
 	return success;
 }
 
@@ -124,11 +141,11 @@ int evaluate_is_equal(struct yocton_object *obj)
 	return result;
 }
 
-void evaluate_obj(struct yocton_object *obj)
+void evaluate_obj(struct yocton_object *obj, char **output)
 {
 	struct yocton_field *field;
 	enum yocton_field_type ft;
-	const char *name;
+	const char *name, *value;
 
 	for (;;) {
 		field = yocton_next_field(obj);
@@ -156,13 +173,26 @@ void evaluate_obj(struct yocton_object *obj)
 			yocton_check(obj, "values not equal",
 			    evaluate_is_equal(yocton_field_inner(field)));
 		} else if (ft == YOCTON_FIELD_OBJECT) {
-			evaluate_obj(yocton_field_inner(field));
+			evaluate_obj(yocton_field_inner(field), output);
 		} else {
 			assert(yocton_field_value(field) != NULL);
 		}
 		if (!strcmp(name, "special.fail_after_last_field")) {
 			yocton_check(yocton_field_inner(field),
 			             "failed after last field was read", 0);
+		}
+		if (!strcmp(name, "output")) {
+			char *new_output;
+			value = yocton_field_value(field);
+			new_output = (char *) realloc(
+				*output, strlen(*output) + strlen(value) + 2);
+			if (new_output == NULL) {
+				yocton_check(obj, ERROR_ALLOC, 0);
+				return;
+			}
+			*output = new_output;
+			strcat(*output, value);
+			strcat(*output, "\n");
 		}
 	}
 }
@@ -173,6 +203,7 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	struct yocton_object *obj;
 	FILE *fstream;
 	const char *error_msg;
+	char *output;
 	int have_error, lineno, success;
 
 	assert(alloc_test_get_allocated() == 0);
@@ -181,6 +212,7 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	fstream = fopen(filename, "r");
 	assert(fstream != NULL);
 	assert(read_error_data_from(filename, fstream, &error_data));
+	output = strdup("");
 
 	alloc_test_set_limit(alloc_limit);
 
@@ -193,15 +225,21 @@ int run_test_with_limit(char *filename, int alloc_limit)
 			success = 0;
 		}
 		free(error_data.error_message);
+		free(error_data.expected_output);
+		free(output);
 		return success;
 	}
 
-	evaluate_obj(obj);
+	evaluate_obj(obj, &output);
 	fclose(fstream);
 
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
 	if (alloc_limit != -1 && strstr(error_msg, ERROR_ALLOC) != NULL) {
 		// Perfectly normal to get a memory alloc error.
+	} else if (strcmp(output, error_data.expected_output) != 0) {
+		fprintf(stderr, "%s: wrong output, want:\n%s\ngot:\n%s\n",
+			filename, error_data.expected_output, output);
+		success = 0;
 	} else if (error_data.error_message == NULL) {
 		if (have_error) {
 			fprintf(stderr, "%s:%d: error when parsing: %s\n",
@@ -228,6 +266,8 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	}
 	yocton_free(obj);
 	free(error_data.error_message);
+	free(error_data.expected_output);
+	free(output);
 
 	if (alloc_test_get_allocated() != 0) {
 		fprintf(stderr, "%s: %d bytes still allocated after test\n",

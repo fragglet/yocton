@@ -1,17 +1,18 @@
-special.is_equal {
-	x: "\x5c"
-	y: "\\"
-}
-special.is_equal {
-	x: "\x22"
-	y: "\""
-}
-special.is_equal {
-	x: "\x09"
-	y: "\t"
-}
-special.is_equal {
-	x: "\x0a"
-	y: "\n"
-}
-
+// The following is outputted by the test when parsing (the >
+// prefix in these comments means "check output")
+//> Here is a backslash: \
+//> Here are double quotes: "
+//> Here is a tab character: '	'
+//> Here is another tab character: '	'
+//> Here is a newline:
+//> (EOL)
+//> Here is another newline:
+//> (EOL)
+//> Here is a form feed character: ''
+output: "Here is a backslash: \\"
+output: "Here are double quotes: \""
+output: "Here is a tab character: '\t'"
+output: "Here is another tab character: '\x09'"
+output: "Here is a newline:\n(EOL)"
+output: "Here is another newline:\x0a(EOL)"
+output: "Here is a form feed character: '\x0c'"
