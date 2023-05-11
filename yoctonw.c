@@ -134,7 +134,7 @@ static void write_string(struct yoctonw_writer *w, const char *s)
 		case '\\': insert_char(w, '\\'); insert_char(w, '\\'); break;
 		case '\"': insert_char(w, '\\'); insert_char(w, '\"'); break;
 		default:
-			if (c >= 0x20 && c < 0x7f) {
+			if (c >= 0x20) {
 				insert_char(w, c);
 				break;
 			}

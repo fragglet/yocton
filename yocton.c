@@ -174,6 +174,11 @@ static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 				            "\\x escape sequence.");
 				return 0;
 			}
+			if (*c >= 0x20) {
+				input_error(s, "\\x escape sequence can only "
+				            "be used for control characters.");
+				return 0;
+			}
 			return 1;
 		default:
 			input_error(s, "unknown string escape: \\%c", *c);
@@ -194,7 +199,7 @@ static enum token_type read_string(struct yocton_instream *s)
 			if (!read_escape_sequence(s, &c)) {
 				return TOKEN_ERROR;
 			}
-		} else if (c < 0x80 && !isprint(c)) {
+		} else if (c < 0x20) {
 			input_error(s, "control character not allowed inside "
 			            "string (ASCII char 0x%02x)", c);
 			return TOKEN_ERROR;
