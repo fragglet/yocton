@@ -154,11 +154,7 @@ static int append_string_byte(struct yocton_instream *s, uint8_t c)
 static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 {
 	uint8_t xcs[3];
-	if (!read_next_byte(s, c)) {
-		input_error(s, "\\ escape must be followed by character "
-		               "indicating escape type");
-		return 0;
-	}
+	CHECK_OR_RETURN(read_next_byte(s, c), 0);
 	switch (*c) {
 		case 'n':  *c = '\n'; return 1;
 		case 't':  *c = '\t'; return 1;
