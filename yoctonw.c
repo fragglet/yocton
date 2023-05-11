@@ -117,7 +117,7 @@ static void write_string(struct yoctonw_writer *w, const char *s)
 	int i, c;
 	char hex[3];
 
-	if (is_bare_string(s)) {
+	if (strlen(s) > 0 && is_bare_string(s)) {
 		for (i = 0; s[i] != '\0'; ++i) {
 			insert_char(w, s[i]);
 		}
