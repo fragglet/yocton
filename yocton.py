@@ -18,6 +18,7 @@
 
 from __future__ import unicode_literals, print_function, generators
 import collections
+import io
 
 TOKEN_STRING = 0
 TOKEN_COLON = 1
@@ -36,6 +37,7 @@ ASCII_COLON = ord(':')
 SIMPLE_ESCAPES = { ord('n'): ASCII_NEWLINE, ord('t'): ord('\t'),
                    ASCII_QUOTES: ASCII_QUOTES,
                    ASCII_BACKSLASH: ASCII_BACKSLASH }
+REVERSE_ESCAPES = { "\n": "\\n", "\t": "\\t", '"': "\\\"", "\\": "\\\\" }
 BOM = 0xfeff
 UTF8_BOM = b'\xef\xbb\xbf'
 ERROR_EOF = "unexpected EOF"
@@ -259,6 +261,62 @@ class YoctonObject(object):
 			return None
 		raise SyntaxError("expected start of next field")
 
+def is_bare_string(s):
+	# TODO: Could be a regexp
+	for c in s:
+		if not c.isalnum() and c not in "_-+.":
+			return False
+	return True
+
+class YoctonWriter(object):
+	def __init__(self, outstream):
+		self.outstream = outstream
+		self.indent_level = 0
+
+	def write_string(self, s):
+		if is_bare_string(s):
+			self.outstream.write(s)
+			return
+
+		# TODO: Write bytes when in binary mode
+		self.outstream.write('"')
+		for c in s:
+			esc = REVERSE_ESCAPES.get(c)
+			if esc is not None:
+				self.outstream.write(esc)
+			elif ord(c) >= 0x20:
+				self.outstream.write(c)
+			else:
+				self.outstream.write("\\x%02x" % ord(c))
+		self.outstream.write('"')
+
+	def write_indent(self):
+		self.outstream.write("\t" * self.indent_level)
+
+	def write_field(self, name, value):
+		self.write_indent()
+		self.write_string(name)
+		self.outstream.write(": ")
+		self.write_string(value)
+		self.outstream.write("\n")
+		# Always flush after top-level def
+		if self.indent_level == 0:
+			self.outstream.flush()
+
+	def begin_subobject(self, name):
+		self.write_indent()
+		self.write_string(name)
+		self.outstream.write(" {\n")
+		self.indent_level += 1
+
+	def end(self):
+		if self.indent_level == 0:
+			return
+		self.indent_level -= 1
+		self.write_indent()
+		self.outstream.write("}\n")
+		if self.indent_level == 0:
+			self.outstream.flush()
 
 import glob, os, sys
 
@@ -269,7 +327,15 @@ for filename in glob.glob("tests/*.yocton"):
 		os.system("grep . %s" % filename)
 		with open(filename) as f:
 			obj = YoctonObject(InStream(f))
-			for f in obj:
-				print(f)
+			for k, v in obj:
+				print("%r = %r" % (k, v))
 	except Exception as e:
 		print(e)
+
+writer = YoctonWriter(sys.stdout)
+writer.write_field("foo", "bar")
+writer.write_field("asdf", "a1234")
+writer.begin_subobject("sub")
+writer.write_field("asdf", "this is a string")
+writer.write_field("baz", "this one has escapes: \n\b\r\t\\\"\f")
+writer.end()
