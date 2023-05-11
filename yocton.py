@@ -207,6 +207,15 @@ class YoctonObject(object):
 		if parent is None:
 			instream.root = self
 
+	def __iter__(self):
+		return self
+
+	def __next__(self):
+		f = self.next_field()
+		if f is None:
+			raise StopIteration
+		return f
+
 	def skip_forward(self):
 		while self.child is not None and not self.child.done:
 			self.child.next_field()
@@ -260,10 +269,7 @@ for filename in glob.glob("tests/*.yocton"):
 		os.system("grep . %s" % filename)
 		with open(filename) as f:
 			obj = YoctonObject(InStream(f))
-			while True:
-				f = obj.next_field()
-				if not f:
-					break
+			for f in obj:
 				print(f)
 	except Exception as e:
 		print(e)
