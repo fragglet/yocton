@@ -62,11 +62,6 @@ enum yocton_field_type {
 struct yocton_object;
 struct yocton_field;
 
-struct yocton_buffer {
-	uint8_t *data;
-	size_t len;
-};
-
 #ifdef __DOXYGEN__
 
 /**
@@ -85,13 +80,6 @@ typedef struct yocton_object yocton_object;
  * parent object.
  */
 typedef struct yocton_field yocton_field;
-
-/**
- * A buffer contains the raw bytes associated with a string value. This
- * returned by @ref yocton_field_name_bytes and
- * @ref yocton_field_value_bytes.
- */
-typedef struct yocton_buffer yocton_buffer.
 
 #endif
 

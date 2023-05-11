@@ -37,6 +37,11 @@
 #define CHECK_OR_RETURN(condition, value) \
 	if (!(condition)) { return value; }
 
+struct yocton_buffer {
+	uint8_t *data;
+	size_t len;
+};
+
 enum token_type {
 	TOKEN_STRING,
 	TOKEN_COLON,

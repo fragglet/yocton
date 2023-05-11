@@ -45,11 +45,6 @@ extern "C" {
  */
 typedef int (*yoctonw_write)(void *buf, size_t nbytes, void *handle);
 
-struct yoctonw_buffer {
-	const uint8_t *data;
-	size_t len;
-};
-
 struct yoctonw_writer;
 
 /**
