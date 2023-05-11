@@ -176,7 +176,8 @@ static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 			}
 			if (*c >= 0x20) {
 				input_error(s, "\\x escape sequence can only "
-				            "be used for control characters.");
+				            "be used for control characters "
+				            "(ASCII 0x01-0x1f range)");
 				return 0;
 			}
 			return 1;
