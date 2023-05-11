@@ -19,6 +19,9 @@
 from __future__ import unicode_literals, print_function, generators
 import collections
 import io
+import re
+
+VALID_SYMBOL_RE = re.compile(r"^[a-zA-Z0-9_\-\+\.]+$")
 
 TOKEN_STRING = 0
 TOKEN_COLON = 1
@@ -43,8 +46,7 @@ UTF8_BOM = b'\xef\xbb\xbf'
 ERROR_EOF = "unexpected EOF"
 
 def is_symbol_char(c):
-	c = "%c" % c
-	return c.isalnum() or c in "_-+."
+	return VALID_SYMBOL_RE.match("%c" % c) is not None
 
 class InStream(object):
 	def __init__(self, instream):
@@ -261,20 +263,13 @@ class YoctonObject(object):
 			return None
 		raise SyntaxError("expected start of next field")
 
-def is_bare_string(s):
-	# TODO: Could be a regexp
-	for c in s:
-		if not c.isalnum() and c not in "_-+.":
-			return False
-	return True
-
 class YoctonWriter(object):
 	def __init__(self, outstream):
 		self.outstream = outstream
 		self.indent_level = 0
 
 	def write_string(self, s):
-		if is_bare_string(s):
+		if VALID_SYMBOL_RE.match(s):
 			self.outstream.write(s)
 			return
 
