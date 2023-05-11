@@ -1,0 +1,3 @@
+//| error_message: "NUL byte not allowed in \\x escape sequence."
+//| error_lineno: 3
+image: "\x00"
