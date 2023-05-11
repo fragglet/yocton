@@ -220,6 +220,9 @@ class YoctonObject(object):
 			raise StopIteration
 		return f
 
+	def next(self):
+		return self.__next__()
+
 	def skip_forward(self):
 		while self.child is not None and not self.child.done:
 			self.child.next_field()
