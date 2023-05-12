@@ -316,6 +316,45 @@ class YoctonWriter(object):
 		if self.indent_level == 0:
 			self.outstream.flush()
 
+def dump(obj, fp):
+	if isinstance(obj, dict):
+		obj = list(obj.items())
+
+	w = YoctonWriter(fp)
+
+	def write_obj(o):
+		for name, value in o:
+			if isinstance(value, (str, bytes)):
+				w.write_field(name, value)
+			else:
+				w.begin_subobject(name)
+				write_obj(value)
+				w.end()
+
+	write_obj(obj)
+
+def dumps(obj):
+	buf = io.StringIO()
+	dump(obj, buf)
+	buf.flush()
+	return buf.getvalue()
+
+def load(fp):
+	def read_obj(o):
+		result = []
+		for name, value in o:
+			if isinstance(value, YoctonObject):
+				result.append((name, read_obj(value)))
+			else:
+				result.append((name, value))
+		return result
+	instream = InStream(fp)
+	return read_obj(YoctonObject(instream))
+
+def loads(s):
+	buf = io.StringIO(s)
+	return load(buf)
+
 import glob, os, sys
 
 for filename in glob.glob("tests/*.yocton"):
@@ -336,4 +375,15 @@ writer.write_field("asdf", "a1234")
 writer.begin_subobject("sub")
 writer.write_field("asdf", "this is a string")
 writer.write_field("baz", "this one has escapes: \n\b\r\t\\\"\f")
+writer.write_field("", "")
 writer.end()
+
+print("%r" % (dumps({
+	'hello': 'world',
+	'subobj': (
+		('field', 'first'),
+		('field', 'second'),
+	),
+})))
+
+print("%r" % (loads('hello: world subobj { field: first field: second }')))
