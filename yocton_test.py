@@ -17,7 +17,6 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-import functools
 import glob
 import unittest
 import yocton
