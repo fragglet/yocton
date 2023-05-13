@@ -47,9 +47,13 @@ my_list {
 }
 ```
 
-As seen in the example, the symbol notation allows a variety of different
-formats to be represented, including C symbol names, floating-point
+As seen in this example:
+
+* The symbol notation allows a variety of different
+formats to be concisely represented, including C symbol names, floating-point
 numbers, IP addresses or even temperatures.
+
+* There is no requirement that a particular object can only have one field of a particular name; this provides a way of representing lists even though there is no special syntax for them. 
 
 ## Unicode
 
