@@ -317,12 +317,12 @@ class YoctonWriter(object):
 			self.outstream.flush()
 
 def dump(obj, fp):
-	if isinstance(obj, dict):
-		obj = list(obj.items())
-
 	w = YoctonWriter(fp)
 
 	def write_obj(o):
+		if isinstance(o, dict):
+			o = list(o.items())
+
 		for name, value in o:
 			if isinstance(value, (str, bytes)):
 				w.write_field(name, value)
