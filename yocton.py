@@ -316,6 +316,17 @@ class YoctonWriter(object):
 		if self.indent_level == 0:
 			self.outstream.flush()
 
+def parse(fp):
+	lexer = Lexer(fp)
+	return YoctonObject(lexer)
+
+def parses(s):
+	if isinstance(s, str):
+		buf = io.StringIO(s)
+	else:
+		buf = io.BytesIO(s)
+	return parse(buf)
+
 def dump(obj, fp):
 	w = YoctonWriter(fp)
 
@@ -348,8 +359,7 @@ def load(fp):
 			else:
 				result.append((name, value))
 		return result
-	instream = InStream(fp)
-	return read_obj(YoctonObject(instream))
+	return read_obj(parse(fp))
 
 def loads(s):
 	if isinstance(s, str):

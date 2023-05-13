@@ -71,8 +71,7 @@ class YoctonReadTests(unittest.TestCase):
 		params = read_special_comments(fp, s)
 		if params.get(s("c_only")) == s("true"):
 			return
-		stream = yocton.InStream(fp)
-		obj = yocton.YoctonObject(stream)
+		obj = yocton.parse(fp)
 		try:
 			output = []
 			evaluate_obj(obj, output, s)
