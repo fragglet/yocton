@@ -55,6 +55,18 @@ numbers, IP addresses or even temperatures.
 
 * There is no requirement that a particular object can only have one field of a particular name; this provides a way of representing lists even though there is no special syntax for them. 
 
+## Strings
+
+Strings are represented using a subset of the familiar C syntax with the following escape sequences:
+
+* `\n`: Newline
+* `\t`: Tab
+* `\"`: Double quotes (")
+* `\\`: Literal backslash (\) 
+* `\xDD`: ASCII control character by hexadecimal number, in range 01h-1Fh (characters outside this range are not valid). 
+
+Control characters are not valid in bare form inside a string and must be escaped. There is no way of representing a NUL character (ASCII 00h); this is a design decision. Strings are intended for storing textual data; binary data can be stored using an encoding like base64 if necessary. 
+
 ## Unicode
 
 Yocton is "UTF-8 friendly" but does not include special support for
