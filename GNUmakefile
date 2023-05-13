@@ -10,6 +10,7 @@ all: yocton_print yocton_test
 
 check: yocton_test
 	./yocton_test tests/*
+	./yocton_test.py
 
 coverage : yocton.c.gcov
 
