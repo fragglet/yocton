@@ -49,7 +49,7 @@ ERROR_EOF = "unexpected EOF"
 def is_symbol_char(c):
 	return VALID_SYMBOL_RE.match("%c" % c) is not None
 
-class InStream(object):
+class Lexer(object):
 	def __init__(self, instream):
 		self.instream = instream
 		self.buf = ''
@@ -203,13 +203,13 @@ class InStream(object):
 YoctonField = collections.namedtuple('YoctonField', ('name', 'value'))
 
 class YoctonObject(object):
-	def __init__(self, instream, parent=None):
-		self.instream = instream
+	def __init__(self, lexer, parent=None):
+		self.lexer = lexer
 		self.parent = parent
 		self.child = None
 		self.done = False
 		if parent is None:
-			instream.root = self
+			lexer.root = self
 
 	def __iter__(self):
 		return self
@@ -229,17 +229,17 @@ class YoctonObject(object):
 		self.child = None
 
 	def parse_next_field(self):
-		tt, value = self.instream.read_next_token()
+		tt, value = self.lexer.read_next_token()
 		if tt == TOKEN_COLON:
 			# This is the string:string case.
-			tt, value = self.instream.read_next_token()
+			tt, value = self.lexer.read_next_token()
 			if tt != TOKEN_STRING:
 				raise SyntaxError(
 					"string expected to follow ':'")
 			return value
 
 		elif tt == TOKEN_OPEN_BRACE:
-			self.child = YoctonObject(self.instream, self)
+			self.child = YoctonObject(self.lexer, self)
 			return self.child
 
 		raise SyntaxError("':' or '{' expected to follow field name");
@@ -249,18 +249,18 @@ class YoctonObject(object):
 			return None
 
 		self.skip_forward()
-		tt, value = self.instream.read_next_token()
+		tt, value = self.lexer.read_next_token()
 
 		if tt == TOKEN_STRING:
 			return YoctonField(value, self.parse_next_field())
 		elif tt == TOKEN_CLOSE_BRACE:
-			if self == self.instream.root:
+			if self == self.lexer.root:
 				raise SyntaxError("closing brace '}' not "
 				                  "expected at top level")
 			self.done = True
 			return None
 		elif tt == TOKEN_EOF:
-			if self != self.instream.root:
+			if self != self.lexer.root:
 				raise EOFError(ERROR_EOF)
 			self.done = True
 			return None
