@@ -1,3 +1,4 @@
 //| error_message: "field 'special.read_as_object' has string, not object type"
-//| error_lineno: 3
+//| error_lineno: 4
+//| c_only: true
 special.read_as_object: 1234

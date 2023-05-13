@@ -1,5 +1,6 @@
 //| error_message: "field 'special.read_as_string' has object, not string type"
-//| error_lineno: 3
+//| error_lineno: 4
+//| c_only: true
 special.read_as_string {
   we_dont_get_this_far = true
 }

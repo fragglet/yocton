@@ -1,5 +1,6 @@
 //| error_message: "failed after last field was read"
-//| error_lineno: 6
+//| error_lineno: 7
+//| c_only: true
 field1: "value"
 special.fail_after_last_field {
   field2: "doesn't matter"

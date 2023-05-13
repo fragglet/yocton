@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright (c) 2023, Simon Howard
 #
@@ -141,8 +142,7 @@ class InStream(object):
 
 	def read_symbol(self, first):
 		self.syntax_assert(is_symbol_char(first),
-			'unknown token: not a valid symbol character: %r',
-			first)
+			'unknown token: not valid symbol character')
 
 		result_chars = [first]
 		while True:
@@ -352,38 +352,9 @@ def load(fp):
 	return read_obj(YoctonObject(instream))
 
 def loads(s):
-	buf = io.StringIO(s)
+	if isinstance(s, str):
+		buf = io.StringIO(s)
+	else:
+		buf = io.BytesIO(s)
 	return load(buf)
 
-import glob, os, sys
-
-for filename in glob.glob("tests/*.yocton"):
-	try:
-		print("==== " + filename)
-		sys.stdout.flush()
-		os.system("grep . %s" % filename)
-		with open(filename) as f:
-			obj = YoctonObject(InStream(f))
-			for k, v in obj:
-				print("%r = %r" % (k, v))
-	except Exception as e:
-		print(e)
-
-writer = YoctonWriter(sys.stdout)
-writer.write_field("foo", "bar")
-writer.write_field("asdf", "a1234")
-writer.begin_subobject("sub")
-writer.write_field("asdf", "this is a string")
-writer.write_field("baz", "this one has escapes: \n\b\r\t\\\"\f")
-writer.write_field("", "")
-writer.end()
-
-print("%r" % (dumps({
-	'hello': 'world',
-	'subobj': (
-		('field', 'first'),
-		('field', 'second'),
-	),
-})))
-
-print("%r" % (loads('hello: world subobj { field: first field: second }')))
