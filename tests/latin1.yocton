@@ -1,0 +1,10 @@
+// The following is outputted by the test when parsing (the >
+// prefix in these comments means "check output")
+//> Saluton mondo
+//> РСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя
+
+// ASCII
+output: "Saluton mondo"
+// Latin-1
+output: "РСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя"
+
