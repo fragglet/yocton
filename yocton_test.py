@@ -77,6 +77,7 @@ class YoctonReadTests(unittest.TestCase):
 			evaluate_obj(obj, output, s)
 			output = s("").join(output)
 			self.assertEqual(output, params[s("output")])
+			self.assertTrue(s("error_message") not in params)
 		except Exception as e:
 			self.assertTrue(s("error_message") in params)
 			self.assertEqual(params[s("error_message")],
