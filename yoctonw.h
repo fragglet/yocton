@@ -85,6 +85,16 @@ void yoctonw_field(struct yoctonw_writer *w, const char *name,
                    const char *value);
 
 /**
+ * Write a new field with the value constructed printf-style.
+ *
+ * @param w       Writer.
+ * @param name    Field name.
+ * @param fmt     Format string
+ */
+void yoctonw_printf(struct yoctonw_writer *w, const char *name,
+                    const char *fmt, ...);
+
+/**
  * Start writing a new subobject.
  *
  * The @ref yoctonw_end function should be called to end the subobject.

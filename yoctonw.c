@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -28,6 +29,8 @@ struct yoctonw_writer {
 	void *callback_handle;
 	uint8_t *buf;
 	size_t buf_len, buf_size;
+	char *printf_buf;
+	size_t printf_buf_size;
 	int indent_level;
 	int error;
 };
@@ -48,6 +51,8 @@ struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle)
 	writer->buf_size = 256;
 	writer->buf_len = 0;
 	writer->buf = (uint8_t *) calloc(writer->buf_size, sizeof(char));
+	writer->printf_buf = NULL;
+	writer->printf_buf_size = 0;
 	if (writer->buf == NULL) {
 		free(writer);
 		return NULL;
@@ -68,6 +73,7 @@ struct yoctonw_writer *yoctonw_write_to(FILE *fstream)
 
 void yoctonw_free(struct yoctonw_writer *writer)
 {
+	free(writer->printf_buf);
 	free(writer->buf);
 	free(writer);
 }
@@ -206,4 +212,61 @@ void yoctonw_end(struct yoctonw_writer *w)
 int yoctonw_have_error(struct yoctonw_writer *w)
 {
 	return w->error;
+}
+
+static int increase_buffer(struct yoctonw_writer *w, size_t min_size)
+{
+	char *new_buf;
+	size_t new_buf_size;
+
+	if (w->printf_buf_size == 0) {
+		new_buf_size = min_size;
+	} else {
+		new_buf_size = w->printf_buf_size;
+	}
+	while (new_buf_size < min_size) {
+		new_buf_size *= 2;
+	}
+	new_buf = (char *) realloc(w->printf_buf, new_buf_size);
+	if (new_buf == NULL) {
+		// TODO: Better error reporting?
+		w->error = 1;
+		return 0;
+	}
+
+	w->printf_buf = new_buf;
+	w->printf_buf_size = new_buf_size;
+	return 1;
+}
+
+void yoctonw_printf(struct yoctonw_writer *w, const char *name,
+                    const char *fmt, ...)
+{
+	va_list args;
+	int attempt, sz;
+
+	if (w->error) {
+		return;
+	}
+	if (w->printf_buf_size == 0 && !increase_buffer(w, 128)) {
+		return;
+	}
+	// We try to snprintf and if it fails, we try again with a larger
+	// buffer.
+	for (attempt = 0; attempt < 2; ++attempt) {
+		va_start(args, fmt);
+		sz = vsnprintf(w->printf_buf, w->printf_buf_size, fmt, args);
+		va_end(args);
+		if (sz < w->printf_buf_size) {
+			yoctonw_field(w, name, w->printf_buf);
+			return;
+		}
+		if (!increase_buffer(w, sz + 1)) {
+			return;
+		}
+	}
+
+	// This should never happen.
+	// TODO: Better error reporting?
+	w->error = 1;
 }
