@@ -111,16 +111,15 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 static void integer_value(struct yocton_object *obj)
 {
 	struct yocton_field *field;
-	size_t n = 0;
+	struct { int size; } s = {0};
 	for (;;) {
 		field = yocton_next_field(obj);
 		if (field == NULL) {
 			break;
 		}
-		if (!strcmp(yocton_field_name(field), "size")) {
-			n = yocton_field_int(field, 1);
-		} else if (!strcmp(yocton_field_name(field), "value")) {
-			yocton_field_int(field, n);
+		YOCTON_FIELD_INT(field, s, size_t, size);
+		if (!strcmp(yocton_field_name(field), "value")) {
+			yocton_field_int(field, s.size);
 		}
 	}
 }
@@ -128,16 +127,15 @@ static void integer_value(struct yocton_object *obj)
 static void uinteger_value(struct yocton_object *obj)
 {
 	struct yocton_field *field;
-	size_t n = 0;
+	struct { unsigned int size; } s = {0};
 	for (;;) {
 		field = yocton_next_field(obj);
 		if (field == NULL) {
 			break;
 		}
-		if (!strcmp(yocton_field_name(field), "size")) {
-			n = yocton_field_int(field, 1);
-		} else if (!strcmp(yocton_field_name(field), "value")) {
-			yocton_field_uint(field, n);
+		YOCTON_FIELD_UINT(field, s, size_t, size);
+		if (!strcmp(yocton_field_name(field), "value")) {
+			yocton_field_uint(field, s.size);
 		}
 	}
 }
