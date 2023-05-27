@@ -571,7 +571,8 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n)
 	value = yocton_field_value(f);
 	errno = 0;
 	result = strtoll(value, &endptr, 10);
-	if (*endptr != '\0' || *value == '\0') {
+	// Must be entire string, not empty, nothing leading or trailing:
+	if (*value == '\0' || isspace(*value) || *endptr != '\0') {
 		input_error(f->parent->instream, "not a valid integer "
 		            "value: '%s'", value);
 		return 0;
@@ -605,7 +606,7 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n)
 	value = yocton_field_value(f);
 	errno = 0;
 	result = strtoull(value, &endptr, 10);
-	if (*endptr != '\0' || *value == '\0') {
+	if (*value == '\0' || isspace(*value) || *endptr != '\0') {
 		input_error(f->parent->instream, "not a valid integer "
 		            "value: '%s'", value);
 		return 0;
