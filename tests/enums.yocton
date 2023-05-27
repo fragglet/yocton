@@ -1,0 +1,13 @@
+special.enum {
+	expected: 0
+	value: FIRST
+}
+special.enum {
+	expected: 1
+	value: SECOND
+}
+special.enum {
+	expected: 2
+	value: THIRD
+}
+

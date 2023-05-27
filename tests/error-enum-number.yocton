@@ -1,0 +1,10 @@
+//| error_message: "unknown enum value: '99'"
+//| error_lineno: 8
+//| c_only: true
+
+// The enum value has to be the symbolic name; can't use integer value.
+special.enum {
+	expected: 99
+	value: 99
+}
+

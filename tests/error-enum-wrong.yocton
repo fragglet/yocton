@@ -1,0 +1,8 @@
+//| error_message: "unknown enum value: 'FOURTH'"
+//| error_lineno: 6
+//| c_only: true
+special.enum {
+	expected: 99
+	value: FOURTH
+}
+

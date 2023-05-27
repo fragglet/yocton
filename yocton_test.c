@@ -24,6 +24,9 @@
 #include "alloc-testing.h"
 #include "yocton.h"
 
+enum { FIRST, SECOND, THIRD };
+static const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
+
 struct error_data {
 	char *error_message;
 	char *expected_output;
@@ -140,6 +143,20 @@ static void uinteger_value(struct yocton_object *obj)
 	}
 }
 
+static void enum_value(struct yocton_object *obj)
+{
+	struct { unsigned int expected, value; } s = {-1, -2};
+	for (;;) {
+		struct yocton_field *field = yocton_next_field(obj);
+		if (field == NULL) {
+			break;
+		}
+		YOCTON_FIELD_UINT(field, s, unsigned int, expected);
+		YOCTON_FIELD_ENUM(field, s, value, enum_values);
+	}
+	yocton_check(obj, "wrong enum value matched", s.expected == s.value);
+}
+
 static char *string_dup(struct yocton_object *obj, const char *value)
 {
 	char *result = strdup(value);
@@ -208,6 +225,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 			integer_value(yocton_field_inner(field));
 		} else if (!strcmp(name, "special.uinteger")) {
 			uinteger_value(yocton_field_inner(field));
+		} else if (!strcmp(name, "special.enum")) {
+			enum_value(yocton_field_inner(field));
 		} else if (ft == YOCTON_FIELD_OBJECT) {
 			evaluate_obj(yocton_field_inner(field), output);
 		} else {
