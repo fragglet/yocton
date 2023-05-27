@@ -208,10 +208,12 @@ struct yocton_object *yocton_field_inner(struct yocton_field *f);
 signed long long yocton_field_int(struct yocton_field *f, size_t n);
 
 #define YOCTON_FIELD_INT(field, my_struct, field_type, name) \
-	if (!strcmp(yocton_field_name(field), #name)) { \
-		(my_struct).name = (field_type) \
-			yocton_field_int(field, sizeof(field_type)); \
-	}
+	do { \
+		if (!strcmp(yocton_field_name(field), #name)) { \
+			(my_struct).name = (field_type) \
+				yocton_field_int(field, sizeof(field_type)); \
+		} \
+	} while (0)
 
 /**
  * Parse the field value as a unsigned integer.
@@ -229,10 +231,12 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
 unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
 
 #define YOCTON_FIELD_UINT(field, my_struct, field_type, name) \
-	if (!strcmp(yocton_field_name(field), #name)) { \
-		(my_struct).name = (field_type) \
-			yocton_field_uint(field, sizeof(field_type)); \
-	}
+	do { \
+		if (!strcmp(yocton_field_name(field), #name)) { \
+			(my_struct).name = (field_type) \
+				yocton_field_uint(field, sizeof(field_type)); \
+		} \
+	} while (0)
 
 #ifdef __cplusplus
 }
