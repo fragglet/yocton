@@ -108,6 +108,40 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 	return success;
 }
 
+static void integer_value(struct yocton_object *obj)
+{
+	struct yocton_field *field;
+	size_t n = 0;
+	for (;;) {
+		field = yocton_next_field(obj);
+		if (field == NULL) {
+			break;
+		}
+		if (!strcmp(yocton_field_name(field), "size")) {
+			n = yocton_field_int(field, 1);
+		} else if (!strcmp(yocton_field_name(field), "value")) {
+			yocton_field_int(field, n);
+		}
+	}
+}
+
+static void uinteger_value(struct yocton_object *obj)
+{
+	struct yocton_field *field;
+	size_t n = 0;
+	for (;;) {
+		field = yocton_next_field(obj);
+		if (field == NULL) {
+			break;
+		}
+		if (!strcmp(yocton_field_name(field), "size")) {
+			n = yocton_field_int(field, 1);
+		} else if (!strcmp(yocton_field_name(field), "value")) {
+			yocton_field_uint(field, n);
+		}
+	}
+}
+
 static char *string_dup(struct yocton_object *obj, const char *value)
 {
 	char *result = strdup(value);
@@ -172,6 +206,10 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 		if (!strcmp(name, "special.is_equal")) {
 			yocton_check(obj, "values not equal",
 			    evaluate_is_equal(yocton_field_inner(field)));
+		} else if (!strcmp(name, "special.integer")) {
+			integer_value(yocton_field_inner(field));
+		} else if (!strcmp(name, "special.uinteger")) {
+			uinteger_value(yocton_field_inner(field));
 		} else if (ft == YOCTON_FIELD_OBJECT) {
 			evaluate_obj(yocton_field_inner(field), output);
 		} else {

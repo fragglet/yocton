@@ -1,0 +1,7 @@
+//| error_message: "unsupported integer size: 72-bit"
+//| error_lineno: 6
+//| c_only: true
+special.uinteger {
+	size: 9
+	value: ""
+}

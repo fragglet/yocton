@@ -1,0 +1,7 @@
+//| error_message: "value not in range of a 64-bit unsigned integer: 999999999999999999999999999"
+//| error_lineno: 6
+//| c_only: true
+special.uinteger {
+	size: 8
+	value: 999999999999999999999999999
+}

@@ -192,6 +192,48 @@ const char *yocton_field_value(struct yocton_field *f);
  */
 struct yocton_object *yocton_field_inner(struct yocton_field *f);
 
+/**
+ * Parse the field value as a signed integer.
+ *
+ * If the field value is not a valid integer of the given size, zero is
+ * returned and an error is set.
+ *
+ * @param f   The field.
+ * @param n   Size of the expected field in bytes, eg. sizeof(uint16_t).
+ * @return    The integer value, or zero if it cannot be parsed as an
+ *            integer of that size. Although the return value is a long
+ *            long type, it will always be in the range of an integer
+ *            of the given size and can be safely cast to one.
+ */
+signed long long yocton_field_int(struct yocton_field *f, size_t n);
+
+#define YOCTON_FIELD_INT(field, my_struct, field_type, name) \
+	if (!strcmp(yocton_field_name(field), #name)) { \
+		(my_struct).name = (field_type) \
+			yocton_field_int(field, sizeof(field_type)); \
+	}
+
+/**
+ * Parse the field value as a unsigned integer.
+ *
+ * If the field value is not a valid integer of the given size, zero is
+ * returned and an error is set.
+ *
+ * @param f   The field.
+ * @param n   Size of the expected field in bytes, eg. sizeof(uint16_t).
+ * @return    The integer value, or zero if it cannot be parsed as an
+ *            signed integer of that size. Although the return value is a
+ *            long long type, it will always be in the range of an integer
+ *            of the given size and can be safely cast to one.
+ */
+unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
+
+#define YOCTON_FIELD_UINT(field, my_struct, field_type, name) \
+	if (!strcmp(yocton_field_name(field), #name)) { \
+		(my_struct).name = (field_type) \
+			yocton_field_uint(field, sizeof(field_type)); \
+	}
+
 #ifdef __cplusplus
 }
 #endif

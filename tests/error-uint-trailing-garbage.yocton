@@ -1,0 +1,7 @@
+//| error_message: "not a valid integer value: '1234jlksjdgklsd'"
+//| error_lineno: 6
+//| c_only: true
+special.uinteger {
+	size: 4
+	value: 1234jlksjdgklsd
+}

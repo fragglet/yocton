@@ -1,0 +1,7 @@
+//| error_message: "value not in range of a 16-bit unsigned integer: 99999"
+//| error_lineno: 6
+//| c_only: true
+special.uinteger {
+	size: 2
+	value: 99999
+}

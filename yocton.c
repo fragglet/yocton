@@ -19,9 +19,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
-#include <ctype.h>
 #include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <string.h>
 
 #include "yocton.h"
 
@@ -547,3 +550,71 @@ struct yocton_object *yocton_field_inner(struct yocton_field *f)
 	return f->child;
 }
 
+signed long long yocton_field_int(struct yocton_field *f, size_t n)
+{
+	signed long long result, min, max;
+	const char *value;
+	char *endptr;
+
+	if (n == 0 || n > sizeof(long long)) {
+		input_error(f->parent->instream, "unsupported "
+		            "integer size: %d-bit", n * 8);
+		return 0;
+	} else if (n == sizeof(long long)) {
+		min = LLONG_MIN;
+		max = LLONG_MAX;
+	} else {
+		min = -(1ULL << (n * 8 - 1));
+		max = -min - 1;
+	}
+
+	value = yocton_field_value(f);
+	errno = 0;
+	result = strtoll(value, &endptr, 10);
+	if (*endptr != '\0' || *value == '\0') {
+		input_error(f->parent->instream, "not a valid integer "
+		            "value: '%s'", value);
+		return 0;
+	}
+
+	if (((result == LLONG_MIN || result == LLONG_MAX) && errno == ERANGE)
+	 || result < min || result > max) {
+		input_error(f->parent->instream, "value not in range of a "
+		            "%d-bit signed integer: %s", n * 8, value);
+		return 0;
+	}
+	return result;
+}
+
+unsigned long long yocton_field_uint(struct yocton_field *f, size_t n)
+{
+	unsigned long long result, max;
+	const char *value;
+	char *endptr;
+
+	if (n == 0 || n > sizeof(unsigned long long)) {
+		input_error(f->parent->instream, "unsupported "
+		            "integer size: %d-bit", n * 8);
+		return 0;
+	} else if (n == sizeof(unsigned long long)) {
+		max = ULLONG_MAX;
+	} else {
+		max = (1ULL << (n * 8)) - 1;
+	}
+
+	value = yocton_field_value(f);
+	errno = 0;
+	result = strtoull(value, &endptr, 10);
+	if (*endptr != '\0' || *value == '\0') {
+		input_error(f->parent->instream, "not a valid integer "
+		            "value: '%s'", value);
+		return 0;
+	}
+
+	if ((result == ULLONG_MAX && errno == ERANGE) || result > max) {
+		input_error(f->parent->instream, "value not in range of a "
+		            "%d-bit unsigned integer: %s", n * 8, value);
+		return 0;
+	}
+	return result;
+}

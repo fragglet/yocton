@@ -1,0 +1,7 @@
+//| error_message: "unsupported integer size: 0-bit"
+//| error_lineno: 6
+//| c_only: true
+special.integer {
+	size: 0
+	value: ""
+}

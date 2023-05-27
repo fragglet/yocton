@@ -1,0 +1,7 @@
+//| error_message: "value not in range of a 16-bit signed integer: -99999"
+//| error_lineno: 6
+//| c_only: true
+special.integer {
+	size: 2
+	value: -99999
+}

@@ -1,0 +1,64 @@
+special.integer {
+	size: 1
+	value: -128
+}
+special.integer {
+	size: 1
+	value: 127
+}
+special.integer {
+	size: 2
+	value: -32768
+}
+special.integer {
+	size: 2
+	value: 32767
+}
+special.integer {
+	size: 4
+	value: -2147483648
+}
+special.integer {
+	size: 4
+	value: 2147483647
+}
+special.integer {
+	size: 8
+	value: -9223372036854775808
+}
+special.integer {
+	size: 8
+	value: 9223372036854775807
+}
+special.uinteger {
+	size: 1
+	value: 0
+}
+special.uinteger {
+	size: 1
+	value: 255
+}
+special.uinteger {
+	size: 2
+	value: 0
+}
+special.uinteger {
+	size: 2
+	value: 65535
+}
+special.uinteger {
+	size: 4
+	value: 0
+}
+special.uinteger {
+	size: 4
+	value: 4294967295
+}
+special.uinteger {
+	size: 8
+	value: 0
+}
+special.uinteger {
+	size: 8
+	value: 18446744073709551615
+}

@@ -1,0 +1,7 @@
+//| error_message: "not a valid integer value: ''"
+//| error_lineno: 6
+//| c_only: true
+special.integer {
+	size: 4
+	value: ""
+}
