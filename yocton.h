@@ -181,6 +181,32 @@ const char *yocton_field_name(struct yocton_field *f);
 const char *yocton_field_value(struct yocton_field *f);
 
 /**
+ * Get newly-allocated string value of a @ref yocton_field.
+ *
+ * Unlike @ref yocton_field_value, the returned value is a mutable string that
+ * will survive beyond the lifetime of the field. It is the job of the caller
+ * to free the string. Calling multiple times returns a newly-allocated string
+ * each time.
+ *
+ * It is an error to call this for a field that is not of type @ref
+ * YOCTON_FIELD_STRING. String encoding depends on the input file.
+ *
+ * @param f  The field.
+ * @return   String value of this field, or NULL if it is not a field of
+ *           type @ref YOCTON_FIELD_STRING, or if a memory allocation failure
+ *           occurred.
+ */
+char *yocton_field_value_dup(struct yocton_field *f);
+
+#define YOCTON_FIELD_STRING(field, my_struct, name) \
+	do { \
+		if (!strcmp(yocton_field_name(field), #name)) { \
+			free((my_struct).name); \
+			(my_struct).name = yocton_field_value_dup(field); \
+		} \
+	} while (0)
+
+/**
  * Get the inner object associated with a @ref yocton_field of type
  * @ref YOCTON_FIELD_OBJECT. It is an error to call this for a field that
  * is not of this type.

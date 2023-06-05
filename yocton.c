@@ -540,6 +540,18 @@ const char *yocton_field_value(struct yocton_field *f)
 	return (const char *) f->value.data;
 }
 
+char *yocton_field_value_dup(struct yocton_field *f)
+{
+	const char *value = yocton_field_value(f);
+	char *result;
+	if (value == NULL) {
+		return NULL;
+	}
+	result = strdup(value);
+	yocton_check(f->parent, ERROR_ALLOC, result != NULL);
+	return result;
+}
+
 struct yocton_object *yocton_field_inner(struct yocton_field *f)
 {
 	if (f->type != YOCTON_FIELD_OBJECT) {

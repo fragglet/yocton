@@ -60,21 +60,14 @@ size_t read_from_comment(void *buf, size_t buf_size, void *handle)
 void read_error_data(struct error_data *data, struct yocton_object *obj)
 {
 	struct yocton_field *field;
-	const char *name;
 
 	for (;;) {
 		field = yocton_next_field(obj);
 		if (field == NULL) {
 			return;
 		}
-		name = yocton_field_name(field);
-		if (!strcmp(name, "error_message")) {
-			data->error_message = strdup(yocton_field_value(field));
-			assert(data->error_message != NULL);
-		} else if (!strcmp(name, "error_lineno")) {
-			data->error_lineno = atoi(yocton_field_value(field));
-			assert(data->error_lineno > 0);
-		}
+		YOCTON_FIELD_STRING(field, *data, error_message);
+		YOCTON_FIELD_INT(field, *data, int, error_lineno);
 	}
 }
 
