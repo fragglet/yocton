@@ -191,6 +191,9 @@ const char *yocton_field_value(struct yocton_field *f);
  * It is an error to call this for a field that is not of type @ref
  * YOCTON_FIELD_STRING. String encoding depends on the input file.
  *
+ * It may be more convenient to use @ref YOCTON_FIELD_STRING which is a wrapper
+ * around this function.
+ *
  * @param f  The field.
  * @return   String value of this field, or NULL if it is not a field of
  *           type @ref YOCTON_FIELD_STRING, or if a memory allocation failure
@@ -198,6 +201,32 @@ const char *yocton_field_value(struct yocton_field *f);
  */
 char *yocton_field_value_dup(struct yocton_field *f);
 
+/**
+ * Set the value of a string struct field if appropriate.
+ *
+ * If the Yocton field currently being parsed has the same name as the given
+ * struct field, the struct field will be initialized to a newly-allocated
+ * buffer containing a copy of the string value.
+ *
+ * If the string field has an existing value it will be freed. It is therefore
+ * important that the field is initialized to NULL before this macro is used.
+ *
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct s {
+ *     char *bar;
+ *   };
+ *   struct s foo = {NULL};
+ *
+ *   while ((f = yocton_next_field(obj)) != NULL) {
+ *       YOCTON_FIELD_STRING(f, foo, bar);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param field      Yocton field.
+ * @param my_struct  C struct to initialize.
+ * @param name       Name of field to initialize.
+ */
 #define YOCTON_FIELD_STRING(field, my_struct, name) \
 	do { \
 		if (!strcmp(yocton_field_name(field), #name)) { \
@@ -224,6 +253,9 @@ struct yocton_object *yocton_field_inner(struct yocton_field *f);
  * If the field value is not a valid integer of the given size, zero is
  * returned and an error is set.
  *
+ * It may be more convenient to use @ref YOCTON_FIELD_INT which is a wrapper
+ * around this function.
+ *
  * @param f   The field.
  * @param n   Size of the expected field in bytes, eg. sizeof(uint16_t).
  * @return    The integer value, or zero if it cannot be parsed as an
@@ -233,6 +265,34 @@ struct yocton_object *yocton_field_inner(struct yocton_field *f);
  */
 signed long long yocton_field_int(struct yocton_field *f, size_t n);
 
+/**
+ * Set the value of a signed integer struct field if appropriate.
+ *
+ * If the Yocton field currently being parsed has the same name as the given
+ * struct field, the struct field will be initialized to a signed integer value
+ * parsed from the Yocton field value. If the Yocton field value cannot be
+ * parsed as a signed integer, it will be set to zero and an error is set.
+ *
+ * This will work with any kind of signed integer field, but the type of the
+ * field must be provided.
+ *
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct s {
+ *     int bar;
+ *   };
+ *   struct s foo;
+ *
+ *   while ((f = yocton_next_field(obj)) != NULL) {
+ *       YOCTON_FIELD_INT(f, foo, int, bar);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param field       Yocton field.
+ * @param my_struct   C struct to initialize.
+ * @param field_type  Type of the field, eg. `int` or `ssize_t`.
+ * @param name        Name of field to initialize.
+ */
 #define YOCTON_FIELD_INT(field, my_struct, field_type, name) \
 	do { \
 		if (!strcmp(yocton_field_name(field), #name)) { \
@@ -247,6 +307,9 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
  * If the field value is not a valid integer of the given size, zero is
  * returned and an error is set.
  *
+ * It may be more convenient to use @ref YOCTON_FIELD_UINT which is a wrapper
+ * around this function.
+ *
  * @param f   The field.
  * @param n   Size of the expected field in bytes, eg. sizeof(uint16_t).
  * @return    The integer value, or zero if it cannot be parsed as an
@@ -256,6 +319,34 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
  */
 unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
 
+/**
+ * Set the value of a unsigned integer struct field if appropriate.
+ *
+ * If the Yocton field currently being parsed has the same name as the given
+ * struct field, the struct field will be initialized to a unsigned integer
+ * value parsed from the Yocton field value. If the Yocton field value cannot
+ * be parsed as a unsigned integer, it will be set to zero and an error is set.
+ *
+ * This will work with any kind of unsigned integer field, but the type of the
+ * field must be provided.
+ *
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct s {
+ *     unsigned int bar;
+ *   };
+ *   struct s foo;
+ *
+ *   while ((f = yocton_next_field(obj)) != NULL) {
+ *       YOCTON_FIELD_INT(f, foo, unsigned int, bar);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param field       Yocton field.
+ * @param my_struct   C struct to initialize.
+ * @param field_type  Type of the field, eg. `unsigned int` or `size_t`.
+ * @param name        Name of field to initialize.
+ */
 #define YOCTON_FIELD_UINT(field, my_struct, field_type, name) \
 	do { \
 		if (!strcmp(yocton_field_name(field), #name)) { \
@@ -275,6 +366,9 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
  * relatively inefficient. If efficiency is concerned, an alternative
  * approach should be used (eg. a hash table).
  *
+ * It may be more convenient to use @ref YOCTON_FIELD_ENUM which is a wrapper
+ * around this function.
+ *
  * @param f       The field.
  * @param values  Pointer to a NULL-terminated array of strings representing
  *                enum values. values[e] is a string representing enum
@@ -284,6 +378,33 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
  */
 unsigned int yocton_field_enum(struct yocton_field *f, const char **values);
 
+/**
+ * Set the value of an enum struct field if appropriate.
+ *
+ * If the Yocton field currently being parsed has the same name as the given
+ * struct field, the struct field will be initialized to an enum value that
+ * matches a name from the given list.
+ *
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   enum e { FIRST, SECOND, THIRD };
+ *   const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
+ *   struct s {
+ *     enum e bar;
+ *   };
+ *   struct s foo;
+ *
+ *   while ((f = yocton_next_field(obj)) != NULL) {
+ *       YOCTON_FIELD_ENUM(f, foo, bar, enum_values);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param field      Yocton field.
+ * @param my_struct  C struct to initialize.
+ * @param name       Name of field to initialize.
+ * @param values     NULL-terminated array of strings representing enum values
+ *                   (same as values parameter to @ref yocton_field_enum).
+ */
 #define YOCTON_FIELD_ENUM(field, my_struct, name, values) \
 	do { \
 		if (!strcmp(yocton_field_name(field), #name)) { \
