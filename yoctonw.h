@@ -29,16 +29,16 @@ extern "C" {
  * @file yoctonw.h
  *
  * Functions for writing a Yocton file. The entrypoint is to use
- * @ref yocton_write_with or @ref yocton_write_from.
+ * @ref yoctonw_write_with or @ref yoctonw_write_to.
  */
 
 /**
  * Callback invoked to write more data to the output.
  *
  * @param buf       Buffer containing data to write.
- * @param buf_size  Size of buffer in bytes.
+ * @param nbytes    Size of buffer in bytes.
  * @param handle    Arbitrary pointer, passed through from
- *                  @ref yocton_write_with.
+ *                  @ref yoctonw_write_with.
  * @return          1 for success; 0 for failure. If a failure status
  *                  is returned, the callback will not be invoked
  *                  again.
@@ -46,6 +46,15 @@ extern "C" {
 typedef int (*yoctonw_write)(void *buf, size_t nbytes, void *handle);
 
 struct yoctonw_writer;
+
+#ifdef __DOXYGEN__
+
+/**
+ * Writer object for generating Yocton-formatted output.
+ */
+typedef struct yoctonw_writer yoctonw_writer;
+
+#endif
 
 /**
  * Start writing a new stream of yocton-encoded data, using the given
