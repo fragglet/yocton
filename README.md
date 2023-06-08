@@ -121,7 +121,7 @@ Compared with JSON:
 
 ## What's with the name?
 
-yocto- is the Si unit prefix for a factor of 10^−24. The -on suffix is the
-same as in JSON where it stands for Object Notation. So it's a very small
-object notation.
+yocto- is the Si unit prefix for a factor of 10<sup>−24</sup>. The -on suffix
+is the same as in JSON where it stands for Object Notation. So it's a very
+small object notation.
 
