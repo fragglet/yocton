@@ -87,6 +87,24 @@ typedef struct yocton_field yocton_field;
  * Start reading a new stream of yocton-encoded data, using the given
  * callback to read more data.
  *
+ * Simple example of how to use a custom read callback:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   static size_t read_callback(void *buf, size_t buf_size, void *handle) {
+ *       static int first = 1;
+ *       const char *value = (const char *) handle;
+ *       size_t bytes = 0;
+ *       if (first) {
+ *           bytes = strlen(value) + 1;
+ *           assert(buf_size >= bytes);
+ *           memcpy(buf, value, bytes);
+ *           first = 0;
+ *       }
+ *       return bytes;
+ *   }
+ *
+ *   obj = yocton_read_with(read_callback, "foo: bar");
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
  * @param callback   Callback function to invoke to read more data.
  * @param handle     Arbitrary pointer passed through when callback is
  *                   invoked.
@@ -97,6 +115,14 @@ struct yocton_object *yocton_read_with(yocton_read callback, void *handle);
 /**
  * Start reading a new stream of yocton-encoded data, using the given
  * FILE handle to read more data.
+ *
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *   FILE *fs = fopen("filename.yocton", "r");
+ *   assert(fs != NULL);
+ *
+ *   struct yocton_object *obj = yocton_read_from(fs);
+ * ~~~~~~~~~~~~~~~~~~~~~~~
  *
  * @param fstream    File handle.
  * @return           A @ref yocton_object representing the top-level object.
@@ -140,6 +166,17 @@ void yocton_check(struct yocton_object *obj, const char *error_msg,
 /**
  * Read the next field of an object.
  *
+ * Example that prints the names and values of all string fields:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct yocton_field *f;
+ *   while ((f = yocton_next_field(obj)) != NULL) {
+ *       if (yocton_field_type(f) == YOCTON_FIELD_STRING) {
+ *           printf("field %s has value %s\n",
+ *                  yocton_field_name(f), yocton_field_value(f));
+ *       }
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
  * @param obj  @ref yocton_object to read from.
  * @return     @ref yocton_field or NULL if there are no more fields to be
  *             read. NULL is also returned if an error occurs in parsing
@@ -152,6 +189,8 @@ struct yocton_field *yocton_next_field(struct yocton_object *obj);
 /**
  * Get the type of a @ref yocton_field.
  *
+ * See @ref yocton_next_field for an example of how this might be used.
+ *
  * @param f  The field.
  * @return   Type of the field.
  */
@@ -161,6 +200,8 @@ enum yocton_field_type yocton_field_type(struct yocton_field *f);
  * Get the name of a @ref yocton_field. Multiple fields of the same object
  * may have the same name. Encoding of the name depends on the encoding of
  * the input file.
+ *
+ * See @ref yocton_next_field for an example of how this might be used.
  *
  * @param f  The field.
  * @return   Name of the field. The returned string is only valid for the
@@ -172,6 +213,8 @@ const char *yocton_field_name(struct yocton_field *f);
  * Get the string value of a @ref yocton_field of type
  * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
  * is not of this type. Encoding of the string depends on the input file.
+ *
+ * See @ref yocton_next_field for an example of how this might be used.
  *
  * @param f  The field.
  * @return   String value of this field, or NULL if it is not a field of
@@ -217,6 +260,7 @@ char *yocton_field_value_dup(struct yocton_field *f);
  *     char *bar;
  *   };
  *   struct s foo = {NULL};
+ *   struct yocton_field *f;
  *
  *   while ((f = yocton_next_field(obj)) != NULL) {
  *       YOCTON_FIELD_STRING(f, foo, bar);
@@ -239,6 +283,19 @@ char *yocton_field_value_dup(struct yocton_field *f);
  * Get the inner object associated with a @ref yocton_field of type
  * @ref YOCTON_FIELD_OBJECT. It is an error to call this for a field that
  * is not of this type.
+ *
+ * Example of a function that recursively reads inner objects:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   void recurse_obj(struct yocton_object *obj) {
+ *       struct yocton_field *f;
+ *       while ((f = yocton_next_field(obj)) != NULL) {
+ *           if (yocton_field_type(f) == YOCTON_FIELD_OBJECT) {
+ *               printf("subobject %s\n", yocton_field_value(f));
+ *               recurse_obj(yocton_field_inner(f));
+ *           }
+ *       }
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * @param f  The field.
  * @return   Inner @ref yocton_object, or NULL if the field is not of type
@@ -282,6 +339,7 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
  *     int bar;
  *   };
  *   struct s foo;
+ *   struct yocton_field *f;
  *
  *   while ((f = yocton_next_field(obj)) != NULL) {
  *       YOCTON_FIELD_INT(f, foo, int, bar);
@@ -336,6 +394,7 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
  *     unsigned int bar;
  *   };
  *   struct s foo;
+ *   struct yocton_field *f;
  *
  *   while ((f = yocton_next_field(obj)) != NULL) {
  *       YOCTON_FIELD_INT(f, foo, unsigned int, bar);
@@ -393,6 +452,7 @@ unsigned int yocton_field_enum(struct yocton_field *f, const char **values);
  *     enum e bar;
  *   };
  *   struct s foo;
+ *   struct yocton_field *f;
  *
  *   while ((f = yocton_next_field(obj)) != NULL) {
  *       YOCTON_FIELD_ENUM(f, foo, bar, enum_values);
