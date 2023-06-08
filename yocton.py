@@ -272,6 +272,7 @@ class YoctonWriter(object):
 		self.indent_level = 0
 
 	def write_string(self, s):
+		s = str(s)
 		if VALID_SYMBOL_RE.match(s):
 			self.outstream.write(s)
 			return
@@ -335,7 +336,7 @@ def dump(obj, fp):
 			o = list(o.items())
 
 		for name, value in o:
-			if isinstance(value, (str, bytes)):
+			if isinstance(value, (str, bytes, int)):
 				w.write_field(name, value)
 			else:
 				w.begin_subobject(name)

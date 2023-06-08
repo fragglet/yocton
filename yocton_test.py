@@ -118,7 +118,7 @@ class YoctonWriteTests(unittest.TestCase):
 			"foo": "bar",
 			"ba z": "qux\n\\qux",
 			"sub-obj": [
-				("something", "1"),
+				("something", 1),
 				("something", "2"),
 				("something", "3"),
 				("sub_sub_obj", (
