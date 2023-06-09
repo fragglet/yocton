@@ -78,7 +78,7 @@ void yoctonw_free(struct yoctonw_writer *writer)
 	free(writer);
 }
 
-static void do_flush(struct yoctonw_writer *w)
+void yoctonw_flush(struct yoctonw_writer *w)
 {
 	int success;
 
@@ -99,7 +99,7 @@ static void do_flush(struct yoctonw_writer *w)
 static inline void insert_char(struct yoctonw_writer *w, uint8_t c)
 {
 	if (w->buf_len >= w->buf_size) {
-		do_flush(w);
+		yoctonw_flush(w);
 	}
 	w->buf[w->buf_len] = c;
 	++w->buf_len;
@@ -178,7 +178,7 @@ void yoctonw_field(struct yoctonw_writer *w, const char *name,
 	// We flush after every top-level def is completed; this means
 	// output will always have been flushed before writer is freed.
 	if (w->indent_level == 0) {
-		do_flush(w);
+		yoctonw_flush(w);
 	}
 }
 
@@ -205,7 +205,7 @@ void yoctonw_end(struct yoctonw_writer *w)
 	insert_char(w, '}');
 	insert_char(w, '\n');
 	if (w->indent_level == 0) {
-		do_flush(w);
+		yoctonw_flush(w);
 	}
 }
 

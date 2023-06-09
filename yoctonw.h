@@ -128,6 +128,17 @@ void yoctonw_end(struct yoctonw_writer *w);
  */
 int yoctonw_have_error(struct yoctonw_writer *w);
 
+/**
+ * Flush output buffer and write all pending data.
+ *
+ * Note that data is automatically flushed whenever a new top-level field is
+ * written, so the main use of this is to force any pending data to be written
+ * while writing a subobject.
+ *
+ * @param w       Writer.
+ */
+void yoctonw_flush(struct yoctonw_writer *w);
+
 #ifdef __cplusplus
 }
 #endif
