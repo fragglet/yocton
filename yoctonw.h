@@ -58,7 +58,16 @@ typedef struct yoctonw_writer yoctonw_writer;
 
 /**
  * Start writing a new stream of yocton-encoded data, using the given
- * callback to write more data.
+ * callback to write more data. Example:
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ *   static int write_callback(void *buf, size_t nbytes, void *handle) {
+ *       printf("Write callback to write %d bytes\n", nbytes);
+ *       return 1;
+ *   }
+ *
+ *   w = yoctonw_write_with(write_callback, NULL);
+ * ~~~~~~~~~~~~~~~~~~~~~~
  *
  * @param callback   Callback function to invoke to write data.
  * @param handle     Arbitrary pointer passed through when callback is
@@ -69,7 +78,13 @@ struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle);
 
 /**
  * Start writing a new stream of yocton-encoded data, using the given
- * FILE handle.
+ * FILE handle. Example:
+ *
+ * ~~~~~~~~~~~~~~~~~~~~
+ *   FILE *fs = fopen("output.txt", "w");
+ *   assert(fs != NULL);
+ *   struct yocton_writer *w = yoctonw_write_to(fs);
+ * ~~~~~~~~~~~~~~~~~~~~
  *
  * @param fstream    File handle.
  * @return           A @ref yoctonw_writer that can be used to output data.
@@ -86,6 +101,17 @@ void yoctonw_free(struct yoctonw_writer *w);
 /**
  * Write a new field and value to the output.
  *
+ * For example, the following code:
+ * ~~~~~~~~~~~~~~~~~
+ *   yoctonw_field(w, "foo", "bar");
+ *   yoctonw_field(w, "baz", "qux quux");
+ * ~~~~~~~~~~~~~~~~~
+ * will produce the following output:
+ * ~~~~~~~~~~~~~~~~~
+ *   foo: bar
+ *   baz: "qux quux"
+ * ~~~~~~~~~~~~~~~~~
+ *
  * @param w       Writer.
  * @param name    Field name.
  * @param value   Field value.
@@ -95,6 +121,19 @@ void yoctonw_field(struct yoctonw_writer *w, const char *name,
 
 /**
  * Write a new field with the value constructed printf-style.
+ *
+ * For example, the following code:
+ * ~~~~~~~~~~~~~~~~~
+ *   yoctonw_printf(w, "string", "Here is a string: %s", "my string");
+ *   yoctonw_printf(w, "int", "%d", 1234);
+ *   yoctonw_printf(w, "float", "Here is a float: %.02f", 1234.5678);
+ * ~~~~~~~~~~~~~~~~~
+ * will produce the following output:
+ * ~~~~~~~~~~~~~~~~~
+ *   string: "Here is a string: my string"
+ *   int: 1234
+ *   float: "Here is a float: 1234.57"
+ * ~~~~~~~~~~~~~~~~~
  *
  * @param w       Writer.
  * @param name    Field name.
@@ -108,6 +147,19 @@ void yoctonw_printf(struct yoctonw_writer *w, const char *name,
  *
  * The @ref yoctonw_end function should be called to end the subobject.
  *
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ *   yoctonw_subobject(w, "subobj");
+ *   yoctonw_field(w, "value", "my value");
+ *   yoctonw_end(w);
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ * will produce the following output:
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ *   subobj {
+ *       value: "my value"
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ *
  * @param w       Writer.
  * @param name    Field name for subobject.
  */
@@ -115,6 +167,8 @@ void yoctonw_subobject(struct yoctonw_writer *w, const char *name);
 
 /**
  * End the current subobject.
+ *
+ * See @ref yoctonw_subobject for an example.
  *
  * @param w       Writer.
  */
