@@ -428,7 +428,7 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
  *   struct yocton_field *f;
  *
  *   while ((f = yocton_next_field(obj)) != NULL) {
- *       YOCTON_FIELD_INT(f, foo, unsigned int, bar);
+ *       YOCTON_FIELD_UINT(f, foo, unsigned int, bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
