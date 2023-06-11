@@ -258,7 +258,7 @@ int yocton_reserve_array(struct yocton_field *f, void **array,
 	YOCTON_IF_FIELD(field, name, { \
 		if (yocton_reserve_array(field, (void **) &((my_struct).name), \
 		                         (my_struct).name_len, \
-		                         sizeof((my_struct).name))) { \
+		                         sizeof(*(my_struct).name))) { \
 			then \
 		} \
 	}
