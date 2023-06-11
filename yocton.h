@@ -251,6 +251,18 @@ char *yocton_field_value_dup(struct yocton_field *f);
 		} \
 	} while (0)
 
+int yocton_reserve_array(struct yocton_field *f, void **array,
+                         size_t nmemb, size_t size);
+
+#define YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, then) \
+	YOCTON_IF_FIELD(field, name, { \
+		if (yocton_reserve_array(field, (void **) &((my_struct).name), \
+		                         (my_struct).name_len, \
+		                         sizeof((my_struct).name))) { \
+			then \
+		} \
+	}
+
 /**
  * Set the value of a string struct field if appropriate.
  *
@@ -282,6 +294,15 @@ char *yocton_field_value_dup(struct yocton_field *f);
 	YOCTON_IF_FIELD(field, name, { \
 		free((my_struct).name); \
 		(my_struct).name = yocton_field_value_dup(field); \
+	})
+
+#define YOCTON_FIELD_STRING_ARRAY(field, my_struct, name, name_len) \
+	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+		char *__v = yocton_field_value_dup(field); \
+		if (__v) { \
+			(my_struct).name[(my_struct).name_len] = __v; \
+			++(my_struct).name_len; \
+		} \
 	})
 
 /**
@@ -362,6 +383,13 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
 			yocton_field_int(field, sizeof(field_type)); \
 	})
 
+#define YOCTON_FIELD_INT_ARRAY(field, my_struct, field_type, name, name_len) \
+	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+		(my_struct).name[(my_struct).name_len] = (field_type) \
+			yocton_field_int(field, sizeof(field_type)); \
+		++(my_struct).name_len; \
+	})
+
 /**
  * Parse the field value as a unsigned integer.
  *
@@ -413,6 +441,13 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
 	YOCTON_IF_FIELD(field, name, { \
 		(my_struct).name = (field_type) \
 			yocton_field_uint(field, sizeof(field_type)); \
+	})
+
+#define YOCTON_FIELD_UINT_ARRAY(field, my_struct, field_type, name, name_len) \
+	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+		(my_struct).name[(my_struct).name_len] = (field_type) \
+			yocton_field_uint(field, sizeof(field_type)); \
+		++(my_struct).name_len; \
 	})
 
 /**
@@ -469,6 +504,13 @@ unsigned int yocton_field_enum(struct yocton_field *f, const char **values);
 #define YOCTON_FIELD_ENUM(field, my_struct, name, values) \
 	YOCTON_IF_FIELD(field, name, { \
 		(my_struct).name = yocton_field_enum(field, values); \
+	})
+
+#define YOCTON_FIELD_ENUM_ARRAY(field, my_struct, name, name_len, values) \
+	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+		(my_struct).name[(my_struct).name_len] = \
+			yocton_field_enum(field, values) \
+		++(my_struct).name_len; \
 	})
 
 #ifdef __cplusplus

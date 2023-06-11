@@ -648,3 +648,23 @@ unsigned int yocton_field_enum(struct yocton_field *f, const char **values)
 	            value);
 	return 0;
 }
+
+// Helper function for array macros. Reallocates the given array one element
+// longer so that it can be (potentially) extended in length.
+int yocton_reserve_array(struct yocton_field *f, void **array, size_t nmemb,
+                         size_t size)
+{
+	void *new_array;
+
+	if (nmemb == 0) {
+		*array = NULL;
+	}
+	new_array = realloc(*array, (nmemb + 1) * size);
+	if (new_array == NULL) {
+		input_error(f->parent->instream, ERROR_ALLOC);
+		return 0;
+	}
+
+	*array = new_array;
+	return 1;
+}
