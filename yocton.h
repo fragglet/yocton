@@ -244,6 +244,13 @@ const char *yocton_field_value(struct yocton_field *f);
  */
 char *yocton_field_value_dup(struct yocton_field *f);
 
+#define YOCTON_IF_FIELD(field, name, then) \
+	do { \
+		if (!strcmp(yocton_field_name(field), #name)) { \
+			then \
+		} \
+	} while (0)
+
 /**
  * Set the value of a string struct field if appropriate.
  *
@@ -272,12 +279,10 @@ char *yocton_field_value_dup(struct yocton_field *f);
  * @param name       Name of field to initialize.
  */
 #define YOCTON_FIELD_STRING(field, my_struct, name) \
-	do { \
-		if (!strcmp(yocton_field_name(field), #name)) { \
-			free((my_struct).name); \
-			(my_struct).name = yocton_field_value_dup(field); \
-		} \
-	} while (0)
+	YOCTON_IF_FIELD(field, name, { \
+		free((my_struct).name); \
+		(my_struct).name = yocton_field_value_dup(field); \
+	})
 
 /**
  * Get the inner object associated with a @ref yocton_field of type
@@ -352,12 +357,10 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
  * @param name        Name of field to initialize.
  */
 #define YOCTON_FIELD_INT(field, my_struct, field_type, name) \
-	do { \
-		if (!strcmp(yocton_field_name(field), #name)) { \
-			(my_struct).name = (field_type) \
-				yocton_field_int(field, sizeof(field_type)); \
-		} \
-	} while (0)
+	YOCTON_IF_FIELD(field, name, { \
+		(my_struct).name = (field_type) \
+			yocton_field_int(field, sizeof(field_type)); \
+	})
 
 /**
  * Parse the field value as a unsigned integer.
@@ -407,12 +410,10 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
  * @param name        Name of field to initialize.
  */
 #define YOCTON_FIELD_UINT(field, my_struct, field_type, name) \
-	do { \
-		if (!strcmp(yocton_field_name(field), #name)) { \
-			(my_struct).name = (field_type) \
-				yocton_field_uint(field, sizeof(field_type)); \
-		} \
-	} while (0)
+	YOCTON_IF_FIELD(field, name, { \
+		(my_struct).name = (field_type) \
+			yocton_field_uint(field, sizeof(field_type)); \
+	})
 
 /**
  * Parse the field value as an enumeration.
@@ -466,11 +467,9 @@ unsigned int yocton_field_enum(struct yocton_field *f, const char **values);
  *                   (same as values parameter to @ref yocton_field_enum).
  */
 #define YOCTON_FIELD_ENUM(field, my_struct, name, values) \
-	do { \
-		if (!strcmp(yocton_field_name(field), #name)) { \
-			(my_struct).name = yocton_field_enum(field, values); \
-		} \
-	} while (0)
+	YOCTON_IF_FIELD(field, name, { \
+		(my_struct).name = yocton_field_enum(field, values); \
+	})
 
 #ifdef __cplusplus
 }
