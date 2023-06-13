@@ -1,0 +1,4 @@
+//| error_message: "':' or '{' expected to follow property name"
+//| error_lineno: 4
+property1: "value"
+property2 }

@@ -1,0 +1,7 @@
+//| error_message: "failed after last property was read"
+//| error_lineno: 7
+//| c_only: true
+property1: "value"
+special.fail_after_last_property {
+  property2: "doesn't matter"
+}

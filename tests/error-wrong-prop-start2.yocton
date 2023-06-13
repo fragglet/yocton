@@ -1,0 +1,4 @@
+//| error_message: "expected start of next property"
+//| error_lineno: 4
+property1: "value"
+{

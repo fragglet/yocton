@@ -1,6 +1,6 @@
 //| error_message: "string expected to follow ':'"
 //| error_lineno: 4
-field1: "value"
+property1: "value"
 inner: {
   this: wrong
 }

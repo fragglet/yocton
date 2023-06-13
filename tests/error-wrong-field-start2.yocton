@@ -1,4 +1,0 @@
-//| error_message: "expected start of next field"
-//| error_lineno: 4
-field1: "value"
-{

@@ -1,5 +1,5 @@
-//| error_message: "field 'special.parse_as_int': failed to parse as integer"
+//| error_message: "property 'special.parse_as_int': failed to parse as integer"
 //| error_lineno: 5
 //| c_only: true
-field1: "value"
+property1: "value"
 special.parse_as_int: "not an integer"

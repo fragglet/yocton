@@ -59,15 +59,15 @@ size_t read_from_comment(void *buf, size_t buf_size, void *handle)
 
 void read_error_data(struct error_data *data, struct yocton_object *obj)
 {
-	struct yocton_field *field;
+	struct yocton_prop *property;
 
 	for (;;) {
-		field = yocton_next_field(obj);
-		if (field == NULL) {
+		property = yocton_next_prop(obj);
+		if (property == NULL) {
 			return;
 		}
-		YOCTON_FIELD_STRING(field, *data, error_message);
-		YOCTON_FIELD_INT(field, *data, int, error_lineno);
+		YOCTON_FIELD_STRING(property, *data, error_message);
+		YOCTON_FIELD_INT(property, *data, int, error_lineno);
 	}
 }
 
@@ -106,32 +106,32 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 
 static void integer_value(struct yocton_object *obj)
 {
-	struct yocton_field *field;
+	struct yocton_prop *property;
 	struct { int size; } s = {0};
 	for (;;) {
-		field = yocton_next_field(obj);
-		if (field == NULL) {
+		property = yocton_next_prop(obj);
+		if (property == NULL) {
 			break;
 		}
-		YOCTON_FIELD_INT(field, s, size_t, size);
-		if (!strcmp(yocton_field_name(field), "value")) {
-			yocton_field_int(field, s.size);
+		YOCTON_FIELD_INT(property, s, size_t, size);
+		if (!strcmp(yocton_prop_name(property), "value")) {
+			yocton_prop_int(property, s.size);
 		}
 	}
 }
 
 static void uinteger_value(struct yocton_object *obj)
 {
-	struct yocton_field *field;
+	struct yocton_prop *property;
 	struct { unsigned int size; } s = {0};
 	for (;;) {
-		field = yocton_next_field(obj);
-		if (field == NULL) {
+		property = yocton_next_prop(obj);
+		if (property == NULL) {
 			break;
 		}
-		YOCTON_FIELD_UINT(field, s, size_t, size);
-		if (!strcmp(yocton_field_name(field), "value")) {
-			yocton_field_uint(field, s.size);
+		YOCTON_FIELD_UINT(property, s, size_t, size);
+		if (!strcmp(yocton_prop_name(property), "value")) {
+			yocton_prop_uint(property, s.size);
 		}
 	}
 }
@@ -140,12 +140,12 @@ static void enum_value(struct yocton_object *obj)
 {
 	struct { unsigned int expected, value; } s = {-1, -2};
 	for (;;) {
-		struct yocton_field *field = yocton_next_field(obj);
-		if (field == NULL) {
+		struct yocton_prop *property = yocton_next_prop(obj);
+		if (property == NULL) {
 			break;
 		}
-		YOCTON_FIELD_UINT(field, s, unsigned int, expected);
-		YOCTON_FIELD_ENUM(field, s, value, enum_values);
+		YOCTON_FIELD_UINT(property, s, unsigned int, expected);
+		YOCTON_FIELD_ENUM(property, s, value, enum_values);
 	}
 	yocton_check(obj, "wrong enum value matched", s.expected == s.value);
 }
@@ -159,21 +159,21 @@ static char *string_dup(struct yocton_object *obj, const char *value)
 
 int evaluate_is_equal(struct yocton_object *obj)
 {
-	struct yocton_field *field;
+	struct yocton_prop *property;
 	const char *name;
 	int result;
 	char *x, *y;
 
 	for (;;) {
-		field = yocton_next_field(obj);
-		if (field == NULL) {
+		property = yocton_next_prop(obj);
+		if (property == NULL) {
 			break;
 		}
-		name = yocton_field_name(field);
+		name = yocton_prop_name(property);
 		if (!strcmp(name, "x")) {
-			x = string_dup(obj, yocton_field_value(field));
+			x = string_dup(obj, yocton_prop_value(property));
 		} else if (!strcmp(name, "y")) {
-			y = string_dup(obj, yocton_field_value(field));
+			y = string_dup(obj, yocton_prop_value(property));
 		}
 	}
 
@@ -185,53 +185,53 @@ int evaluate_is_equal(struct yocton_object *obj)
 
 void evaluate_obj(struct yocton_object *obj, char **output)
 {
-	struct yocton_field *field;
-	enum yocton_field_type ft;
+	struct yocton_prop *property;
+	enum yocton_prop_type pt;
 	const char *name, *value;
 
 	for (;;) {
-		field = yocton_next_field(obj);
-		if (field == NULL) {
+		property = yocton_next_prop(obj);
+		if (property == NULL) {
 			return;
 		}
-		name = yocton_field_name(field);
+		name = yocton_prop_name(property);
 		assert(name != NULL);
-		if (!strcmp(name, "special.fail_before_any_field")) {
-			yocton_check(yocton_field_inner(field),
-			             "failed before any field was read", 0);
+		if (!strcmp(name, "special.fail_before_any_property")) {
+			yocton_check(yocton_prop_inner(property),
+			             "failed before any property was read", 0);
 		} else if (!strcmp(name, "special.parse_as_int")) {
 			int throwaway;
 			yocton_check(obj, "failed to parse as integer",
-			    1 == sscanf(yocton_field_value(field), "%d",
+			    1 == sscanf(yocton_prop_value(property), "%d",
 			                &throwaway));
 		}
-		ft = yocton_field_type(field);
+		pt = yocton_prop_type(property);
 		if (!strcmp(name, "special.read_as_object")) {
-			ft = YOCTON_FIELD_OBJECT;
+			pt = YOCTON_PROP_OBJECT;
 		} else if (!strcmp(name, "special.read_as_string")) {
-			ft = YOCTON_FIELD_STRING;
+			pt = YOCTON_PROP_STRING;
 		}
 		if (!strcmp(name, "special.is_equal")) {
 			yocton_check(obj, "values not equal",
-			    evaluate_is_equal(yocton_field_inner(field)));
+			    evaluate_is_equal(yocton_prop_inner(property)));
 		} else if (!strcmp(name, "special.integer")) {
-			integer_value(yocton_field_inner(field));
+			integer_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.uinteger")) {
-			uinteger_value(yocton_field_inner(field));
+			uinteger_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.enum")) {
-			enum_value(yocton_field_inner(field));
-		} else if (ft == YOCTON_FIELD_OBJECT) {
-			evaluate_obj(yocton_field_inner(field), output);
+			enum_value(yocton_prop_inner(property));
+		} else if (pt == YOCTON_PROP_OBJECT) {
+			evaluate_obj(yocton_prop_inner(property), output);
 		} else {
-			assert(yocton_field_value(field) != NULL);
+			assert(yocton_prop_value(property) != NULL);
 		}
-		if (!strcmp(name, "special.fail_after_last_field")) {
-			yocton_check(yocton_field_inner(field),
-			             "failed after last field was read", 0);
+		if (!strcmp(name, "special.fail_after_last_property")) {
+			yocton_check(yocton_prop_inner(property),
+			             "failed after last property was read", 0);
 		}
 		if (!strcmp(name, "output")) {
 			char *new_output;
-			value = yocton_field_value(field);
+			value = yocton_prop_value(property);
 			new_output = (char *) realloc(
 				*output, strlen(*output) + strlen(value) + 2);
 			if (new_output == NULL) {

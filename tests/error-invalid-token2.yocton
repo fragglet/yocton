@@ -1,4 +1,4 @@
 //| error_message: "unknown token: not valid symbol character"
 //| error_lineno: 4
-field1: "value"
+property1: "value"
 start_is_ok_but_then%oops

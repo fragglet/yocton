@@ -99,12 +99,12 @@ struct yoctonw_writer *yoctonw_write_to(FILE *fstream);
 void yoctonw_free(struct yoctonw_writer *w);
 
 /**
- * Write a new field and value to the output.
+ * Write a new property and value to the output.
  *
  * For example, the following code:
  * ~~~~~~~~~~~~~~~~~
- *   yoctonw_field(w, "foo", "bar");
- *   yoctonw_field(w, "baz", "qux quux");
+ *   yoctonw_prop(w, "foo", "bar");
+ *   yoctonw_prop(w, "baz", "qux quux");
  * ~~~~~~~~~~~~~~~~~
  * will produce the following output:
  * ~~~~~~~~~~~~~~~~~
@@ -113,14 +113,14 @@ void yoctonw_free(struct yoctonw_writer *w);
  * ~~~~~~~~~~~~~~~~~
  *
  * @param w       Writer.
- * @param name    Field name.
- * @param value   Field value.
+ * @param name    Property name.
+ * @param value   Property value.
  */
-void yoctonw_field(struct yoctonw_writer *w, const char *name,
+void yoctonw_prop(struct yoctonw_writer *w, const char *name,
                    const char *value);
 
 /**
- * Write a new field with the value constructed printf-style.
+ * Write a new property with the value constructed printf-style.
  *
  * For example, the following code:
  * ~~~~~~~~~~~~~~~~~
@@ -136,7 +136,7 @@ void yoctonw_field(struct yoctonw_writer *w, const char *name,
  * ~~~~~~~~~~~~~~~~~
  *
  * @param w       Writer.
- * @param name    Field name.
+ * @param name    Property name.
  * @param fmt     Format string
  */
 void yoctonw_printf(struct yoctonw_writer *w, const char *name,
@@ -150,7 +150,7 @@ void yoctonw_printf(struct yoctonw_writer *w, const char *name,
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~
  *   yoctonw_subobject(w, "subobj");
- *   yoctonw_field(w, "value", "my value");
+ *   yoctonw_prop(w, "value", "my value");
  *   yoctonw_end(w);
  * ~~~~~~~~~~~~~~~~~~~~~~
  * will produce the following output:
@@ -161,7 +161,7 @@ void yoctonw_printf(struct yoctonw_writer *w, const char *name,
  * ~~~~~~~~~~~~~~~~~~~~~~
  *
  * @param w       Writer.
- * @param name    Field name for subobject.
+ * @param name    Property name for subobject.
  */
 void yoctonw_subobject(struct yoctonw_writer *w, const char *name);
 
@@ -185,7 +185,7 @@ int yoctonw_have_error(struct yoctonw_writer *w);
 /**
  * Flush output buffer and write all pending data.
  *
- * Note that data is automatically flushed whenever a new top-level field is
+ * Note that data is automatically flushed whenever a new top-level property is
  * written, so the main use of this is to force any pending data to be written
  * while writing a subobject.
  *

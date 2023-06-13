@@ -163,7 +163,7 @@ static void write_indent(struct yoctonw_writer *w)
 	}
 }
 
-void yoctonw_field(struct yoctonw_writer *w, const char *name,
+void yoctonw_prop(struct yoctonw_writer *w, const char *name,
                    const char *value)
 {
 	if (w->error) {
@@ -258,7 +258,7 @@ void yoctonw_printf(struct yoctonw_writer *w, const char *name,
 		sz = vsnprintf(w->printf_buf, w->printf_buf_size, fmt, args);
 		va_end(args);
 		if (sz < w->printf_buf_size) {
-			yoctonw_field(w, name, w->printf_buf);
+			yoctonw_prop(w, name, w->printf_buf);
 			return;
 		}
 		if (!increase_buffer(w, sz + 1)) {

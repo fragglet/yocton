@@ -1,4 +1,4 @@
 //| error_message: "unknown string escape: \\&"
 //| error_lineno: 4
-field1: "value"
-field2: "\&value2"
+property1: "value"
+property2: "\&value2"

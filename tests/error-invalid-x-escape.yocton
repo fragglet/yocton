@@ -1,4 +1,4 @@
 //| error_message: "\\x sequence must be followed by two hexadecimal characters"
 //| error_lineno: 4
-field1: "value"
+property1: "value"
 bad-escape: "this isn't using hexadecimal characters: \xaz"

@@ -1,5 +1,4 @@
 //| error_message: "string expected to follow ':'"
-//| error_lineno: 4
-field1: "value"
-foo::
-
+//| error_lineno: 5
+property1: "value"
+property2:

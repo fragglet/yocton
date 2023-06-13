@@ -9,14 +9,15 @@ The mascot for Yocton is Captain Yocton, who is a tiny alien superhero.
 
 ## Data model
 
-A Yocton document consists of an object. Every object has a number of fields.
-Each field has a name and either a string value or an inner object. For example:
+A Yocton document consists of an object. Every object has a number of
+properties. Each property has a name and either a string value or an inner
+object. For example:
 ```
-field_name1: "hello"
-string_field: "world"
-object_field {
-  inner_field1: "foo"
-  inner_field2: "bar"
+property_name1: "hello"
+string_property: "world"
+object_property {
+  inner_property1: "foo"
+  inner_property2: "bar"
 }
 ```
 Strings can be represented in two different ways:
@@ -49,13 +50,13 @@ my_list {
 
 As seen in this example:
 
-* The symbol notation allows a variety of different
-formats to be concisely represented, including C symbol names, floating-point
-numbers, IP addresses or even temperatures.
+* The symbol notation allows a variety of different formats to be concisely
+represented, including C symbol names, floating-point numbers, IP addresses or
+even temperatures.
 
-* There is no requirement that a particular object can only have one field of a
-* particular name; this provides a way of representing lists even though there
-* is no special syntax for them.
+* There is no requirement that an object can only have one property of a
+particular name; this provides a way of representing lists even though there is
+no special syntax for them.
 
 ## Strings
 
@@ -112,10 +113,10 @@ Compared with JSON:
   only providing a basic hierarchical structure for strings to be arranged
   in. It is up to the programmer to interpret the content of these strings,
   placing some additional burden not found with other formats.
-* Arrays: since there is no restriction that an object can only have one field
-  with any particular name, repeated values can be represented as repeated
-  fields with the same name. An alternative is an object where sequential
-  numbers are used as field names.
+* Arrays: since there is no restriction that an object can only have one
+  property with a particular name, repeated values can be represented as
+  repeated properties with the same name. An alternative is an object where
+  sequential numbers are used as property names.
 * Number types: strings can be used to store a representation of a number.
   The set of characters allowed in symbols includes alphanumeric
   characters, period, plus and minus, allowing natural representation of

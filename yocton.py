@@ -200,7 +200,7 @@ class Lexer(object):
 
 		return self.do_read_next_token()
 
-YoctonField = collections.namedtuple('YoctonField', ('name', 'value'))
+YoctonProperty = collections.namedtuple('YoctonProperty', ('name', 'value'))
 
 class YoctonObject(object):
 	def __init__(self, lexer, parent=None):
@@ -215,20 +215,20 @@ class YoctonObject(object):
 		return self
 
 	def __next__(self):
-		f = self.next_field()
-		if f is None:
+		p = self.next_prop()
+		if p is None:
 			raise StopIteration
-		return f
+		return p
 
 	def next(self):
 		return self.__next__()
 
 	def skip_forward(self):
 		while self.child is not None and not self.child.done:
-			self.child.next_field()
+			self.child.next_prop()
 		self.child = None
 
-	def parse_next_field(self):
+	def parse_next_prop(self):
 		tt, value = self.lexer.read_next_token()
 		if tt == TOKEN_COLON:
 			# This is the string:string case.
@@ -242,9 +242,9 @@ class YoctonObject(object):
 			self.child = YoctonObject(self.lexer, self)
 			return self.child
 
-		raise SyntaxError("':' or '{' expected to follow field name");
+		raise SyntaxError("':' or '{' expected to follow property name");
 
-	def next_field(self):
+	def next_prop(self):
 		if self.done:
 			return None
 
@@ -252,7 +252,7 @@ class YoctonObject(object):
 		tt, value = self.lexer.read_next_token()
 
 		if tt == TOKEN_STRING:
-			return YoctonField(value, self.parse_next_field())
+			return YoctonProperty(value, self.parse_next_prop())
 		elif tt == TOKEN_CLOSE_BRACE:
 			if self == self.lexer.root:
 				raise SyntaxError("closing brace '}' not "
@@ -264,7 +264,7 @@ class YoctonObject(object):
 				raise EOFError(ERROR_EOF)
 			self.done = True
 			return None
-		raise SyntaxError("expected start of next field")
+		raise SyntaxError("expected start of next property")
 
 class YoctonWriter(object):
 	def __init__(self, outstream):
@@ -292,7 +292,7 @@ class YoctonWriter(object):
 	def write_indent(self):
 		self.outstream.write("\t" * self.indent_level)
 
-	def write_field(self, name, value):
+	def write_property(self, name, value):
 		self.write_indent()
 		self.write_string(name)
 		self.outstream.write(": ")
@@ -337,7 +337,7 @@ def dump(obj, fp):
 
 		for name, value in o:
 			if isinstance(value, (str, bytes, int)):
-				w.write_field(name, value)
+				w.write_property(name, value)
 			else:
 				w.begin_subobject(name)
 				write_obj(value)

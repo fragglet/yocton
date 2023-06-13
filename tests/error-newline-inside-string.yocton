@@ -1,5 +1,5 @@
 //| error_message: "control character not allowed inside string (ASCII char 0x0a)"
 //| error_lineno: 5
-field1: "value"
-field2: "multiline strings
+property1: "value"
+property2: "multiline strings
 are not allowed."

@@ -44,42 +44,41 @@ extern "C" {
  */
 typedef size_t (*yocton_read)(void *buf, size_t buf_size, void *handle);
 
-/** Type of a @ref yocton_field. */
-enum yocton_field_type {
+/** Type of a @ref yocton_prop. */
+enum yocton_prop_type {
 	/**
-	 * Field that has a string value. @ref yocton_field_value can be
+	 * Property that has a string value. @ref yocton_prop_value can be
 	 * used to get the value.
 	 */
-	YOCTON_FIELD_STRING,
+	YOCTON_PROP_STRING,
 
 	/**
-	 * Field that has an object value. @ref yocton_field_inner can be
+	 * Property that has an object value. @ref yocton_prop_inner can be
 	 * used to read the inner object.
 	 */
-	YOCTON_FIELD_OBJECT,
+	YOCTON_PROP_OBJECT,
 };
 
 struct yocton_object;
-struct yocton_field;
+struct yocton_prop;
 
 #ifdef __DOXYGEN__
 
 /**
  * The object is the main abstraction of the Yocton format. Each object
- * can have multiple fields (@ref yocton_field), which can themselves
+ * can have multiple properties (@ref yocton_prop), which can themselves
  * contain more objects.
  */
 typedef struct yocton_object yocton_object;
 
 /**
- * An object has multiple fields. Each field has a name which is always
- * a string. It also always has a value, which is either a string
- * (@ref YOCTON_FIELD_STRING) or an object (@ref YOCTON_FIELD_OBJECT).
- * Fields only have a very limited lifetime and are only valid until
- * @ref yocton_next_field is called to read the next field of their
- * parent object.
+ * An object can have multiple properties. Each property has a name which is
+ * always a string. It also always has a value, which is either a string
+ * (@ref YOCTON_PROP_STRING) or an object (@ref YOCTON_PROP_OBJECT). Properties
+ * have a very limited lifetime and are only valid until @ref yocton_next_prop
+ * is called to read the next property.
  */
-typedef struct yocton_field yocton_field;
+typedef struct yocton_prop yocton_prop;
 
 #endif
 
@@ -131,7 +130,7 @@ struct yocton_object *yocton_read_from(FILE *fstream);
 
 /**
  * Query whether an error occurred during parsing. This should be called
- * once no more data is returned from obj (ie. when @ref yocton_next_field
+ * once no more data is returned from obj (ie. when @ref yocton_next_prop
  * returns NULL for the top-level object).
  *
  * @param obj        Top-level @ref yocton_object.
@@ -164,99 +163,99 @@ void yocton_check(struct yocton_object *obj, const char *error_msg,
                   int normally_true);
 
 /**
- * Read the next field of an object.
+ * Read the next property of an object.
  *
- * Example that prints the names and values of all string fields:
+ * Example that prints the names and values of all string properties:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *   struct yocton_field *f;
- *   while ((f = yocton_next_field(obj)) != NULL) {
- *       if (yocton_field_type(f) == YOCTON_FIELD_STRING) {
- *           printf("field %s has value %s\n",
- *                  yocton_field_name(f), yocton_field_value(f));
+ *   struct yocton_prop *p;
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       if (yocton_prop_type(p) == YOCTON_PROP_STRING) {
+ *           printf("property %s has value %s\n",
+ *                  yocton_prop_name(p), yocton_prop_value(p));
  *       }
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * @param obj  @ref yocton_object to read from.
- * @return     @ref yocton_field or NULL if there are no more fields to be
+ * @return     @ref yocton_prop or NULL if there are no more properties to be
  *             read. NULL is also returned if an error occurs in parsing
  *             the input; @ref yocton_have_error should be used to
- *             distinguish the two. If a field is returned, it is only
- *             valid until the next field is read from the same object.
+ *             distinguish the two. If a property is returned, it is only
+ *             valid until the next call to yocton_next_prop.
  */
-struct yocton_field *yocton_next_field(struct yocton_object *obj);
+struct yocton_prop *yocton_next_prop(struct yocton_object *obj);
 
 /**
- * Get the type of a @ref yocton_field.
+ * Get the type of a @ref yocton_prop.
  *
- * See @ref yocton_next_field for an example of how this might be used.
+ * See @ref yocton_next_prop for an example of how this might be used.
  *
- * @param f  The field.
- * @return   Type of the field.
+ * @param p  The property.
+ * @return   Type of the property.
  */
-enum yocton_field_type yocton_field_type(struct yocton_field *f);
+enum yocton_prop_type yocton_prop_type(struct yocton_prop *p);
 
 /**
- * Get the name of a @ref yocton_field. Multiple fields of the same object
+ * Get the name of a @ref yocton_prop. Multiple properties of the same object
  * may have the same name. Encoding of the name depends on the encoding of
  * the input file.
  *
- * See @ref yocton_next_field for an example of how this might be used.
+ * See @ref yocton_next_prop for an example of how this might be used.
  *
- * @param f  The field.
- * @return   Name of the field. The returned string is only valid for the
- *           lifetime of the field itself.
+ * @param p  The property.
+ * @return   Name of the property. The returned string is only valid for the
+ *           lifetime of the property itself.
  */
-const char *yocton_field_name(struct yocton_field *f);
+const char *yocton_prop_name(struct yocton_prop *p);
 
 /**
- * Get the string value of a @ref yocton_field of type
- * @ref YOCTON_FIELD_STRING. It is an error to call this for a field that
+ * Get the string value of a @ref yocton_prop of type
+ * @ref YOCTON_PROP_STRING. It is an error to call this for a property that
  * is not of this type. Encoding of the string depends on the input file.
  *
- * See @ref yocton_next_field for an example of how this might be used.
+ * See @ref yocton_next_prop for an example of how this might be used.
  *
- * @param f  The field.
- * @return   String value of this field, or NULL if it is not a field of
- *           type @ref YOCTON_FIELD_STRING. The returned string is only
- *           valid for the lifetime of the field itself.
+ * @param p  The property.
+ * @return   String value of this property, or NULL if it is not a property of
+ *           type @ref YOCTON_PROP_STRING. The returned string is only
+ *           valid for the lifetime of the property itself.
  */
-const char *yocton_field_value(struct yocton_field *f);
+const char *yocton_prop_value(struct yocton_prop *p);
 
 /**
- * Get newly-allocated string value of a @ref yocton_field.
+ * Get newly-allocated copy of a property value.
  *
- * Unlike @ref yocton_field_value, the returned value is a mutable string that
- * will survive beyond the lifetime of the field. It is the job of the caller
- * to free the string. Calling multiple times returns a newly-allocated string
- * each time.
+ * Unlike @ref yocton_prop_value, the returned value is a mutable string that
+ * will survive beyond the lifetime of the property. It is the responsibility
+ * of the caller to free the string. Calling multiple times returns a
+ * newly-allocated string each time.
  *
- * It is an error to call this for a field that is not of type @ref
- * YOCTON_FIELD_STRING. String encoding depends on the input file.
+ * It is an error to call this for a property that is not of type @ref
+ * YOCTON_PROP_STRING. String encoding depends on the input file.
  *
  * It may be more convenient to use @ref YOCTON_FIELD_STRING which is a wrapper
  * around this function.
  *
- * @param f  The field.
- * @return   String value of this field, or NULL if it is not a field of
- *           type @ref YOCTON_FIELD_STRING, or if a memory allocation failure
+ * @param p  The property.
+ * @return   String value of this property, or NULL if it is not a property of
+ *           type @ref YOCTON_PROP_STRING, or if a memory allocation failure
  *           occurred.
  */
-char *yocton_field_value_dup(struct yocton_field *f);
+char *yocton_prop_value_dup(struct yocton_prop *p);
 
-#define YOCTON_IF_FIELD(field, name, then) \
+#define YOCTON_IF_FIELD(property, name, then) \
 	do { \
-		if (!strcmp(yocton_field_name(field), #name)) { \
+		if (!strcmp(yocton_prop_name(property), #name)) { \
 			then \
 		} \
 	} while (0)
 
-int yocton_reserve_array(struct yocton_field *f, void **array,
+int yocton_reserve_array(struct yocton_prop *p, void **array,
                          size_t nmemb, size_t size);
 
-#define YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, then) \
-	YOCTON_IF_FIELD(field, name, { \
-		if (yocton_reserve_array(field, (void **) &((my_struct).name), \
+#define YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, then) \
+	YOCTON_IF_FIELD(prop, name, { \
+		if (yocton_reserve_array(prop, (void **) &((my_struct).name), \
 		                         (my_struct).name_len, \
 		                         sizeof(*(my_struct).name))) { \
 			then \
@@ -266,39 +265,40 @@ int yocton_reserve_array(struct yocton_field *f, void **array,
 /**
  * Set the value of a string struct field if appropriate.
  *
- * If the Yocton field currently being parsed has the same name as the given
- * struct field, the struct field will be initialized to a newly-allocated
- * buffer containing a copy of the string value.
+ * If the property currently being parsed has the same name as the given field,
+ * the field will be initialized to a newly-allocated buffer containing a copy
+ * of the string value.
  *
- * If the string field has an existing value it will be freed. It is therefore
- * important that the field is initialized to NULL before this macro is used.
+ * If the field has an existing value it will be freed. It is therefore
+ * important that the field is initialized to NULL before the first time this
+ * macro is used to set it.
  *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   struct s {
- *     char *bar;
+ *       char *bar;
  *   };
  *   struct s foo = {NULL};
- *   struct yocton_field *f;
+ *   struct yocton_prop *p;
  *
- *   while ((f = yocton_next_field(obj)) != NULL) {
- *       YOCTON_FIELD_STRING(f, foo, bar);
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_FIELD_STRING(p, foo, bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param field      Yocton field.
+ * @param prop       Property.
  * @param my_struct  C struct to initialize.
  * @param name       Name of field to initialize.
  */
-#define YOCTON_FIELD_STRING(field, my_struct, name) \
-	YOCTON_IF_FIELD(field, name, { \
+#define YOCTON_FIELD_STRING(prop, my_struct, name) \
+	YOCTON_IF_FIELD(prop, name, { \
 		free((my_struct).name); \
-		(my_struct).name = yocton_field_value_dup(field); \
+		(my_struct).name = yocton_prop_value_dup(prop); \
 	})
 
-#define YOCTON_FIELD_STRING_ARRAY(field, my_struct, name, name_len) \
-	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
-		char *__v = yocton_field_value_dup(field); \
+#define YOCTON_FIELD_STRING_ARRAY(prop, my_struct, name, name_len) \
+	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
+		char *__v = yocton_prop_value_dup(prop); \
 		if (__v) { \
 			(my_struct).name[(my_struct).name_len] = __v; \
 			++(my_struct).name_len; \
@@ -306,55 +306,55 @@ int yocton_reserve_array(struct yocton_field *f, void **array,
 	})
 
 /**
- * Get the inner object associated with a @ref yocton_field of type
- * @ref YOCTON_FIELD_OBJECT. It is an error to call this for a field that
+ * Get the inner object associated with a @ref yocton_prop of type
+ * @ref YOCTON_PROP_OBJECT. It is an error to call this for a property that
  * is not of this type.
  *
  * Example of a function that recursively reads inner objects:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   void recurse_obj(struct yocton_object *obj) {
- *       struct yocton_field *f;
- *       while ((f = yocton_next_field(obj)) != NULL) {
- *           if (yocton_field_type(f) == YOCTON_FIELD_OBJECT) {
- *               printf("subobject %s\n", yocton_field_value(f));
- *               recurse_obj(yocton_field_inner(f));
+ *       struct yocton_prop *p;
+ *       while ((p = yocton_next_prop(obj)) != NULL) {
+ *           if (yocton_prop_type(p) == YOCTON_PROP_OBJECT) {
+ *               printf("subobject %s\n", yocton_prop_value(p));
+ *               recurse_obj(yocton_prop_inner(p));
  *           }
  *       }
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param f  The field.
- * @return   Inner @ref yocton_object, or NULL if the field is not of type
- *           @ref YOCTON_FIELD_OBJECT. The returned object is only only
- *           valid for the lifetime of the field itself.
+ * @param p  The property.
+ * @return   Inner @ref yocton_object, or NULL if the property is not of type
+ *           @ref YOCTON_PROP_OBJECT. The returned object is only only
+ *           valid for the lifetime of the property itself.
  */
-struct yocton_object *yocton_field_inner(struct yocton_field *f);
+struct yocton_object *yocton_prop_inner(struct yocton_prop *p);
 
 /**
- * Parse the field value as a signed integer.
+ * Parse the property value as a signed integer.
  *
- * If the field value is not a valid integer of the given size, zero is
+ * If the property value is not a valid integer of the given size, zero is
  * returned and an error is set.
  *
  * It may be more convenient to use @ref YOCTON_FIELD_INT which is a wrapper
  * around this function.
  *
- * @param f   The field.
- * @param n   Size of the expected field in bytes, eg. sizeof(uint16_t).
+ * @param p   The property.
+ * @param n   Size of the expected property in bytes, eg. sizeof(uint16_t).
  * @return    The integer value, or zero if it cannot be parsed as an
  *            integer of that size. Although the return value is a long
  *            long type, it will always be in the range of an integer
  *            of the given size and can be safely cast to one.
  */
-signed long long yocton_field_int(struct yocton_field *f, size_t n);
+signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
 
 /**
  * Set the value of a signed integer struct field if appropriate.
  *
- * If the Yocton field currently being parsed has the same name as the given
- * struct field, the struct field will be initialized to a signed integer value
- * parsed from the Yocton field value. If the Yocton field value cannot be
- * parsed as a signed integer, it will be set to zero and an error is set.
+ * If the property currently being parsed has the same name as the given struct
+ * field, the field will be initialized to a signed integer value parsed from
+ * the property value. If the property value cannot be parsed as a signed
+ * integer, the field will be set to zero and an error set.
  *
  * This will work with any kind of signed integer field, but the type of the
  * field must be provided.
@@ -362,99 +362,99 @@ signed long long yocton_field_int(struct yocton_field *f, size_t n);
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   struct s {
- *     int bar;
+ *       int bar;
  *   };
  *   struct s foo;
- *   struct yocton_field *f;
+ *   struct yocton_prop *p;
  *
- *   while ((f = yocton_next_field(obj)) != NULL) {
- *       YOCTON_FIELD_INT(f, foo, int, bar);
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_FIELD_INT(p, foo, int, bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param field       Yocton field.
- * @param my_struct   C struct to initialize.
- * @param field_type  Type of the field, eg. `int` or `ssize_t`.
- * @param name        Name of field to initialize.
+ * @param prop           Property.
+ * @param my_struct      C struct to initialize.
+ * @param field_type     Type of the field, eg. `int` or `ssize_t`.
+ * @param name           Name of field to initialize.
  */
-#define YOCTON_FIELD_INT(field, my_struct, field_type, name) \
-	YOCTON_IF_FIELD(field, name, { \
+#define YOCTON_FIELD_INT(prop, my_struct, field_type, name) \
+	YOCTON_IF_FIELD(prop, name, { \
 		(my_struct).name = (field_type) \
-			yocton_field_int(field, sizeof(field_type)); \
+			yocton_prop_int(prop, sizeof(field_type)); \
 	})
 
-#define YOCTON_FIELD_INT_ARRAY(field, my_struct, field_type, name, name_len) \
-	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+#define YOCTON_FIELD_INT_ARRAY(prop, my_struct, field_type, name, name_len) \
+	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
 		(my_struct).name[(my_struct).name_len] = (field_type) \
-			yocton_field_int(field, sizeof(field_type)); \
+			yocton_prop_int(prop, sizeof(field_type)); \
 		++(my_struct).name_len; \
 	})
 
 /**
- * Parse the field value as a unsigned integer.
+ * Parse the property value as an unsigned integer.
  *
- * If the field value is not a valid integer of the given size, zero is
+ * If the property value is not a valid integer of the given size, zero is
  * returned and an error is set.
  *
  * It may be more convenient to use @ref YOCTON_FIELD_UINT which is a wrapper
  * around this function.
  *
- * @param f   The field.
- * @param n   Size of the expected field in bytes, eg. sizeof(uint16_t).
+ * @param p   The property.
+ * @param n   Size of the expected property in bytes, eg. sizeof(uint16_t).
  * @return    The integer value, or zero if it cannot be parsed as an
  *            signed integer of that size. Although the return value is a
  *            long long type, it will always be in the range of an integer
  *            of the given size and can be safely cast to one.
  */
-unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
+unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
 
 /**
- * Set the value of a unsigned integer struct field if appropriate.
+ * Set the value of an unsigned integer struct field if appropriate.
  *
- * If the Yocton field currently being parsed has the same name as the given
- * struct field, the struct field will be initialized to a unsigned integer
- * value parsed from the Yocton field value. If the Yocton field value cannot
- * be parsed as a unsigned integer, it will be set to zero and an error is set.
+ * If the property currently being parsed has the same name as the given struct
+ * field, the field will be initialized to an unsigned integer value parsed
+ * from the property value. If the property value cannot be parsed as an
+ * unsigned integer, the field will be set to zero and an error set.
  *
- * This will work with any kind of unsigned integer field, but the type of the
- * field must be provided.
+ * This will work with any kind of unsigned integer property, but the type of the
+ * property must be provided.
  *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   struct s {
- *     unsigned int bar;
+ *       unsigned int bar;
  *   };
  *   struct s foo;
- *   struct yocton_field *f;
+ *   struct yocton_prop *p;
  *
- *   while ((f = yocton_next_field(obj)) != NULL) {
- *       YOCTON_FIELD_UINT(f, foo, unsigned int, bar);
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_FIELD_UINT(p, foo, unsigned int, bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param field       Yocton field.
+ * @param prop        Property.
  * @param my_struct   C struct to initialize.
  * @param field_type  Type of the field, eg. `unsigned int` or `size_t`.
  * @param name        Name of field to initialize.
  */
-#define YOCTON_FIELD_UINT(field, my_struct, field_type, name) \
-	YOCTON_IF_FIELD(field, name, { \
+#define YOCTON_FIELD_UINT(prop, my_struct, field_type, name) \
+	YOCTON_IF_FIELD(prop, name, { \
 		(my_struct).name = (field_type) \
-			yocton_field_uint(field, sizeof(field_type)); \
+			yocton_prop_uint(prop, sizeof(field_type)); \
 	})
 
-#define YOCTON_FIELD_UINT_ARRAY(field, my_struct, field_type, name, name_len) \
-	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+#define YOCTON_FIELD_UINT_ARRAY(prop, my_struct, field_type, name, name_len) \
+	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
 		(my_struct).name[(my_struct).name_len] = (field_type) \
-			yocton_field_uint(field, sizeof(field_type)); \
+			yocton_prop_uint(prop, sizeof(field_type)); \
 		++(my_struct).name_len; \
 	})
 
 /**
- * Parse the field value as an enumeration.
+ * Parse the property value as an enumeration.
  *
  * Enumeration values are assumed to be contiguous and start from zero.
- * values[e] gives the string representing enum value e. If the field
+ * values[e] gives the string representing enum value e. If the property
  * value is not found in the values array, an error is set.
  *
  * Note that the lookup of name to enum value is a linear scan so it is
@@ -464,21 +464,21 @@ unsigned long long yocton_field_uint(struct yocton_field *f, size_t n);
  * It may be more convenient to use @ref YOCTON_FIELD_ENUM which is a wrapper
  * around this function.
  *
- * @param f       The field.
+ * @param p       The property.
  * @param values  Pointer to a NULL-terminated array of strings representing
  *                enum values. values[e] is a string representing enum
  *                value e.
  * @return        The identified enum value. If not found, an error is set
  *                and zero is returned.
  */
-unsigned int yocton_field_enum(struct yocton_field *f, const char **values);
+unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 
 /**
  * Set the value of an enum struct field if appropriate.
  *
- * If the Yocton field currently being parsed has the same name as the given
- * struct field, the struct field will be initialized to an enum value that
- * matches a name from the given list.
+ * If the property currently being parsed has the same name as the given struct
+ * field, the field will be initialized to an enum value that matches a name
+ * from the given list.
  *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -488,28 +488,28 @@ unsigned int yocton_field_enum(struct yocton_field *f, const char **values);
  *     enum e bar;
  *   };
  *   struct s foo;
- *   struct yocton_field *f;
+ *   struct yocton_prop *p;
  *
- *   while ((f = yocton_next_field(obj)) != NULL) {
- *       YOCTON_FIELD_ENUM(f, foo, bar, enum_values);
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_FIELD_ENUM(p, foo, bar, enum_values);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param field      Yocton field.
+ * @param prop       Property.
  * @param my_struct  C struct to initialize.
  * @param name       Name of field to initialize.
  * @param values     NULL-terminated array of strings representing enum values
- *                   (same as values parameter to @ref yocton_field_enum).
+ *                   (same as values parameter to @ref yocton_prop_enum).
  */
-#define YOCTON_FIELD_ENUM(field, my_struct, name, values) \
-	YOCTON_IF_FIELD(field, name, { \
-		(my_struct).name = yocton_field_enum(field, values); \
+#define YOCTON_FIELD_ENUM(prop, my_struct, name, values) \
+	YOCTON_IF_FIELD(prop, name, { \
+		(my_struct).name = yocton_prop_enum(prop, values); \
 	})
 
-#define YOCTON_FIELD_ENUM_ARRAY(field, my_struct, name, name_len, values) \
-	YOCTON_IF_ARRAY_FIELD(field, my_struct, name, name_len, { \
+#define YOCTON_FIELD_ENUM_ARRAY(prop, my_struct, name, name_len, values) \
+	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
 		(my_struct).name[(my_struct).name_len] = \
-			yocton_field_enum(field, values) \
+			yocton_prop_enum(prop, values) \
 		++(my_struct).name_len; \
 	})
 

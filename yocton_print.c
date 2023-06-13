@@ -35,19 +35,19 @@ void print_indent(int indent)
 
 void print_object(struct yocton_object *obj, int indent)
 {
-	struct yocton_field *field;
+	struct yocton_prop *property;
 	for (;;) {
-		field = yocton_next_field(obj);
-		if (field == NULL) {
+		property = yocton_next_prop(obj);
+		if (property == NULL) {
 			break;
 		}
 		print_indent(indent);
-		printf("%s", yocton_field_name(field));
-		if (yocton_field_type(field) == YOCTON_FIELD_OBJECT) {
+		printf("%s", yocton_prop_name(property));
+		if (yocton_prop_type(property) == YOCTON_PROP_OBJECT) {
 			printf(":\n");
-			print_object(yocton_field_inner(field), indent + 4);
+			print_object(yocton_prop_inner(property), indent + 4);
 		} else {
-			printf(" = \"%s\"\n", yocton_field_value(field));
+			printf(" = \"%s\"\n", yocton_prop_value(property));
 		}
 	}
 }

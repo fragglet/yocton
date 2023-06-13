@@ -1,0 +1,7 @@
+//| error_message: "failed before any property was read"
+//| error_lineno: 5
+//| c_only: true
+property1: "value"
+special.fail_before_any_property {
+  we_never_get: "here"
+}
