@@ -243,7 +243,7 @@ const char *yocton_prop_value(struct yocton_prop *p);
  */
 char *yocton_prop_value_dup(struct yocton_prop *p);
 
-#define YOCTON_IF_FIELD(property, name, then) \
+#define YOCTON_IF_PROP(property, name, then) \
 	do { \
 		if (!strcmp(yocton_prop_name(property), #name)) { \
 			then \
@@ -253,14 +253,29 @@ char *yocton_prop_value_dup(struct yocton_prop *p);
 int yocton_reserve_array(struct yocton_prop *p, void **array,
                          size_t nmemb, size_t size);
 
-#define YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, then) \
-	YOCTON_IF_FIELD(prop, name, { \
-		if (yocton_reserve_array(prop, (void **) &((my_struct).name), \
-		                         (my_struct).name_len, \
-		                         sizeof(*(my_struct).name))) { \
+#define YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, then) \
+	YOCTON_IF_PROP(prop, propname, { \
+		if (yocton_reserve_array(prop, (void **) &(varname), \
+		                         varname_len, \
+		                         sizeof(*(varname)))) { \
 			then \
 		} \
-	}
+	})
+
+#define YOCTON_VAR_STRING(prop, propname, varname) \
+	YOCTON_IF_PROP(prop, propname, { \
+		free(varname); \
+		varname = yocton_prop_value_dup(prop); \
+	})
+
+#define YOCTON_VAR_STRING_ARRAY(prop, propname, varname, varname_len) \
+	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+		char *__v = yocton_prop_value_dup(prop); \
+		if (__v) { \
+			(varname)[varname_len] = __v; \
+			++(varname_len); \
+		} \
+	})
 
 /**
  * Set the value of a string struct field if appropriate.
@@ -291,19 +306,11 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
  * @param name       Name of field to initialize.
  */
 #define YOCTON_FIELD_STRING(prop, my_struct, name) \
-	YOCTON_IF_FIELD(prop, name, { \
-		free((my_struct).name); \
-		(my_struct).name = yocton_prop_value_dup(prop); \
-	})
+	YOCTON_VAR_STRING(prop, name, (my_struct).name)
 
 #define YOCTON_FIELD_STRING_ARRAY(prop, my_struct, name, name_len) \
-	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
-		char *__v = yocton_prop_value_dup(prop); \
-		if (__v) { \
-			(my_struct).name[(my_struct).name_len] = __v; \
-			++(my_struct).name_len; \
-		} \
-	})
+	YOCTON_VAR_STRING_ARRAY(prop, name, (my_struct).name, \
+	                        (my_struct).name_len)
 
 /**
  * Get the inner object associated with a @ref yocton_prop of type
@@ -348,6 +355,18 @@ struct yocton_object *yocton_prop_inner(struct yocton_prop *p);
  */
 signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
 
+#define YOCTON_VAR_INT(prop, propname, var_type, varname) \
+	YOCTON_IF_PROP(prop, propname, { \
+		varname = (var_type) yocton_prop_int(prop, sizeof(var_type)); \
+	})
+
+#define YOCTON_VAR_INT_ARRAY(prop, propname, var_type, varname, varname_len) \
+	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+		(varname)[varname_len] = (var_type) \
+			yocton_prop_int(prop, sizeof(var_type)); \
+		++(varname_len); \
+	})
+
 /**
  * Set the value of a signed integer struct field if appropriate.
  *
@@ -378,17 +397,11 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  * @param name           Name of field to initialize.
  */
 #define YOCTON_FIELD_INT(prop, my_struct, field_type, name) \
-	YOCTON_IF_FIELD(prop, name, { \
-		(my_struct).name = (field_type) \
-			yocton_prop_int(prop, sizeof(field_type)); \
-	})
+	YOCTON_VAR_INT(prop, name, field_type, (my_struct).name)
 
 #define YOCTON_FIELD_INT_ARRAY(prop, my_struct, field_type, name, name_len) \
-	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
-		(my_struct).name[(my_struct).name_len] = (field_type) \
-			yocton_prop_int(prop, sizeof(field_type)); \
-		++(my_struct).name_len; \
-	})
+	YOCTON_VAR_INT_ARRAY(prop, name, field_type, (my_struct).name, \
+	                     (my_struct).name_len)
 
 /**
  * Parse the property value as an unsigned integer.
@@ -407,6 +420,19 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  *            of the given size and can be safely cast to one.
  */
 unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
+
+#define YOCTON_VAR_UINT(prop, propname, var_type, varname) \
+	YOCTON_IF_PROP(prop, propname, { \
+		varname = (var_type) \
+			yocton_prop_uint(prop, sizeof(var_type)); \
+	})
+
+#define YOCTON_VAR_UINT_ARRAY(prop, propname, var_type, varname, varname_len) \
+	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+		(varname)[varname_len] = (var_type) \
+			yocton_prop_uint(prop, sizeof(var_type)); \
+		++(varname_len); \
+	})
 
 /**
  * Set the value of an unsigned integer struct field if appropriate.
@@ -438,17 +464,11 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  * @param name        Name of field to initialize.
  */
 #define YOCTON_FIELD_UINT(prop, my_struct, field_type, name) \
-	YOCTON_IF_FIELD(prop, name, { \
-		(my_struct).name = (field_type) \
-			yocton_prop_uint(prop, sizeof(field_type)); \
-	})
+	YOCTON_VAR_UINT(prop, name, field_type, (my_struct).name)
 
 #define YOCTON_FIELD_UINT_ARRAY(prop, my_struct, field_type, name, name_len) \
-	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
-		(my_struct).name[(my_struct).name_len] = (field_type) \
-			yocton_prop_uint(prop, sizeof(field_type)); \
-		++(my_struct).name_len; \
-	})
+	YOCTON_VAR_UINT_ARRAY(prop, name, field_type, (my_struct).name, \
+	                      (my_struct).name_len)
 
 /**
  * Parse the property value as an enumeration.
@@ -472,6 +492,17 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  *                and zero is returned.
  */
 unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
+
+#define YOCTON_VAR_ENUM(prop, propname, varname, values) \
+	YOCTON_IF_PROP(prop, propname, { \
+		(varname) = yocton_prop_enum(prop, values); \
+	})
+
+#define YOCTON_VAR_ENUM_ARRAY(prop, propname, varname, varname_len, values) \
+	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+		(varname)[varname_len] = yocton_prop_enum(prop, values); \
+		++(varname_len); \
+	})
 
 /**
  * Set the value of an enum struct field if appropriate.
@@ -502,16 +533,11 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *                   (same as values parameter to @ref yocton_prop_enum).
  */
 #define YOCTON_FIELD_ENUM(prop, my_struct, name, values) \
-	YOCTON_IF_FIELD(prop, name, { \
-		(my_struct).name = yocton_prop_enum(prop, values); \
-	})
+	YOCTON_VAR_ENUM(prop, name, (my_struct).name, values)
 
 #define YOCTON_FIELD_ENUM_ARRAY(prop, my_struct, name, name_len, values) \
-	YOCTON_IF_ARRAY_FIELD(prop, my_struct, name, name_len, { \
-		(my_struct).name[(my_struct).name_len] = \
-			yocton_prop_enum(prop, values) \
-		++(my_struct).name_len; \
-	})
+	YOCTON_VAR_ENUM_ARRAY(prop, name, (my_struct).name, \
+	                      (my_struct).name_len, values)
 
 #ifdef __cplusplus
 }
