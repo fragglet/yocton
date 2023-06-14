@@ -331,6 +331,31 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
 	YOCTON_VAR_ARRAY(prop, name, (my_struct).name, \
 	                 (my_struct).name_len, then)
 
+/**
+ * Set the value of a string variable if appropriate.
+ *
+ * If the name of the property currently being parsed is equal to `propname`,
+ * the variable `varname` will be initialized to a newly-allocated buffer
+ * containing a copy of the string value.
+ *
+ * If the variable has an existing value it will be freed. It is therefore
+ * important that the variable is initialized to NULL before the first time
+ * this macro is used to set it.
+ *
+ * Example to match a property named "foo":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   char *bar = NULL;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_STRING(p, foo, bar);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop       Property.
+ * @param propname   Name of property to match.
+ * @param varname    Name of variable to initialize.
+ */
 #define YOCTON_VAR_STRING(prop, propname, varname) \
 	YOCTON_IF_PROP(prop, propname, { \
 		free(varname); \
@@ -428,6 +453,32 @@ struct yocton_object *yocton_prop_inner(struct yocton_prop *p);
  */
 signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
 
+/**
+ * Set the value of a signed integer variable if appropriate.
+ *
+ * If the name of the property currently being parsed has is equal to
+ * `propname`, the variable `varname` will be initialized to a signed integer
+ * value parsed from the property value. If the property value cannot be parsed
+ * as a signed integer, the variable will be set to zero and an error set.
+ *
+ * This will work with any kind of signed integer variable, but the type of the
+ * variable must be provided.
+ *
+ * Example to match a property named "foo":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   int bar;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_INT(p, foo, int, bar);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop         Property.
+ * @param propname     Name of the property to match.
+ * @param var_type     Type of the variable, eg. `int` or `ssize_t`.
+ * @param varname      Name of variable to set.
+ */
 #define YOCTON_VAR_INT(prop, propname, var_type, varname) \
 	YOCTON_IF_PROP(prop, propname, { \
 		varname = (var_type) yocton_prop_int(prop, sizeof(var_type)); \
@@ -498,6 +549,32 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  */
 unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
 
+/**
+ * Set the value of an unsigned integer variable if appropriate.
+ *
+ * If the name of the property currently being parsed has is equal to
+ * `propname`, the variable `varname` will be initialized to an unsigned integer
+ * value parsed from the property value. If the property value cannot be parsed
+ * as an unsigned integer, the variable will be set to zero and an error set.
+ *
+ * This will work with any kind of unssigned integer variable, but the type of
+ * the variable must be provided.
+ *
+ * Example to match a property named "foo":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   unsigned int bar;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_UINT(p, foo, unsigned int, bar);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop         Property.
+ * @param propname     Name of the property to match.
+ * @param var_type     Type of the variable, eg. `uint32_t` or `size_t`.
+ * @param varname      Name of variable to set.
+ */
 #define YOCTON_VAR_UINT(prop, propname, var_type, varname) \
 	YOCTON_IF_PROP(prop, propname, { \
 		varname = (var_type) \
@@ -574,6 +651,30 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  */
 unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 
+/**
+ * Set the value of an enum variable if appropriate.
+ *
+ * If the name of the property currently being parsed is equal to `propname`,
+ * the variable `varname` will be initialized to an enum value that matches a
+ * name from the given list.
+ *
+ * Example to match a property named "foo":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
+ *   int bar;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_ENUM(p, foo, bar, enum_values);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop       Property.
+ * @param propname   Name of the property to match.
+ * @param varname    Name of variable to initialize.
+ * @param values     NULL-terminated array of strings representing enum values
+ *                   (same as values parameter to @ref yocton_prop_enum).
+ */
 #define YOCTON_VAR_ENUM(prop, propname, varname, values) \
 	YOCTON_IF_PROP(prop, propname, { \
 		(varname) = yocton_prop_enum(prop, values); \
