@@ -293,6 +293,40 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
 		} \
 	})
 
+/**
+ * Match a particular property name and allocate array storage.
+ *
+ * This macro is used to build other array macros such as
+ * @ref YOCTON_FIELD_INT_ARRAY and @ref YOCTON_FIELD_STRING_ARRAY. If the
+ * name of the given property is equal to `name`, the struct field `name`
+ * (a pointer to array data) will be reallocated so that enough space is
+ * available in the array to append a new element. The argument `then` is then
+ * evaluated to (conditionally) append the new element.
+ *
+ * Example that populates an array field named "bar":
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct my_element { int id; }
+ *   struct foo {
+ *       struct my_element *elements;
+ *       size_t num_elements;
+ *   };
+ *   struct foo s = {NULL, 0};
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_FIELD_ARRAY(p, s, elements, num_elements, {
+ *           s.elements[s.num_elements].id = yocton_prop_int(p, sizeof(int));
+ *           s.num_elements++;
+ *       });
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop         The property.
+ * @param my_struct    The structure containing the fields.
+ * @param name         Name of the property to match, and struct field to set.
+ * @param name_len     Name of struct field containing array length.
+ * @param then         Code to evaluate after new element space is allocated.
+ */
 #define YOCTON_FIELD_ARRAY(prop, my_struct, name, name_len, then) \
 	YOCTON_VAR_ARRAY(prop, name, (my_struct).name, \
 	                 (my_struct).name_len, then)
