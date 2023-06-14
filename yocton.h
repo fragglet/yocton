@@ -253,7 +253,38 @@ char *yocton_prop_value_dup(struct yocton_prop *p);
 int yocton_reserve_array(struct yocton_prop *p, void **array,
                          size_t nmemb, size_t size);
 
-#define YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, then) \
+/**
+ * Match a particular property name and allocate array storage.
+ *
+ * This macro is used to build other array macros such as
+ * @ref YOCTON_VAR_INT_ARRAY and @ref YOCTON_VAR_STRING_ARRAY. If the
+ * name of the given property is equal to `propname`, the variable `varname`
+ * (a pointer to array data) will be reallocated so that enough space is
+ * available in the array to append a new element. The argument `then` is then
+ * evaluated to (conditionally) append the new element.
+ *
+ * Example that matches a property named "foo" to populate an array of structs:
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct my_element { int id; }
+ *   struct my_element *elements = NULL;
+ *   size_t num_elements;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_ARRAY(p, foo, elements, num_elements, {
+ *           elements[num_elements].id = yocton_prop_int(p, sizeof(int));
+ *           num_elements++;
+ *       });
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop         The property.
+ * @param propname     The property name to match.
+ * @param varname      Name of the variable pointing to array data.
+ * @param varname_len  Variable storing length of array.
+ * @param then         Code to evaluate after new element space is allocated.
+ */
+#define YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, then) \
 	YOCTON_IF_PROP(prop, propname, { \
 		if (yocton_reserve_array(prop, (void **) &(varname), \
 		                         varname_len, \
@@ -263,8 +294,8 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
 	})
 
 #define YOCTON_FIELD_ARRAY(prop, my_struct, name, name_len, then) \
-	YOCTON_IF_ARRAY_PROP(prop, name, (my_struct).name, \
-	                     (my_struct).name_len, then)
+	YOCTON_VAR_ARRAY(prop, name, (my_struct).name, \
+	                 (my_struct).name_len, then)
 
 #define YOCTON_VAR_STRING(prop, propname, varname) \
 	YOCTON_IF_PROP(prop, propname, { \
@@ -273,7 +304,7 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
 	})
 
 #define YOCTON_VAR_STRING_ARRAY(prop, propname, varname, varname_len) \
-	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		char *__v = yocton_prop_value_dup(prop); \
 		if (__v) { \
 			(varname)[varname_len] = __v; \
@@ -365,7 +396,7 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
 	})
 
 #define YOCTON_VAR_INT_ARRAY(prop, propname, var_type, varname, varname_len) \
-	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = (var_type) \
 			yocton_prop_int(prop, sizeof(var_type)); \
 		++(varname_len); \
@@ -432,7 +463,7 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
 	})
 
 #define YOCTON_VAR_UINT_ARRAY(prop, propname, var_type, varname, varname_len) \
-	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = (var_type) \
 			yocton_prop_uint(prop, sizeof(var_type)); \
 		++(varname_len); \
@@ -503,7 +534,7 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 	})
 
 #define YOCTON_VAR_ENUM_ARRAY(prop, propname, varname, varname_len, values) \
-	YOCTON_IF_ARRAY_PROP(prop, propname, varname, varname_len, { \
+	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = yocton_prop_enum(prop, values); \
 		++(varname_len); \
 	})
