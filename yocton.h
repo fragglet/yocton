@@ -262,6 +262,10 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
 		} \
 	})
 
+#define YOCTON_FIELD_ARRAY(prop, my_struct, name, name_len, then) \
+	YOCTON_IF_ARRAY_PROP(prop, name, (my_struct).name, \
+	                     (my_struct).name_len, then)
+
 #define YOCTON_VAR_STRING(prop, propname, varname) \
 	YOCTON_IF_PROP(prop, propname, { \
 		free(varname); \

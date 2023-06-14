@@ -1,0 +1,55 @@
+//| c_only: true
+
+// unsigneds:
+//> 70
+//> 99999
+//> 3000000000
+
+// signeds:
+//> 99
+//> -100
+//> 12345678
+
+// strings:
+//> hello
+//> world
+//> etc.
+
+// enums:
+//> 1
+//> 0
+//> 2
+
+// items:
+//> { id 1234: value 5678 }
+//> { id 867: value 5309 }
+//> { id 23: value 42 }
+
+special.arrays {
+	signeds: 99
+	signeds: -100
+	signeds: 12345678
+	unsigneds: 70
+	unsigneds: 99999
+	unsigneds: 3000000000
+	strings: "hello"
+	strings: "world"
+	strings: "etc."
+	enums: SECOND
+	enums: FIRST
+	enums: THIRD
+
+	items {
+		id: 1234
+		value: 5678
+	}
+	items {
+		id: 867
+		value: 5309
+	}
+	items {
+		id: 23
+		value: 42
+	}
+}
+
