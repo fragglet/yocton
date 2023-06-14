@@ -323,6 +323,10 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
  * important that the field is initialized to NULL before the first time this
  * macro is used to set it.
  *
+ * This macro assumes that the property and field names are the same. If this
+ * is not the case, @ref YOCTON_VAR_STRING can be used to initialize a
+ * different field.
+ *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   struct s {
@@ -413,6 +417,10 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  * This will work with any kind of signed integer field, but the type of the
  * field must be provided.
  *
+ * This macro assumes that the property and field names are the same. If this
+ * is not the case, @ref YOCTON_VAR_INT can be used to initialize a different
+ * field.
+ *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   struct s {
@@ -480,6 +488,10 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  * This will work with any kind of unsigned integer property, but the type of the
  * property must be provided.
  *
+ * This macro assumes that the property and field names are the same. If this
+ * is not the case, @ref YOCTON_VAR_UINT can be used to initialize a different
+ * field.
+ *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   struct s {
@@ -545,6 +557,10 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  * If the property currently being parsed has the same name as the given struct
  * field, the field will be initialized to an enum value that matches a name
  * from the given list.
+ *
+ * This macro assumes that the property and field names are the same. If this
+ * is not the case, @ref YOCTON_VAR_ENUM can be used to initialize a different
+ * field.
  *
  * Example:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
