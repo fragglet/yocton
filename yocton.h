@@ -250,8 +250,9 @@ char *yocton_prop_value_dup(struct yocton_prop *p);
 		} \
 	} while (0)
 
-int yocton_reserve_array(struct yocton_prop *p, void **array,
-                         size_t nmemb, size_t size);
+/* Helper function used by YOCTON_VAR_ARRAY() */
+int __yocton_reserve_array(struct yocton_prop *p, void **array,
+                           size_t nmemb, size_t size);
 
 /**
  * Match a particular property name and allocate array storage.
@@ -286,9 +287,9 @@ int yocton_reserve_array(struct yocton_prop *p, void **array,
  */
 #define YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, then) \
 	YOCTON_IF_PROP(prop, propname, { \
-		if (yocton_reserve_array(prop, (void **) &(varname), \
-		                         varname_len, \
-		                         sizeof(*(varname)))) { \
+		if (__yocton_reserve_array(prop, (void **) &(varname), \
+		                           varname_len, \
+		                           sizeof(*(varname)))) { \
 			then \
 		} \
 	})

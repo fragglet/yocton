@@ -651,8 +651,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values)
 
 // Helper function for array macros. Reallocates the given array one element
 // longer so that it can be (potentially) extended in length.
-int yocton_reserve_array(struct yocton_prop *p, void **array, size_t nmemb,
-                         size_t size)
+int __yocton_reserve_array(struct yocton_prop *p, void **array, size_t nmemb,
+                           size_t size)
 {
 	void *new_array;
 
