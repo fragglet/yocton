@@ -144,6 +144,9 @@ struct yocton_object *yocton_read_from(FILE *fstream);
 int yocton_have_error(struct yocton_object *obj, int *lineno,
                       const char **error_msg);
 
+/* Helper wrapper function around above, for array macros. */
+int __yocton_prop_have_error(struct yocton_prop *p);
+
 /**
  * Free the top-level object and stop reading from the input stream.
  *
@@ -566,7 +569,9 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
 	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = (var_type) \
 			yocton_prop_int(prop, sizeof(var_type)); \
-		++(varname_len); \
+		if (!__yocton_prop_have_error(prop)) { \
+			++(varname_len); \
+		} \
 	})
 
 /**
@@ -718,7 +723,9 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
 	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = (var_type) \
 			yocton_prop_uint(prop, sizeof(var_type)); \
-		++(varname_len); \
+		if (!__yocton_prop_have_error(prop)) { \
+			++(varname_len); \
+		} \
 	})
 
 /**
@@ -873,7 +880,9 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 #define YOCTON_VAR_ENUM_ARRAY(prop, propname, varname, varname_len, values) \
 	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = yocton_prop_enum(prop, values); \
-		++(varname_len); \
+		if (!__yocton_prop_have_error(prop)) { \
+			++(varname_len); \
+		} \
 	})
 
 /**

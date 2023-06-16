@@ -395,6 +395,11 @@ int yocton_have_error(struct yocton_object *obj, int *lineno,
 	return 1;
 }
 
+int __yocton_prop_have_error(struct yocton_prop *p)
+{
+	return yocton_have_error(p->parent, NULL, NULL);
+}
+
 void yocton_check(struct yocton_object *obj, const char *error_msg,
                   int normally_true)
 {
