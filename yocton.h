@@ -246,6 +246,13 @@ const char *yocton_prop_value(struct yocton_prop *p);
  */
 char *yocton_prop_value_dup(struct yocton_prop *p);
 
+/**
+ * Match a particular property name.
+ *
+ * @param property     The property.
+ * @param name         Name of property to match.
+ * @param then         Code to execute if yocton_prop_name(property) == name.
+ */
 #define YOCTON_IF_PROP(property, name, then) \
 	do { \
 		if (!strcmp(yocton_prop_name(property), #name)) { \
