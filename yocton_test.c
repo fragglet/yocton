@@ -66,8 +66,8 @@ void read_error_data(struct error_data *data, struct yocton_object *obj)
 		if (property == NULL) {
 			return;
 		}
-		YOCTON_FIELD_STRING(property, *data, error_message);
-		YOCTON_FIELD_INT(property, *data, int, error_lineno);
+		YOCTON_VAR_STRING(property, error_message, data->error_message);
+		YOCTON_VAR_INT(property, error_lineno, int, data->error_lineno);
 	}
 }
 
@@ -107,15 +107,15 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 static void integer_value(struct yocton_object *obj)
 {
 	struct yocton_prop *property;
-	struct { int size; } s = {0};
+	int size = 0;
 	for (;;) {
 		property = yocton_next_prop(obj);
 		if (property == NULL) {
 			break;
 		}
-		YOCTON_FIELD_INT(property, s, size_t, size);
+		YOCTON_VAR_INT(property, size, size_t, size);
 		if (!strcmp(yocton_prop_name(property), "value")) {
-			yocton_prop_int(property, s.size);
+			yocton_prop_int(property, size);
 		}
 	}
 }
@@ -123,31 +123,31 @@ static void integer_value(struct yocton_object *obj)
 static void uinteger_value(struct yocton_object *obj)
 {
 	struct yocton_prop *property;
-	struct { unsigned int size; } s = {0};
+	unsigned int size;
 	for (;;) {
 		property = yocton_next_prop(obj);
 		if (property == NULL) {
 			break;
 		}
-		YOCTON_FIELD_UINT(property, s, size_t, size);
+		YOCTON_VAR_UINT(property, size, size_t, size);
 		if (!strcmp(yocton_prop_name(property), "value")) {
-			yocton_prop_uint(property, s.size);
+			yocton_prop_uint(property, size);
 		}
 	}
 }
 
 static void enum_value(struct yocton_object *obj)
 {
-	struct { unsigned int expected, value; } s = {-1, -2};
+	unsigned int expected = -1, value = -2;
 	for (;;) {
 		struct yocton_prop *property = yocton_next_prop(obj);
 		if (property == NULL) {
 			break;
 		}
-		YOCTON_FIELD_UINT(property, s, unsigned int, expected);
-		YOCTON_FIELD_ENUM(property, s, value, enum_values);
+		YOCTON_VAR_UINT(property, expected, unsigned int, expected);
+		YOCTON_VAR_ENUM(property, value, value, enum_values);
 	}
-	yocton_check(obj, "wrong enum value matched", s.expected == s.value);
+	yocton_check(obj, "wrong enum value matched", expected == value);
 }
 
 static void add_output(struct yocton_object *obj, char **output, const char *s)
@@ -168,80 +168,74 @@ struct array_data_item {
 	int value;
 };
 
-struct array_data {
-	unsigned int *unsigneds;
-	size_t unsigneds_count;
-
-	int *signeds;
-	size_t signeds_count;
-
-	char **strings;
-	size_t strings_count;
-
-	int *enums;
-	size_t enums_count;
-
-	struct array_data_item *items;
-	size_t items_count;
-};
-
 static void parse_array_item(struct yocton_object *obj,
                              struct array_data_item *item)
 {
 	struct yocton_prop *p;
 
 	while ((p = yocton_next_prop(obj)) != NULL) {
-		YOCTON_FIELD_UINT(p, *item, unsigned int, id);
-		YOCTON_FIELD_INT(p, *item, int, value);
+		YOCTON_VAR_UINT(p, id, unsigned int, item->id);
+		YOCTON_VAR_INT(p, value, int, item->value);
 	}
 }
 
 static void array_values(struct yocton_object *obj, char **output)
 {
-	struct array_data ad = {NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0};
+	unsigned int *unsigneds = NULL;
+	size_t unsigneds_count = 0;
+	int *signeds = NULL;
+	size_t signeds_count = 0;
+	char **strings = NULL;
+	size_t strings_count = 0;
+	int *enums = NULL;
+	size_t enums_count = 0;
+	struct array_data_item *items = NULL;
+	size_t items_count = 0;
+
 	struct yocton_prop *p;
 	char buf[32];
 	int i;
 
 	while ((p = yocton_next_prop(obj)) != NULL) {
-		YOCTON_FIELD_UINT_ARRAY(p, ad, unsigned int,
-		                       unsigneds, unsigneds_count);
-		YOCTON_FIELD_INT_ARRAY(p, ad, int, signeds, signeds_count);
-		YOCTON_FIELD_STRING_ARRAY(p, ad, strings, strings_count);
-		YOCTON_FIELD_ENUM_ARRAY(p, ad, enums, enums_count, enum_values);
-		YOCTON_FIELD_ARRAY(p, ad, items, items_count, {
-			parse_array_item(yocton_prop_inner(p), &ad.items[ad.items_count]);
-			++ad.items_count;
+		YOCTON_VAR_UINT_ARRAY(p, unsigneds, unsigned int,
+		                      unsigneds, unsigneds_count);
+		YOCTON_VAR_INT_ARRAY(p, signeds, int, signeds, signeds_count);
+		YOCTON_VAR_STRING_ARRAY(p, strings, strings, strings_count);
+		YOCTON_VAR_ENUM_ARRAY(p, enums, enums, enums_count, enum_values);
+		YOCTON_VAR_ARRAY(p, items, items, items_count, {
+			parse_array_item(yocton_prop_inner(p),
+			                 &items[items_count]);
+			++items_count;
 		});
 	}
 
-	for (i = 0; i < ad.unsigneds_count; ++i) {
-		snprintf(buf, sizeof(buf), "%u\n", ad.unsigneds[i]);
+	for (i = 0; i < unsigneds_count; ++i) {
+		snprintf(buf, sizeof(buf), "%u\n", unsigneds[i]);
 		add_output(obj, output, buf);
 	}
-	free(ad.unsigneds);
-	for (i = 0; i < ad.signeds_count; ++i) {
-		snprintf(buf, sizeof(buf), "%i\n", ad.signeds[i]);
+	free(unsigneds);
+	for (i = 0; i < signeds_count; ++i) {
+		snprintf(buf, sizeof(buf), "%i\n", signeds[i]);
 		add_output(obj, output, buf);
 	}
-	free(ad.signeds);
-	for (i = 0; i < ad.strings_count; ++i) {
-		add_output(obj, output, ad.strings[i]);
+	free(signeds);
+	for (i = 0; i < strings_count; ++i) {
+		add_output(obj, output, strings[i]);
 		add_output(obj, output, "\n");
-		free(ad.strings[i]);
+		free(strings[i]);
 	}
-	free(ad.strings);
-	for (i = 0; i < ad.enums_count; ++i) {
-		snprintf(buf, sizeof(buf), "%i\n", ad.enums[i]);
+	free(strings);
+	for (i = 0; i < enums_count; ++i) {
+		snprintf(buf, sizeof(buf), "%i\n", enums[i]);
 		add_output(obj, output, buf);
 	}
-	free(ad.enums);
-	for (i = 0; i < ad.items_count; ++i) {
+	free(enums);
+	for (i = 0; i < items_count; ++i) {
 		snprintf(buf, sizeof(buf), "{ id %u: value %d }\n",
-		         ad.items[i].id, ad.items[i].value);
+		         items[i].id, items[i].value);
 		add_output(obj, output, buf);
 	}
-	free(ad.items);
+	free(items);
 }
 
 static char *string_dup(struct yocton_object *obj, const char *value)

@@ -84,15 +84,15 @@ values into these types:
 | yocton_prop_enum()      | Parse value as an enum value by looking it up in an array of strings. Useful for representing values symbolically rather than just as raw integers. |
 
 While these functions are useful, in most cases it is more convenient to use
-the preprocessor macros which are specifically intended for populating struct
-fields.
+the preprocessor macros which are specifically intended for populating
+variables.
 
-| Type                   | Variable                     | Struct field                   |
-|------------------------|------------------------------|--------------------------------|
-| String                 | @ref YOCTON_VAR_STRING       | @ref YOCTON_FIELD_STRING       |
-| Signed integer         | @ref YOCTON_VAR_INT          | @ref YOCTON_FIELD_INT          |
-| Unsigned integer       | @ref YOCTON_VAR_UINT         | @ref YOCTON_FIELD_UINT         |
-| Enum                   | @ref YOCTON_VAR_ENUM         | @ref YOCTON_FIELD_ENUM         |
+| Type                   | Macro                        |
+|------------------------|------------------------------|
+| String                 | @ref YOCTON_VAR_STRING       |
+| Signed integer         | @ref YOCTON_VAR_INT          |
+| Unsigned integer       | @ref YOCTON_VAR_UINT         |
+| Enum                   | @ref YOCTON_VAR_ENUM         |
 
 For the following example we will populate the `foo` struct:
 
@@ -110,13 +110,13 @@ The input can be parsed and the struct populated using the following code:
 
 ```c
 const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
-struct foo my_struct = {0, 0, 0, NULL};
+struct foo x = {0, 0, 0, NULL};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_FIELD_ENUM(p, my_struct, enum_value, enum_names);
-  YOCTON_FIELD_INT(p, my_struct, int, signed_value) ;
-  YOCTON_FIELD_UINT(p, my_struct, unsigned int, unsigned_value);
-  YOCTON_FIELD_STRING(p, my_struct, string_value);
+  YOCTON_VAR_ENUM(p, enum_value, x.enum_value, enum_names);
+  YOCTON_VAR_INT(p, signed_value, int, x.signed_value) ;
+  YOCTON_VAR_UINT(p, unsigned_value, unsigned int, x.unsigned_value);
+  YOCTON_VAR_STRING(p, string_value, x.string_value);
 }
 ```
 
@@ -133,15 +133,15 @@ multiple properties with the same name.
 
 As with the previous example that described how to populate struct fields,
 convenience macros also exist for constructing arrays. The main difference is
-that an extra field is needed to store the array length.
+that an extra variable (or array field) is needed to store the array length.
 
-| Type                   | Variable                     | Struct field                   |
-|------------------------|------------------------------|--------------------------------|
-| String array           | @ref YOCTON_VAR_STRING_ARRAY | @ref YOCTON_FIELD_STRING_ARRAY |
-| Signed integer array   | @ref YOCTON_VAR_INT_ARRAY    | @ref YOCTON_FIELD_INT_ARRAY    |
-| Unsigned integer array | @ref YOCTON_VAR_UINT_ARRAY   | @ref YOCTON_FIELD_UINT_ARRAY   |
-| Enum array             | @ref YOCTON_VAR_ENUM_ARRAY   | @ref YOCTON_FIELD_ENUM_ARRAY   |
-| Generic array          | @ref YOCTON_VAR_ARRAY        | @ref YOCTON_FIELD_ARRAY        |
+| Type                   | Macro                        |
+|------------------------|------------------------------|
+| String array           | @ref YOCTON_VAR_STRING_ARRAY |
+| Signed integer array   | @ref YOCTON_VAR_INT_ARRAY    |
+| Unsigned integer array | @ref YOCTON_VAR_UINT_ARRAY   |
+| Enum array             | @ref YOCTON_VAR_ENUM_ARRAY   |
+| Generic array          | @ref YOCTON_VAR_ARRAY        |
 
 For example:
 
@@ -163,20 +163,24 @@ The parsing code looks very similar to the previous example:
 
 ```c
 const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
-struct bar my_struct = {NULL, 0, NULL, 0, NULL, 0, NULL, 0};
+struct bar x = {NULL, 0, NULL, 0, NULL, 0, NULL, 0};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_FIELD_ENUM_ARRAY(p, my_struct, enum_values, num_enum_values, enum_names);
-  YOCTON_FIELD_INT_ARRAY(p, my_struct, int, signed_values, num_signed_values);
-  YOCTON_FIELD_UINT_ARRAY(p, my_struct, unsigned int, unsigned_values, num_unsigned_values);
-  YOCTON_FIELD_STRING_ARRAY(p, my_struct, string_values, num_string_values);
+  YOCTON_VAR_ENUM_ARRAY(p, enum_val, x.enum_values,
+                        x.num_enum_values, enum_names);
+  YOCTON_VAR_INT_ARRAY(p, signed_val, int, x.signed_values,
+                       x.num_signed_values);
+  YOCTON_VAR_UINT_ARRAY(p, unsigned_val, unsigned int,
+                        x.unsigned_values, x.num_unsigned_values);
+  YOCTON_VAR_STRING_ARRAY(p, string_val, x.string_values,
+                          x.num_string_values);
 }
 ```
 
 While these macros are convenient for building arrays of base types, often it
 is preferable to construct arrays of more complex data structures. The above
-macros are built on another macro named `YOCTON_FIELD_ARRAY` which can be used
-to achieve this goal. `YOCTON_FIELD_ARRAY` does the following:
+macros are built on another macro named `YOCTON_VAR_ARRAY` which can be used
+to achieve this goal. `YOCTON_VAR_ARRAY` does the following:
 
 1. Check if the name of the property matches a particular name.
 2. If the name matches, an array pointer is reallocated to allocate space for a
@@ -191,18 +195,17 @@ struct foo {
   struct bar *elements;
   size_t num_elements;
 };
-struct foo my_struct;
+struct foo x;
 struct yocton_prop *p;
 
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_FIELD_ARRAY(p, my_struct, elements, num_elements, {
+  YOCTON_VAR_ARRAY(p, element, x.elements, x.num_elements, {
     populate_element(yocton_prop_inner(p),
-             &my_struct.elements[my_struct.num_elements]);
-    my_struct.num_elements++;
+                     &x.elements[x.num_elements]);
+    x.num_elements++;
   });
 }
 ```
-
 
 ## Error handling
 
