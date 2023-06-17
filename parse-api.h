@@ -21,13 +21,12 @@ struct foo {
     char *bar;
 };
 
-struct foo *read_foo(struct yocton_object *obj) {
-  struct foo *result = calloc(1, sizeof(struct foo));
+struct foo *read_foo(struct foo *f, struct yocton_object *obj) {
   struct yocton_prop *p;
 
   while ((p = yocton_next_prop(obj)) != NULL) {
     if (!strcmp(yocton_prop_name(p), "bar")) {
-      result->bar = yocton_prop_value_dup(p);
+      f->bar = yocton_prop_value_dup(p);
     }
   }
   return result;
@@ -68,7 +67,7 @@ written that reads and populates each type of struct. In the examples above,
 functions. This makes for clear and readable deserialization code; the approach
 also means that the individual functions can be tested in isolation.
 
-## Struct population
+## Reading properties and populating variables
 
 Yocton properties can contain arbitrary strings, the contents of which are open
 to interpretation by the code that is reading them. In practice though, the
@@ -85,7 +84,7 @@ values into these types:
 
 While these functions are useful, in most cases it is more convenient to use
 the preprocessor macros which are specifically intended for populating
-variables.
+variables (and struct fields).
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
@@ -113,10 +112,22 @@ const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
 struct foo x = {0, 0, 0, NULL};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ENUM(p, enum_value, x.enum_value, enum_names);
-  YOCTON_VAR_INT(p, signed_value, int, x.signed_value) ;
-  YOCTON_VAR_UINT(p, unsigned_value, unsigned int, x.unsigned_value);
-  YOCTON_VAR_STRING(p, string_value, x.string_value);
+  YOCTON_VAR_ENUM(p, enum_val, x.enum_value, enum_names);
+  YOCTON_VAR_INT(p, signed_val, int, x.signed_value) ;
+  YOCTON_VAR_UINT(p, unsigned_val, unsigned int, x.unsigned_value);
+  YOCTON_VAR_STRING(p, string_val, x.string_value);
+}
+```
+
+In the above example the fields of a struct are being populated, but this does
+not have to be the case; for example the following would set an ordinary
+variable:
+
+```c
+char *string_value = NULL;
+struct yocton_prop *p;
+while ((p = yocton_next_prop(obj)) != NULL) {
+  YOCTON_VAR_STRING(p, string_val, string_value);
 }
 ```
 
@@ -131,9 +142,10 @@ The Yocton format has no special way of representing lists. Since property
 names do not have to be unique, it is simple enough to represent a list using
 multiple properties with the same name.
 
-As with the previous example that described how to populate struct fields,
-convenience macros also exist for constructing arrays. The main difference is
-that an extra variable (or array field) is needed to store the array length.
+As with the previous example that described how to populate variables (and
+struct fields) with base types, convenience macros also exist for constructing
+arrays. The main difference is that an extra variable (or struct field) is
+needed to store the array length.
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
@@ -183,7 +195,7 @@ macros are built on another macro named `YOCTON_VAR_ARRAY` which can be used
 to achieve this goal. `YOCTON_VAR_ARRAY` does the following:
 
 1. Check if the name of the property matches a particular name.
-2. If the name matches, an array pointer is reallocated to allocate space for a
+2. If the name matches, the array pointer is reallocated to allot space for a
 new element at the end of the array.
 3. An arbitrary block of code is executed that can (optionally) populate the
 new array element.
