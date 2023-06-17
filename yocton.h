@@ -901,7 +901,7 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *   enum e { FIRST, SECOND, THIRD };
  *   const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
  *   struct s {
- *     enum e bar;
+ *       enum e bar;
  *   };
  *   struct s foo;
  *   struct yocton_prop *p;

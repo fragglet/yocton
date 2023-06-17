@@ -138,7 +138,7 @@ static int read_next_byte(struct yocton_instream *s, uint8_t *c)
 
 static int is_symbol_byte(int c)
 {
-       return isalnum(c) || strchr("_-+.", c) != NULL;
+	return isalnum(c) || strchr("_-+.", c) != NULL;
 }
 
 static int append_string_byte(struct yocton_instream *s, uint8_t c)
