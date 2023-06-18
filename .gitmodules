@@ -1,0 +1,3 @@
+[submodule "yocton"]
+	path = yocton
+	url = https://github.com/fragglet/yocton.git
