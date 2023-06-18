@@ -112,10 +112,10 @@ const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
 struct foo x = {0, 0, 0, NULL};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ENUM(p, enum_val, x.enum_value, enum_names);
-  YOCTON_VAR_INT(p, signed_val, int, x.signed_value) ;
-  YOCTON_VAR_UINT(p, unsigned_val, unsigned int, x.unsigned_value);
-  YOCTON_VAR_STRING(p, string_val, x.string_value);
+  YOCTON_VAR_ENUM(p, "enum_val", x.enum_value, enum_names);
+  YOCTON_VAR_INT(p, "signed_val", int, x.signed_value) ;
+  YOCTON_VAR_UINT(p, "unsigned_val", unsigned int, x.unsigned_value);
+  YOCTON_VAR_STRING(p, "string_val", x.string_value);
 }
 ```
 
@@ -127,7 +127,7 @@ variable:
 char *string_value = NULL;
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_STRING(p, string_val, string_value);
+  YOCTON_VAR_STRING(p, "string_val", string_value);
 }
 ```
 
@@ -178,13 +178,13 @@ const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
 struct bar x = {NULL, 0, NULL, 0, NULL, 0, NULL, 0};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ENUM_ARRAY(p, enum_val, x.enum_values,
+  YOCTON_VAR_ENUM_ARRAY(p, "enum_val", x.enum_values,
                         x.num_enum_values, enum_names);
-  YOCTON_VAR_INT_ARRAY(p, signed_val, int, x.signed_values,
+  YOCTON_VAR_INT_ARRAY(p, "signed_val", int, x.signed_values,
                        x.num_signed_values);
-  YOCTON_VAR_UINT_ARRAY(p, unsigned_val, unsigned int,
+  YOCTON_VAR_UINT_ARRAY(p, "unsigned_val", unsigned int,
                         x.unsigned_values, x.num_unsigned_values);
-  YOCTON_VAR_STRING_ARRAY(p, string_val, x.string_values,
+  YOCTON_VAR_STRING_ARRAY(p, "string_val", x.string_values,
                           x.num_string_values);
 }
 ```
@@ -211,7 +211,7 @@ struct foo x;
 struct yocton_prop *p;
 
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ARRAY(p, element, x.elements, x.num_elements, {
+  YOCTON_VAR_ARRAY(p, "element", x.elements, x.num_elements, {
     populate_element(yocton_prop_inner(p),
                      &x.elements[x.num_elements]);
     x.num_elements++;

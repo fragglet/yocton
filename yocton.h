@@ -255,7 +255,7 @@ char *yocton_prop_value_dup(struct yocton_prop *p);
  */
 #define YOCTON_IF_PROP(property, name, then) \
 	do { \
-		if (!strcmp(yocton_prop_name(property), #name)) { \
+		if (!strcmp(yocton_prop_name(property), name)) { \
 			then \
 		} \
 	} while (0)
@@ -282,7 +282,7 @@ int __yocton_reserve_array(struct yocton_prop *p, void **array,
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_ARRAY(p, foo, elements, num_elements, {
+ *       YOCTON_VAR_ARRAY(p, "foo", elements, num_elements, {
  *           elements[num_elements].id = yocton_prop_int(p, sizeof(int));
  *           num_elements++;
  *       });
@@ -321,7 +321,7 @@ int __yocton_reserve_array(struct yocton_prop *p, void **array,
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_STRING(p, foo, bar);
+ *       YOCTON_VAR_STRING(p, "foo", bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -349,7 +349,7 @@ int __yocton_reserve_array(struct yocton_prop *p, void **array,
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_STRING_ARRAY(p, foo, bar, bar_len);
+ *       YOCTON_VAR_STRING_ARRAY(p, "foo", bar, bar_len);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -427,7 +427,7 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_INT(p, foo, int, bar);
+ *       YOCTON_VAR_INT(p, "foo", int, bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -455,7 +455,7 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_INT_ARRAY(p, foo, int, bar, bar_len);
+ *       YOCTON_VAR_INT_ARRAY(p, "foo", int, bar, bar_len);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -509,7 +509,7 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_UINT(p, foo, unsigned int, bar);
+ *       YOCTON_VAR_UINT(p, "foo", unsigned int, bar);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -538,7 +538,7 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_UINT_ARRAY(p, foo, unsigned int, bar, bar_len);
+ *       YOCTON_VAR_UINT_ARRAY(p, "foo", unsigned int, bar, bar_len);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -594,7 +594,7 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_ENUM(p, foo, bar, enum_values);
+ *       YOCTON_VAR_ENUM(p, "foo", bar, enum_values);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -624,7 +624,7 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_ENUM_ARRAY(p, foo, bar, bar_len, enum_names);
+ *       YOCTON_VAR_ENUM_ARRAY(p, "foo", bar, bar_len, enum_names);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *

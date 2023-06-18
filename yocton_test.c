@@ -66,8 +66,10 @@ void read_error_data(struct error_data *data, struct yocton_object *obj)
 		if (property == NULL) {
 			return;
 		}
-		YOCTON_VAR_STRING(property, error_message, data->error_message);
-		YOCTON_VAR_INT(property, error_lineno, int, data->error_lineno);
+		YOCTON_VAR_STRING(property, "error_message",
+		                  data->error_message);
+		YOCTON_VAR_INT(property, "error_lineno",
+		               int, data->error_lineno);
 	}
 }
 
@@ -113,7 +115,7 @@ static void integer_value(struct yocton_object *obj)
 		if (property == NULL) {
 			break;
 		}
-		YOCTON_VAR_INT(property, size, size_t, size);
+		YOCTON_VAR_INT(property, "size", size_t, size);
 		if (!strcmp(yocton_prop_name(property), "value")) {
 			yocton_prop_int(property, size);
 		}
@@ -129,7 +131,7 @@ static void uinteger_value(struct yocton_object *obj)
 		if (property == NULL) {
 			break;
 		}
-		YOCTON_VAR_UINT(property, size, size_t, size);
+		YOCTON_VAR_UINT(property, "size", size_t, size);
 		if (!strcmp(yocton_prop_name(property), "value")) {
 			yocton_prop_uint(property, size);
 		}
@@ -144,8 +146,8 @@ static void enum_value(struct yocton_object *obj)
 		if (property == NULL) {
 			break;
 		}
-		YOCTON_VAR_UINT(property, expected, unsigned int, expected);
-		YOCTON_VAR_ENUM(property, value, value, enum_values);
+		YOCTON_VAR_UINT(property, "expected", unsigned int, expected);
+		YOCTON_VAR_ENUM(property, "value", value, enum_values);
 	}
 	yocton_check(obj, "wrong enum value matched", expected == value);
 }
@@ -174,8 +176,8 @@ static void parse_array_item(struct yocton_object *obj,
 	struct yocton_prop *p;
 
 	while ((p = yocton_next_prop(obj)) != NULL) {
-		YOCTON_VAR_UINT(p, id, unsigned int, item->id);
-		YOCTON_VAR_INT(p, value, int, item->value);
+		YOCTON_VAR_UINT(p, "id", unsigned int, item->id);
+		YOCTON_VAR_INT(p, "value", int, item->value);
 	}
 }
 
@@ -197,12 +199,12 @@ static void array_values(struct yocton_object *obj, char **output)
 	int i;
 
 	while ((p = yocton_next_prop(obj)) != NULL) {
-		YOCTON_VAR_UINT_ARRAY(p, unsigneds, unsigned int,
+		YOCTON_VAR_UINT_ARRAY(p, "unsigneds", unsigned int,
 		                      unsigneds, unsigneds_count);
-		YOCTON_VAR_INT_ARRAY(p, signeds, int, signeds, signeds_count);
-		YOCTON_VAR_STRING_ARRAY(p, strings, strings, strings_count);
-		YOCTON_VAR_ENUM_ARRAY(p, enums, enums, enums_count, enum_values);
-		YOCTON_VAR_ARRAY(p, items, items, items_count, {
+		YOCTON_VAR_INT_ARRAY(p, "signeds", int, signeds, signeds_count);
+		YOCTON_VAR_STRING_ARRAY(p, "strings", strings, strings_count);
+		YOCTON_VAR_ENUM_ARRAY(p, "enums", enums, enums_count, enum_values);
+		YOCTON_VAR_ARRAY(p, "items", items, items_count, {
 			parse_array_item(yocton_prop_inner(p),
 			                 &items[items_count]);
 			++items_count;
