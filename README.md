@@ -101,9 +101,9 @@ valid UTF-8 input file should be parsed correctly.
 ## API
 
 The Yocton API is a "pull parser" that is designed to work nicely for
-statically compiled languages like C.
-
-/* TODO: Code example here. */
+statically compiled languages like C. There is a
+[guide](https://fragglet.github.io/yocton/parse_api.html) to the API that
+explains how to use it.
 
 ## What Yocton doesn't have
 
