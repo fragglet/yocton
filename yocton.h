@@ -646,6 +646,34 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 		} \
 	})
 
+/**
+ * Allocate memory and set pointer variable if appropriate.
+ *
+ * If the name of the property currently being parsed is equal to `propname`,
+ * the pointer variable `varname` will be initialized to a newly allocated
+ * block of `sizeof(*varname)` bytes.
+ *
+ * The pointer variable must be equal to NULL; if it is not, an error will
+ * be set. This usually means that the property must be unique in the input.
+ * This is to prevent a memory leak if the pointer is allocated twice.
+ *
+ * Example to match a property named "foo":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct foo *ptr = NULL;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_PTR(p, "foo", ptr, {
+ *           parse_foo(yocton_prop_inner(p), ptr);
+ *       });
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop       Property.
+ * @param propname   Name of the property to match.
+ * @param varname    Pointer variable to initialize.
+ * @param then       Block of code to execute if the property is matched.
+ */
 #define YOCTON_VAR_PTR(prop, propname, varname, then) \
 	YOCTON_IF_PROP(prop, propname, { \
 		if (__yocton_prop_alloc(prop, (void **) &(varname), \
@@ -654,6 +682,39 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 		} \
 	})
 
+/**
+ * Allocate memory and append pointer to it to an array if appropriate.
+ *
+ * If the name of the property currently being parsed is equal to `propname`,
+ * a newly allocated block of `sizeof(**varname)` bytes will be allocated, and
+ * appended to the array `varname`.
+ *
+ * The code in the `then` block should initialize the new memory pointed at by
+ * `varname[varname_len]`, and then increment `varname_len`. If `varname_len`
+ * is not incremented, the memory block that was allocated will be freed, the
+ * assumption being that it was not needed after all.
+ *
+ * Example that matches a property named "foo" to populate an array of struct
+ * pointers:
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *   struct my_type **elements = NULL;
+ *   size_t num_elements;
+ *   struct yocton_prop *p;
+ *
+ *   while ((p = yocton_next_prop(obj)) != NULL) {
+ *       YOCTON_VAR_PTR_ARRAY(p, "foo", elements, num_elements, {
+ *           parse_my_type(yocton_prop_inner(obj), elements[num_elements]);
+ *           num_elements++;
+ *       });
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * @param prop         The property.
+ * @param propname     The property name to match.
+ * @param varname      Name of the variable pointing to array of pointers.
+ * @param varname_len  Variable storing length of array.
+ * @param then         Code to evaluate after new property is matched.
+ */
 #define YOCTON_VAR_PTR_ARRAY(prop, propname, varname, varname_len, then) \
 	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
 		(varname)[varname_len] = NULL; \
