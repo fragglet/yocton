@@ -1,0 +1,7 @@
+//| error_message: "error when parsing: pointer is non-NULL; property may be duplicated unexpectedly"
+//| error_lineno: 6
+
+special.ptr {
+	value: 1234
+	value: 5678
+}

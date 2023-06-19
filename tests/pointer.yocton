@@ -1,0 +1,8 @@
+special.ptr {
+	expected: 123
+	value: 123
+}
+special.ptr {
+	expected: 456
+	value: 456
+}

@@ -152,6 +152,24 @@ static void enum_value(struct yocton_object *obj)
 	yocton_check(obj, "wrong enum value matched", expected == value);
 }
 
+static void ptr_value(struct yocton_object *obj)
+{
+	unsigned int expected = -1, *value = NULL;
+	for (;;) {
+		struct yocton_prop *property = yocton_next_prop(obj);
+		if (property == NULL) {
+			break;
+		}
+		YOCTON_VAR_UINT(property, "expected", unsigned int, expected);
+		YOCTON_VAR_PTR(property, "value", value, {
+			*value = yocton_prop_uint(property, sizeof(int));
+		});
+	}
+	yocton_check(obj, "wrong enum value matched",
+	             value != NULL && *value == expected);
+	free(value);
+}
+
 static void add_output(struct yocton_object *obj, char **output, const char *s)
 {
 	char *new_output;
@@ -310,6 +328,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 			uinteger_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.enum")) {
 			enum_value(yocton_prop_inner(property));
+		} else if (!strcmp(name, "special.ptr")) {
+			ptr_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.arrays")) {
 			array_values(yocton_prop_inner(property), output);
 		} else if (pt == YOCTON_PROP_OBJECT) {

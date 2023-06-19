@@ -264,6 +264,9 @@ char *yocton_prop_value_dup(struct yocton_prop *p);
 int __yocton_reserve_array(struct yocton_prop *p, void **array,
                            size_t nmemb, size_t size);
 
+/* Helper function used by YOCTON_VAR_PTR() */
+int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
+
 /**
  * Match a particular property name and allocate array storage.
  *
@@ -640,6 +643,14 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 		(varname)[varname_len] = yocton_prop_enum(prop, values); \
 		if (!__yocton_prop_have_error(prop)) { \
 			++(varname_len); \
+		} \
+	})
+
+#define YOCTON_VAR_PTR(prop, propname, varname, then) \
+	YOCTON_IF_PROP(prop, propname, { \
+		if (__yocton_prop_alloc(prop, (void **) &(varname), \
+		                        sizeof(*(varname)))) { \
+			then \
 		} \
 	})
 

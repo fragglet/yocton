@@ -673,3 +673,20 @@ int __yocton_reserve_array(struct yocton_prop *p, void **array, size_t nmemb,
 	*array = new_array;
 	return 1;
 }
+
+int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size)
+{
+	if (*ptr != NULL) {
+		input_error(p->parent->instream, "pointer is non-NULL; "
+		            "property may be duplicated unexpectedly");
+		return 0;
+	}
+
+	*ptr = calloc(1, size);
+	if (*ptr == NULL) {
+		input_error(p->parent->instream, ERROR_ALLOC);
+		return 0;
+	}
+
+	return 1;
+}
