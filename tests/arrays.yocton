@@ -25,6 +25,11 @@
 //> { id 867: value 5309 }
 //> { id 23: value 42 }
 
+// pointer items:
+//> ptr { id 123: value 567 }
+//> ptr { id 8675: value 309 }
+//> ptr { id 15: value 16 }
+
 special.arrays {
 	signeds: 99
 	signeds: -100
@@ -50,6 +55,19 @@ special.arrays {
 	items {
 		id: 23
 		value: 42
+	}
+
+	ptr_items {
+		id: 123
+		value: 567
+	}
+	ptr_items {
+		id: 8675
+		value: 309
+	}
+	ptr_items {
+		id: 15
+		value: 16
 	}
 }
 

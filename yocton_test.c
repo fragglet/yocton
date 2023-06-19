@@ -211,6 +211,8 @@ static void array_values(struct yocton_object *obj, char **output)
 	size_t enums_count = 0;
 	struct array_data_item *items = NULL;
 	size_t items_count = 0;
+	struct array_data_item **ptr_items = NULL;
+	size_t ptr_items_count = 0;
 
 	struct yocton_prop *p;
 	char buf[32];
@@ -226,6 +228,12 @@ static void array_values(struct yocton_object *obj, char **output)
 			parse_array_item(yocton_prop_inner(p),
 			                 &items[items_count]);
 			++items_count;
+		});
+		YOCTON_VAR_PTR_ARRAY(p, "ptr_items",
+		                     ptr_items, ptr_items_count, {
+			parse_array_item(yocton_prop_inner(p),
+			                 ptr_items[ptr_items_count]);
+			++ptr_items_count;
 		});
 	}
 
@@ -256,6 +264,13 @@ static void array_values(struct yocton_object *obj, char **output)
 		add_output(obj, output, buf);
 	}
 	free(items);
+	for (i = 0; i < ptr_items_count; ++i) {
+		snprintf(buf, sizeof(buf), "ptr { id %u: value %d }\n",
+		         ptr_items[i]->id, ptr_items[i]->value);
+		add_output(obj, output, buf);
+		free(ptr_items[i]);
+	}
+	free(ptr_items);
 }
 
 static char *string_dup(struct yocton_object *obj, const char *value)

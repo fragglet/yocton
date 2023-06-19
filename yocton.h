@@ -654,6 +654,21 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 		} \
 	})
 
+#define YOCTON_VAR_PTR_ARRAY(prop, propname, varname, varname_len, then) \
+	YOCTON_VAR_ARRAY(prop, propname, varname, varname_len, { \
+		(varname)[varname_len] = NULL; \
+		if (__yocton_prop_alloc(prop, \
+		                        (void **) &((varname)[varname_len]), \
+		                        sizeof(**(varname)))) { \
+			long old_len = varname_len; \
+			then \
+			if ((varname_len) == old_len) { \
+				free(varname); \
+				(varname)[varname_len] = NULL; \
+			} \
+		} \
+	})
+
 #ifdef __cplusplus
 }
 #endif
