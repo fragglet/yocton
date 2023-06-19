@@ -272,7 +272,7 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * This macro is used to build other array macros such as
  * @ref YOCTON_VAR_INT_ARRAY and @ref YOCTON_VAR_STRING_ARRAY. If the
- * name of the given property is equal to `propname`, the variable `varname`
+ * name of the given property is equal to `propname`, the variable `var`
  * (a pointer to array data) will be reallocated so that enough space is
  * available in the array to append a new element. The argument `then` is then
  * evaluated to (conditionally) append the new element.
@@ -294,15 +294,15 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * @param property     The property.
  * @param propname     The property name to match.
- * @param varname      Name of the variable pointing to array data.
- * @param varname_len  Variable storing length of array.
+ * @param var          Variable pointing to array data.
+ * @param var_len      Variable storing length of array.
  * @param then         Code to evaluate after new element space is allocated.
  */
-#define YOCTON_VAR_ARRAY(property, propname, varname, varname_len, then) \
+#define YOCTON_VAR_ARRAY(property, propname, var, var_len, then) \
 	YOCTON_IF_PROP(property, propname, { \
-		if (__yocton_reserve_array(property, (void **) &(varname), \
-		                           varname_len, \
-		                           sizeof(*(varname)))) { \
+		if (__yocton_reserve_array(property, (void **) &(var), \
+		                           var_len, \
+		                           sizeof(*(var)))) { \
 			then \
 		} \
 	})
@@ -310,7 +310,7 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
 /**
  * Set the value of a string variable if appropriate.
  *
- * If the name of `property` is equal to `propname`, the variable `varname`
+ * If the name of `property` is equal to `propname`, the variable `var`
  * will be initialized to a newly-allocated buffer containing a copy of the
  * string value.
  *
@@ -330,19 +330,19 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * @param property   Property.
  * @param propname   Name of property to match.
- * @param varname    Name of variable to initialize.
+ * @param var        Variable to initialize.
  */
-#define YOCTON_VAR_STRING(property, propname, varname) \
+#define YOCTON_VAR_STRING(property, propname, var) \
 	YOCTON_IF_PROP(property, propname, { \
-		free(varname); \
-		varname = yocton_prop_value_dup(property); \
+		free(var); \
+		var = yocton_prop_value_dup(property); \
 	})
 
 /**
  * Append value to a string array if appropriate.
  *
  * If the name of `property` is equal to `propname`, the property value will be
- * appended to the string array pointed at by `varname`.
+ * appended to the string array pointed at by `var`.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -357,15 +357,15 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * @param property     Property.
  * @param propname     Name of property to match.
- * @param varname      Name of variable pointing to array data.
- * @param varname_len  Name of variable containing length of array.
+ * @param var          Variable pointing to array data.
+ * @param var_len      Variable containing length of array.
  */
-#define YOCTON_VAR_STRING_ARRAY(property, propname, varname, varname_len) \
-	YOCTON_VAR_ARRAY(property, propname, varname, varname_len, { \
+#define YOCTON_VAR_STRING_ARRAY(property, propname, var, var_len) \
+	YOCTON_VAR_ARRAY(property, propname, var, var_len, { \
 		char *__v = yocton_prop_value_dup(property); \
 		if (__v) { \
-			(varname)[varname_len] = __v; \
-			++(varname_len); \
+			(var)[var_len] = __v; \
+			++(var_len); \
 		} \
 	})
 
@@ -415,7 +415,7 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
 /**
  * Set the value of a signed integer variable if appropriate.
  *
- * If the name of `property` is equal to `propname`, the variable `varname`
+ * If the name of `property` is equal to `propname`, the variable `var`
  * will be initialized to a signed integer value parsed from the property
  * value. If the property value cannot be parsed as a signed integer, the
  * variable will be set to zero and an error set.
@@ -436,12 +436,12 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  * @param property     Property.
  * @param propname     Name of the property to match.
  * @param var_type     Type of the variable, eg. `int` or `ssize_t`.
- * @param varname      Name of variable to set.
+ * @param var          Variable to set.
  */
-#define YOCTON_VAR_INT(property, propname, var_type, varname) \
+#define YOCTON_VAR_INT(property, propname, var_type, var) \
 	YOCTON_IF_PROP(property, propname, { \
-		varname = (var_type) yocton_prop_int(property, \
-		                                     sizeof(var_type)); \
+		var = (var_type) yocton_prop_int(property, \
+		                                 sizeof(var_type)); \
 	})
 
 /**
@@ -449,7 +449,7 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  *
  * If the name of `property` is equal to `propname`, the property value will be
  * parsed as a signed integer and appended to the array pointed at by
- * `varname`.
+ * `var`.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -465,16 +465,15 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  * @param property     Property.
  * @param propname     Name of property to match.
  * @param var_type     Type of array element.
- * @param varname      Name of variable pointing to array data.
- * @param varname_len  Name of variable containing length of array.
+ * @param var          Variable pointing to array data.
+ * @param var_len      Variable containing length of array.
  */
-#define YOCTON_VAR_INT_ARRAY(property, propname, var_type, \
-                             varname, varname_len) \
-	YOCTON_VAR_ARRAY(property, propname, varname, varname_len, { \
-		(varname)[varname_len] = (var_type) \
+#define YOCTON_VAR_INT_ARRAY(property, propname, var_type, var, var_len) \
+	YOCTON_VAR_ARRAY(property, propname, var, var_len, { \
+		(var)[var_len] = (var_type) \
 			yocton_prop_int(property, sizeof(var_type)); \
 		if (!__yocton_prop_have_error(property)) { \
-			++(varname_len); \
+			++(var_len); \
 		} \
 	})
 
@@ -499,7 +498,7 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
 /**
  * Set the value of an unsigned integer variable if appropriate.
  *
- * If the name of `property` is equal to `propname`, the variable `varname`
+ * If the name of `property` is equal to `propname`, the variable `var`
  * will be initialized to an unsigned integer value parsed from the property
  * value. If the property value cannot be parsed as an unsigned integer, the
  * variable will be set to zero and an error set.
@@ -520,11 +519,11 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  * @param property     Property.
  * @param propname     Name of the property to match.
  * @param var_type     Type of the variable, eg. `uint32_t` or `size_t`.
- * @param varname      Name of variable to set.
+ * @param var          Variable to set.
  */
-#define YOCTON_VAR_UINT(property, propname, var_type, varname) \
+#define YOCTON_VAR_UINT(property, propname, var_type, var) \
 	YOCTON_IF_PROP(property, propname, { \
-		varname = (var_type) \
+		var = (var_type) \
 			yocton_prop_uint(property, sizeof(var_type)); \
 	})
 
@@ -533,7 +532,7 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  *
  * If the name of `property` is equal to `propname`, the property value will be
  * parsed as an unsigned integer and appended to the array pointed at by
- * `varname`.
+ * `var`.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -549,16 +548,15 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  * @param property     Property.
  * @param propname     Name of property to match.
  * @param var_type     Type of array element.
- * @param varname      Name of variable pointing to array data.
- * @param varname_len  Name of variable containing length of array.
+ * @param var          Variable pointing to array data.
+ * @param var_len      Variable containing length of array.
  */
-#define YOCTON_VAR_UINT_ARRAY(property, propname, var_type, \
-                              varname, varname_len) \
-	YOCTON_VAR_ARRAY(property, propname, varname, varname_len, { \
-		(varname)[varname_len] = (var_type) \
+#define YOCTON_VAR_UINT_ARRAY(property, propname, var_type, var, var_len) \
+	YOCTON_VAR_ARRAY(property, propname, var, var_len, { \
+		(var)[var_len] = (var_type) \
 			yocton_prop_uint(property, sizeof(var_type)); \
 		if (!__yocton_prop_have_error(property)) { \
-			++(varname_len); \
+			++(var_len); \
 		} \
 	})
 
@@ -588,7 +586,7 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 /**
  * Set the value of an enum variable if appropriate.
  *
- * If the name of `property` is equal to `propname`, the variable `varname`
+ * If the name of `property` is equal to `propname`, the variable `var`
  * will be initialized to an enum value that matches a name from the given
  * list.
  *
@@ -605,20 +603,20 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *
  * @param property   Property.
  * @param propname   Name of the property to match.
- * @param varname    Name of variable to initialize.
+ * @param var        Variable to initialize.
  * @param values     NULL-terminated array of strings representing enum values
  *                   (same as values parameter to @ref yocton_prop_enum).
  */
-#define YOCTON_VAR_ENUM(property, propname, varname, values) \
+#define YOCTON_VAR_ENUM(property, propname, var, values) \
 	YOCTON_IF_PROP(property, propname, { \
-		(varname) = yocton_prop_enum(property, values); \
+		(var) = yocton_prop_enum(property, values); \
 	})
 
 /**
  * Append value to an array of enums if appropriate.
  *
  * If the name of `property` is equal to `propname`, the property value will be
- * parsed as an enum and then appended to the array pointed at by `varname`.
+ * parsed as an enum and then appended to the array pointed at by `var`.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -634,17 +632,16 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *
  * @param property     Property.
  * @param propname     Name of property to match.
- * @param varname      Name of variable pointing to array data.
- * @param varname_len  Name of variable containing length of array.
+ * @param var          Variable pointing to array data.
+ * @param var_len      Variable containing length of array.
  * @param values       NULL-terminated array of strings representing enum values
  *                     (same as values parameter to @ref yocton_prop_enum).
  */
-#define YOCTON_VAR_ENUM_ARRAY(property, propname, varname, \
-                              varname_len, values) \
-	YOCTON_VAR_ARRAY(property, propname, varname, varname_len, { \
-		(varname)[varname_len] = yocton_prop_enum(property, values); \
+#define YOCTON_VAR_ENUM_ARRAY(property, propname, var, var_len, values) \
+	YOCTON_VAR_ARRAY(property, propname, var, var_len, { \
+		(var)[var_len] = yocton_prop_enum(property, values); \
 		if (!__yocton_prop_have_error(property)) { \
-			++(varname_len); \
+			++(var_len); \
 		} \
 	})
 
@@ -652,8 +649,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  * Allocate memory and set pointer variable if appropriate.
  *
  * If the name of `property` is equal to `propname`, the pointer variable
- * `varname` will be initialized to a newly allocated block of
- * `sizeof(*varname)` bytes.
+ * `var` will be initialized to a newly allocated block of
+ * `sizeof(*var)` bytes.
  *
  * The pointer variable must be equal to NULL; if it is not, an error will
  * be set. This usually means that the property must be unique in the input.
@@ -673,13 +670,13 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *
  * @param property   Property.
  * @param propname   Name of the property to match.
- * @param varname    Pointer variable to initialize.
+ * @param var        Pointer variable to initialize.
  * @param then       Block of code to execute if the property is matched.
  */
-#define YOCTON_VAR_PTR(property, propname, varname, then) \
+#define YOCTON_VAR_PTR(property, propname, var, then) \
 	YOCTON_IF_PROP(property, propname, { \
-		if (__yocton_prop_alloc(property, (void **) &(varname), \
-		                        sizeof(*(varname)))) { \
+		if (__yocton_prop_alloc(property, (void **) &(var), \
+		                        sizeof(*(var)))) { \
 			then \
 		} \
 	})
@@ -687,12 +684,12 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
 /**
  * Allocate memory and append pointer to it to an array if appropriate.
  *
- * If the name of the property currently being parsed is equal to `propname`,
- * a newly allocated block of `sizeof(**varname)` bytes will be allocated, and
- * appended to the array `varname`.
+ * If the name of `property` is equal to `propname`,
+ * a newly allocated block of `sizeof(**var)` bytes will be allocated, and
+ * appended to the array `var`.
  *
  * The code in the `then` block should initialize the new memory pointed at by
- * `varname[varname_len]`, and then increment `varname_len`. If `varname_len`
+ * `var[var_len]`, and then increment `var_len`. If `var_len`
  * is not incremented, the memory block that was allocated will be freed, the
  * assumption being that it was not needed after all.
  *
@@ -713,21 +710,21 @@ unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
  *
  * @param property     The property.
  * @param propname     The property name to match.
- * @param varname      Name of the variable pointing to array of pointers.
- * @param varname_len  Variable storing length of array.
+ * @param var          Variable pointing to array of pointers.
+ * @param var_len      Variable storing length of array.
  * @param then         Code to evaluate after new property is matched.
  */
-#define YOCTON_VAR_PTR_ARRAY(property, propname, varname, varname_len, then) \
-	YOCTON_VAR_ARRAY(property, propname, varname, varname_len, { \
-		(varname)[varname_len] = NULL; \
+#define YOCTON_VAR_PTR_ARRAY(property, propname, var, var_len, then) \
+	YOCTON_VAR_ARRAY(property, propname, var, var_len, { \
+		(var)[var_len] = NULL; \
 		if (__yocton_prop_alloc(property, \
-		                        (void **) &((varname)[varname_len]), \
-		                        sizeof(**(varname)))) { \
-			long old_len = varname_len; \
+		                        (void **) &((var)[var_len]), \
+		                        sizeof(**(var)))) { \
+			long old_len = var_len; \
 			then \
-			if ((varname_len) == old_len) { \
-				free(varname); \
-				(varname)[varname_len] = NULL; \
+			if ((var_len) == old_len) { \
+				free(var); \
+				(var)[var_len] = NULL; \
 			} \
 		} \
 	})
