@@ -145,7 +145,7 @@ int yocton_have_error(struct yocton_object *obj, int *lineno,
                       const char **error_msg);
 
 /* Helper wrapper function around above, for array macros. */
-int __yocton_prop_have_error(struct yocton_prop *p);
+int __yocton_prop_have_error(struct yocton_prop *property);
 
 /**
  * Free the top-level object and stop reading from the input stream.
@@ -193,10 +193,10 @@ struct yocton_prop *yocton_next_prop(struct yocton_object *obj);
  *
  * See @ref yocton_next_prop for an example of how this might be used.
  *
- * @param p  The property.
- * @return   Type of the property.
+ * @param property  The property.
+ * @return          Type of the property.
  */
-enum yocton_prop_type yocton_prop_type(struct yocton_prop *p);
+enum yocton_prop_type yocton_prop_type(struct yocton_prop *property);
 
 /**
  * Get the name of a @ref yocton_prop. Multiple properties of the same object
@@ -205,11 +205,11 @@ enum yocton_prop_type yocton_prop_type(struct yocton_prop *p);
  *
  * See @ref yocton_next_prop for an example of how this might be used.
  *
- * @param p  The property.
- * @return   Name of the property. The returned string is only valid for the
- *           lifetime of the property itself.
+ * @param property  The property.
+ * @return          Name of the property. The returned string is only valid
+ *                  for the lifetime of the property itself.
  */
-const char *yocton_prop_name(struct yocton_prop *p);
+const char *yocton_prop_name(struct yocton_prop *property);
 
 /**
  * Get the string value of a @ref yocton_prop of type
@@ -218,12 +218,13 @@ const char *yocton_prop_name(struct yocton_prop *p);
  *
  * See @ref yocton_next_prop for an example of how this might be used.
  *
- * @param p  The property.
- * @return   String value of this property, or NULL if it is not a property of
- *           type @ref YOCTON_PROP_STRING. The returned string is only
- *           valid for the lifetime of the property itself.
+ * @param property  The property.
+ * @return          String value of this property, or NULL if it is not a
+ *                  property of type @ref YOCTON_PROP_STRING. The returned
+ *                  string is only valid for the lifetime of the property
+ *                  itself.
  */
-const char *yocton_prop_value(struct yocton_prop *p);
+const char *yocton_prop_value(struct yocton_prop *property);
 
 /**
  * Get newly-allocated copy of a property value.
@@ -239,12 +240,12 @@ const char *yocton_prop_value(struct yocton_prop *p);
  * It may be more convenient to use @ref YOCTON_VAR_STRING which is a wrapper
  * around this function.
  *
- * @param p  The property.
- * @return   String value of this property, or NULL if it is not a property of
- *           type @ref YOCTON_PROP_STRING, or if a memory allocation failure
- *           occurred.
+ * @param property  The property.
+ * @return          String value of this property, or NULL if it is not a
+ *                  property of type @ref YOCTON_PROP_STRING, or if a memory
+ *                  allocation failure occurred.
  */
-char *yocton_prop_value_dup(struct yocton_prop *p);
+char *yocton_prop_value_dup(struct yocton_prop *property);
 
 /**
  * Match a particular property name.
@@ -387,12 +388,12 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param p  The property.
- * @return   Inner @ref yocton_object, or NULL if the property is not of type
- *           @ref YOCTON_PROP_OBJECT. The returned object is only only
- *           valid for the lifetime of the property itself.
+ * @param property  The property.
+ * @return          Inner @ref yocton_object, or NULL if the property is not
+ *                  of type @ref YOCTON_PROP_OBJECT. The returned object is
+ *                  only valid for the lifetime of the property itself.
  */
-struct yocton_object *yocton_prop_inner(struct yocton_prop *p);
+struct yocton_object *yocton_prop_inner(struct yocton_prop *property);
 
 /**
  * Parse the property value as a signed integer.
@@ -403,14 +404,15 @@ struct yocton_object *yocton_prop_inner(struct yocton_prop *p);
  * It may be more convenient to use @ref YOCTON_VAR_INT which is a wrapper
  * around this function.
  *
- * @param p   The property.
- * @param n   Size of the expected property in bytes, eg. sizeof(uint16_t).
- * @return    The integer value, or zero if it cannot be parsed as an
- *            integer of that size. Although the return value is a long
- *            long type, it will always be in the range of an integer
- *            of the given size and can be safely cast to one.
+ * @param property   The property.
+ * @param n          Size of the expected property in bytes,
+ *                   eg. sizeof(uint16_t).
+ * @return           The integer value, or zero if it cannot be parsed as an
+ *                   integer of that size. Although the return value is a long
+ *                   long type, it will always be in the range of an integer
+ *                   of the given size and can be safely cast to one.
  */
-signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
+signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
 
 /**
  * Set the value of a signed integer variable if appropriate.
@@ -486,14 +488,15 @@ signed long long yocton_prop_int(struct yocton_prop *p, size_t n);
  * It may be more convenient to use @ref YOCTON_VAR_UINT which is a wrapper
  * around this function.
  *
- * @param p   The property.
- * @param n   Size of the expected property in bytes, eg. sizeof(uint16_t).
- * @return    The integer value, or zero if it cannot be parsed as an
- *            signed integer of that size. Although the return value is a
- *            long long type, it will always be in the range of an integer
- *            of the given size and can be safely cast to one.
+ * @param property   The property.
+ * @param n          Size of the expected property in bytes,
+ *                   eg. sizeof(uint16_t).
+ * @return           The integer value, or zero if it cannot be parsed as an
+ *                   signed integer of that size. Although the return value is
+ *                   a long long type, it will always be in the range of an
+ *                   integer of the given size and can be safely cast to one.
  */
-unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
+unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
 
 /**
  * Set the value of an unsigned integer variable if appropriate.
@@ -574,14 +577,14 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n);
  * It may be more convenient to use @ref YOCTON_VAR_ENUM which is a wrapper
  * around this function.
  *
- * @param p       The property.
- * @param values  Pointer to a NULL-terminated array of strings representing
- *                enum values. values[e] is a string representing enum
- *                value e.
- * @return        The identified enum value. If not found, an error is set
- *                and zero is returned.
+ * @param property  The property.
+ * @param values    Pointer to a NULL-terminated array of strings representing
+ *                  enum values. values[e] is a string representing enum
+ *                  value e.
+ * @return          The identified enum value. If not found, an error is set
+ *                  and zero is returned.
  */
-unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values);
+unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values);
 
 /**
  * Set the value of an enum variable if appropriate.
