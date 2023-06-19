@@ -6,7 +6,7 @@ git submodule update --checkout yocton
 cd yocton
 git checkout trunk
 git pull
-head_commit=$(git show-ref HEAD | sed "s/ .*//")
+head_commit=$(git show-ref -s HEAD)
 make docs
 cd ..
 git rm -f *.{css,html,js,png}
