@@ -1,6 +1,4 @@
-/**
-
-@page parse_api Yocton Parse API
+# Yocton Parse API
 
 The Yocton API is a pull parser. The APIs for other formats tend to be document
 based - where serialized data is deserialized into a document object after
@@ -288,4 +286,3 @@ your code is implicitly indicating that a string was expected, and the input is
 therefore erroneous. The line number where the error occurred is logged, just
 the same as if the file itself was syntactically incorrect.
 
-*/
