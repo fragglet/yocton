@@ -24,7 +24,7 @@ Strings can be represented in two different ways:
 
 1. The first is the traditional C-style syntax, with surrounding double-quotes
    and backslash-escaping for special characters.
-1. The second is "symbol" format. The surrounding quotes can be omitted
+2. The second is "symbol" format. The surrounding quotes can be omitted
    if the string matches `^[A-Za-z0-9_+-\.]+$`, or in plain English, if every
    character is either alphanumeric, or one of underscore, plus, minus,
    or period.
@@ -63,12 +63,13 @@ no special syntax for them.
 Strings are represented using a subset of the familiar C syntax with the
 following escape sequences:
 
-* `\n`: Newline
-* `\t`: Tab
-* `\"`: Double quotes (")
-* `\\`: Literal backslash (\\)
-* `\xDD`: ASCII control character by hexadecimal number, in range 01h-1Fh
-* (characters outside this range are not valid).
+| Escape | Description            |
+|--------|------------------------|
+| \\n    | Newline                |
+| \\t    | Tab                    |
+| \\\"   | Double quotes (\")     |
+| \\\\   | Literal backslash (\\) |
+| \\xDD  | ASCII control character by hexadecimal number, in range 01h-1Fh (characters outside this range are not valid). |
 
 Control characters are not valid in bare form inside a string and must be
 escaped. There is no way of representing a NUL character (ASCII 00h); this is a
