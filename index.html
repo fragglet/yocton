@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>yocton: Yocton API</title>
+<title>yocton: yocton</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,15 +39,87 @@ $(function() {
 <div id="main-nav"></div>
 </div><!-- top -->
 <div><div class="header">
-  <div class="headertitle"><div class="title">Yocton API </div></div>
+  <div class="headertitle"><div class="title">yocton </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p >The following is some documentation for how to use the Yocton API.</p>
+<div class="textblock"><p ><a class="anchor" id="md_README"></a>Yocton is a minimalist, typeless object notation, intended to fit nicely with the C programming language and intended for situations where the features of other formats such as JSON or protocol buffers are not necessary.</p>
+<div class="image">
+<img src="cpt-yocton.png" alt=""/>
+<div class="caption">
+Captain Yocton</div></div>
+    <p >The mascot for Yocton is Captain Yocton, who is a tiny alien superhero.</p>
+<h2><a class="anchor" id="autotoc_md7"></a>
+Data model</h2>
+<p >A Yocton document consists of an object. Every object has a number of properties. Each property has a name and either a string value or an inner object. For example: </p><div class="fragment"><div class="line">property_name1: &quot;hello&quot;</div>
+<div class="line">string_property: &quot;world&quot;</div>
+<div class="line">object_property {</div>
+<div class="line">  inner_property1: &quot;foo&quot;</div>
+<div class="line">  inner_property2: &quot;bar&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p> Strings can be represented in two different ways:</p>
+<ol type="1">
+<li>The first is the traditional C-style syntax, with surrounding double-quotes and backslash-escaping for special characters.</li>
+<li>The second is "symbol" format. The surrounding quotes can be omitted if the string matches <code>^[A-Za-z0-9_+-\.]+$</code>, or in plain English, if every character is either alphanumeric, or one of underscore, plus, minus, or period.</li>
+</ol>
+<p >Taking into account the above two representations, here is another example: </p><div class="fragment"><div class="line"><span class="comment">// This is a comment</span></div>
+<div class="line">my_integer: 12345</div>
+<div class="line">my_float: 1.234e-10</div>
+<div class="line">my_boolean: <span class="keyword">true</span></div>
+<div class="line">error: EAGAIN</div>
+<div class="line">temperature_map {</div>
+<div class="line">  <span class="stringliteral">&quot;ice cream&quot;</span>: -18C</div>
+<div class="line">  <span class="stringliteral">&quot;room temperature&quot;</span>: 20C</div>
+<div class="line">}</div>
+<div class="line">ip_address: 192.168.4.10</div>
+<div class="line">my_list {</div>
+<div class="line">  element: 123</div>
+<div class="line">  element: 456</div>
+<div class="line">  element: 789</div>
+<div class="line">}</div>
+</div><!-- fragment --><p >As seen in this example:</p>
 <ul>
-<li><a class="el" href="parse_api.html">Parse API </a> - introduction to the parsing API</li>
-<li><a class="el" href="yocton_8h.html">Parse API functions </a></li>
-<li><a class="el" href="yoctonw_8h.html">Write API functions </a> </li>
+<li>The symbol notation allows a variety of different formats to be concisely represented, including C symbol names, floating-point numbers, IP addresses or even temperatures.</li>
+<li>There is no requirement that an object can only have one property of a particular name; this provides a way of representing lists even though there is no special syntax for them.</li>
 </ul>
+<h2><a class="anchor" id="autotoc_md8"></a>
+Strings</h2>
+<p >Strings are represented using a subset of the familiar C syntax with the following escape sequences:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Escape   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">\n   </td><td class="markdownTableBodyNone">Newline    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">\t   </td><td class="markdownTableBodyNone">Tab    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">\"   </td><td class="markdownTableBodyNone">Double quotes (")    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">\\   </td><td class="markdownTableBodyNone">Literal backslash (\)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">\xDD   </td><td class="markdownTableBodyNone">ASCII control character by hexadecimal number, in range 01h-1Fh (characters outside this range are not valid).   </td></tr>
+</table>
+<p >Control characters are not valid in bare form inside a string and must be escaped. There is no way of representing a NUL character (ASCII 00h); this is a design decision. Strings are intended for storing textual data; binary data can be stored using an encoding like base64 if necessary.</p>
+<h2><a class="anchor" id="autotoc_md9"></a>
+Unicode</h2>
+<p >Yocton is "UTF-8 friendly" but does not include special support for Unicode. This is in keeping with its typeless format - strings are really just arbitrary sequences of bytes. The encoding ought to be UTF-8 nowadays, but could also be a different encoding like ISO-8859-1 (although not some multi-byte formats like Shift-JIS unfortunately, for <a href="https://en.wikipedia.org/wiki/Shift_JIS#Description:~:text=0x5C%20byte%20will%20cause%20problems">technical reasons</a>). There isn't any validation of the input encoding that forces you to use UTF-8 or any other format, though UTF-8 is strongly recommended.</p>
+<p >As a result, Yocton does not include any special support for Unicode; most notably it does not include support for the <code>\u</code> or <code>\U</code> escape sequences that JSON has. This is deliberate; simply encode your file as UTF-8 and put the characters that you want in the file. These days it is reasonable to assume UTF-8 as an encoding, all modern text editors support it, and there is no need to encode everything in plain ASCII.</p>
+<p >The one minor piece of special handling for UTF-8 is that Yocton recognizes (and ignores) the UTF-8 <a href="https://en.wikipedia.org/wiki/Byte_order_mark">BOM</a>, ensuring that any valid UTF-8 input file should be parsed correctly.</p>
+<h2><a class="anchor" id="autotoc_md10"></a>
+API</h2>
+<p >The Yocton API is a "pull parser" that is designed to work nicely for statically compiled languages like C. There is a <a class="el" href="yocton_parse_api.html#md_parse_api">guide</a> to the API that explains how to use it.</p>
+<h2><a class="anchor" id="autotoc_md11"></a>
+What Yocton doesn't have</h2>
+<p >Compared with JSON:</p>
+<ul>
+<li>Types: Yocton is <a href="https://wiki.c2.com/?StringlyTyped">"stringly typed"</a>, only providing a basic hierarchical structure for strings to be arranged in. It is up to the programmer to interpret the content of these strings, placing some additional burden not found with other formats.</li>
+<li>Arrays: since there is no restriction that an object can only have one property with a particular name, repeated values can be represented as repeated properties with the same name. An alternative is an object where sequential numbers are used as property names.</li>
+<li>Number types: strings can be used to store a representation of a number. The set of characters allowed in symbols includes alphanumeric characters, period, plus and minus, allowing natural representation of numbers in almost any format - integer, decimal, hexadecimal, exponential/scientific, etc. without the need for quotes.</li>
+<li>Booleans: strings can be used to store the word "true" or "false". The symbol format allows a natural representation.</li>
+<li>Null: strings can be used to store the word "null". The symbol format allows a natural representation.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md12"></a>
+What's with the name?</h2>
+<p >yocto- is the Si unit prefix for a factor of 10<sup>−24</sup>. The -on suffix is the same as in JSON where it stands for Object Notation. So it's a very small object notation. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
