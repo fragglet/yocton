@@ -12,7 +12,7 @@ The mascot for Yocton is Captain Yocton, who is a tiny alien superhero.
 A Yocton document consists of an object. Every object has a number of
 properties. Each property has a name and either a string value or an inner
 object. For example:
-```
+```c
 property_name1: "hello"
 string_property: "world"
 object_property {
