@@ -75,7 +75,7 @@ the example struct here is a minimal one containing a single string field:
 
 ```c
 struct foo {
-    char *bar;
+  char *bar;
 };
 
 struct foo *read_foo(struct foo *f, struct yocton_object *obj) {
@@ -92,11 +92,21 @@ struct foo *read_foo(struct foo *f, struct yocton_object *obj) {
 
 While this is relatively easy to understand, it looks quite verbose. It is
 therefore important to note that there are convenience functions and macros to
-make things much simpler; see below.
+make things much simpler, as will be explained in the sections below.
 
 Yocton is a recursive format where objects can also contain other objects. The
 assumption is that a subobject likely corresponds to a field with a struct
-type. For example:
+type. Consider the following input:
+
+```js
+my_baz {
+  my_foo {
+    bar: "hello world!"
+  }
+}
+```
+
+This might be used to populate structs of the following types:
 
 ```c
 struct baz {
@@ -108,29 +118,19 @@ struct qux {
 };
 ```
 
-might be serialized in Yocton format as:
-
-```js
-my_baz {
-  my_foo {
-    bar: "hello world!"
-  }
-}
-```
-
 When subobjects are mapped to struct types in this way, a function can be
-written that reads and populates each type of struct. In the examples above,
-`read_foo()` might be complemented with `read_baz()` and `read_qux()`
-functions. This makes for clear and readable deserialization code; the approach
-also means that the individual functions can be tested in isolation.
+written to populate each type of struct. In the examples above, `read_foo()`
+might be complemented with `read_baz()` and `read_qux()` functions. This makes
+for clear and readable deserialization code; recursion in the programming
+language is used to handle recursion in the input file. The approach also
+means that the individual functions can be tested in isolation.
 
 ## Reading properties and populating variables
 
-Yocton properties can contain arbitrary strings, the contents of which are open
-to interpretation by the code that is reading them. In practice though, the
-values are often likely to be one of several common base types which every C
-programmer is familiar with. There are convenience functions to help parse
-values into these types:
+Yocton property values can contain arbitrary strings, the contents of which are
+open to interpretation. In practice though, the values are often likely to be
+one of several common base types which every C programmer is familiar with.
+There are convenience functions to help parse values into these types:
 
 | Function                | Purpose
 |-------------------------|----------------------|
@@ -150,35 +150,46 @@ variables (and struct fields).
 | Unsigned integer       | @ref YOCTON_VAR_UINT         |
 | Enum                   | @ref YOCTON_VAR_ENUM         |
 
-For the following example we will populate the `foo` struct:
+Consider the following input:
+
+```js
+signed_val: -123
+unsigned_val: 999
+string_val: "hello world"
+enum_val: THIRD
+```
+
+We might want to read this input and populate the following struct type:
 
 ```c
 enum e { FIRST, SECOND, THIRD };
 struct foo {
-  enum e enum_value;
   int signed_value;
   unsigned int unsigned_value;
   char *string_value;
+  enum e enum_value;
 };
 ```
 
-The input can be parsed and the struct populated using the following code:
+In the following example, we populate a `struct foo` variable named `x`. A
+different `YOCTON_VAR_...` macro is used to match each property name and assign
+a value to a different struct field:
 
 ```c
 const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
 struct foo x = {0, 0, 0, NULL};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ENUM(p, "enum_val", x.enum_value, enum_names);
   YOCTON_VAR_INT(p, "signed_val", int, x.signed_value) ;
   YOCTON_VAR_UINT(p, "unsigned_val", unsigned int, x.unsigned_value);
   YOCTON_VAR_STRING(p, "string_val", x.string_value);
+  YOCTON_VAR_ENUM(p, "enum_val", x.enum_value, enum_names);
 }
 ```
 
 In the above example the fields of a struct are being populated, but this does
-not have to be the case; for example the following would set an ordinary
-variable:
+not have to be the case; for example the following sets an ordinary variable
+named `string_value`:
 
 ```c
 char *string_value = NULL;
@@ -188,7 +199,7 @@ while ((p = yocton_next_prop(obj)) != NULL) {
 }
 ```
 
-An important point to note is that these macros are internally designed to
+It is important to note is that these macros are internally designed to
 provide a simple and convenient API, not for efficiency. If performance is
 essential or becomes a bottleneck, it may be preferable to avoid using these
 macros.
@@ -233,7 +244,7 @@ while ((p = yocton_next_prop(obj)) != NULL) {
 }
 ```
 
-## Representing lists
+## Constructing arrays
 
 The Yocton format has no special way of representing lists. Since property
 names do not have to be unique, it is simple enough to represent a list using
@@ -250,39 +261,53 @@ needed to store the array length.
 | Signed integer array   | @ref YOCTON_VAR_INT_ARRAY    |
 | Unsigned integer array | @ref YOCTON_VAR_UINT_ARRAY   |
 | Enum array             | @ref YOCTON_VAR_ENUM_ARRAY   |
-| Generic array          | @ref YOCTON_VAR_ARRAY        |
+| Array of pointers      | @ref YOCTON_VAR_PTR_ARRAY    |
+| Array of structs       | @ref YOCTON_VAR_ARRAY        |
 
-For example:
+Consider the following input:
+
+```js
+signed_val: -123
+signed_val: 456
+unsigned_val: 999
+unsigned_val: 12345
+string_val: "hello"
+string_val: "world"
+enum_val: THIRD
+enum_val: FIRST
+```
+
+We might want to parse this input to populate the following struct type:
 
 ```c
 enum e { FIRST, SECOND, THIRD };
 struct bar {
-  enum e *enum_values;
-  size_t num_enum_values;
   int *signed_values;
   size_t num_signed_values;
   unsigned int *unsigned_values;
   size_t num_unsigned_values;
   char **string_values;
   size_t num_string_values;
+  enum e *enum_values;
+  size_t num_enum_values;
 };
 ```
 
-The parsing code looks very similar to the previous example:
+The following code populates a single `struct bar` named `x`:
 
 ```c
 const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
 struct bar x = {NULL, 0, NULL, 0, NULL, 0, NULL, 0};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ENUM_ARRAY(p, "enum_val", x.enum_values,
-                        x.num_enum_values, enum_names);
   YOCTON_VAR_INT_ARRAY(p, "signed_val", int, x.signed_values,
                        x.num_signed_values);
   YOCTON_VAR_UINT_ARRAY(p, "unsigned_val", unsigned int,
                         x.unsigned_values, x.num_unsigned_values);
   YOCTON_VAR_STRING_ARRAY(p, "string_val", x.string_values,
                           x.num_string_values);
+  YOCTON_VAR_ENUM_ARRAY(p, "enum_val", x.enum_values,
+                        x.num_enum_values, enum_names);
 }
 ```
 
