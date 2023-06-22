@@ -134,6 +134,46 @@ provide a simple and convenient API, not for efficiency. If performance is
 essential or becomes a bottleneck, it may be preferable to avoid using these
 macros.
 
+## Pointer types
+
+Sometimes we might have a pointer variable, and want to initialize that
+variable when a particular property is read.
+For example, consider the following input:
+
+```js
+foo {
+  val: "hello world"
+}
+```
+
+We might want to use this to initialize the following pointer variable:
+
+```c
+struct foo {
+  char *val;
+};
+
+struct foo *my_foo = NULL;
+```
+
+In this scenario, we can use `YOCTON_VAR_PTR` to allocate a new `struct foo`.
+In the following example, when `YOCTON_VAR_PTR` matches a property named
+`foo`, a new `struct foo` is allocated, `my_foo` is initialized to point to
+it, and `parse_foo()` is called to populate it from the property's object
+value.
+
+```c
+void parse_foo(struct yocton_object *obj, struct foo *my_foo);
+
+struct yocton_prop *p;
+
+while ((p = yocton_next_prop(obj)) != NULL) {
+  YOCTON_VAR_PTR(p, "foo", my_foo, {
+    parse_bar(yocton_prop_inner(p), my_foo);
+  })
+}
+```
+
 ## Representing lists
 
 The Yocton format has no special way of representing lists. Since property
@@ -213,6 +253,48 @@ while ((p = yocton_next_prop(obj)) != NULL) {
     populate_element(yocton_prop_inner(p),
                      &x.elements[x.num_elements]);
     x.num_elements++;
+  });
+}
+```
+
+## Arrays of pointers
+
+The previous section covered how to construct an array of structs.  The
+analogous `YOCTON_VAR_PTR_ARRAY` can be used to construct an array of struct
+pointers. Consider the following input (same input as the previous section):
+
+```js
+item { val: 1 }
+item { val: 2 }
+item { val: 3 }
+```
+
+We might want to parse this input into the following array (note the
+difference to the previous section; this is an array of *pointers to*
+structs):
+
+```c
+struct foo {
+  int val;
+};
+
+struct foo **items = NULL;
+int num_items = 0;
+```
+
+In the following example, when `YOCTON_VAR_PTR_ARRAY` matches a property named
+`item`, a new `struct foo` is allocated and appended to the `items` array, and
+the `parse_foo()` function is called to populate the struct's contents from the
+property's inner object value. Finally, the length of the array `num_items` is
+incremented.
+
+```c
+void parse_foo(struct yocton_object *obj, struct foo *item);
+
+while ((p = yocton_next_prop(obj)) != NULL) {
+  YOCTON_VAR_PTR_ARRAY(p, "item", items, num_items, {
+    parse_foo(yocton_prop_inner(p), items[num_items]);
+    num_items++;
   });
 }
 ```
