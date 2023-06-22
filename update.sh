@@ -7,6 +7,7 @@ cd yocton
 git checkout trunk
 git pull
 head_commit=$(git show-ref -s HEAD)
+rm -rf html
 make docs
 cd ..
 git rm -f *.{css,html,js,png}
