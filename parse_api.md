@@ -286,32 +286,53 @@ while ((p = yocton_next_prop(obj)) != NULL) {
 }
 ```
 
-While these macros are convenient for building arrays of base types, often it
-is preferable to construct arrays of more complex data structures. The above
-macros are built on another macro named `YOCTON_VAR_ARRAY` which can be used
-to achieve this goal. `YOCTON_VAR_ARRAY` does the following:
+## Arrays of structs
+
+While the above macros are convenient for building arrays of base types, often
+it is preferable to construct arrays of structs. The `YOCTON_VAR_ARRAY` macro
+can be used to do this (actually, it can be used to construct arrays of any
+type; it is what the previous macros were built upon). It does the following:
 
 1. Check if the name of the property matches a particular name.
 2. If the name matches, the array pointer is reallocated to allot space for a
 new element at the end of the array.
 3. An arbitrary block of code is executed that can (optionally) populate the
-new array element.
+contents of the new array element.
 
-Here is an example:
+Consider the following input:
+
+```js
+item { val: 1 }
+item { val: 2 }
+item { val: 3 }
+```
+
+We might want to parse this input into the following array:
 
 ```c
 struct foo {
-  struct bar *elements;
-  size_t num_elements;
+  int val;
 };
-struct foo x;
+
+struct foo *items = NULL;
+int num_items = 0;
+```
+
+In the following example, when `YOCTON_VAR_ARRAY` matches a property named
+`item`, the `items` array is reallocated to allot space for a new element
+(`item[num_items]`). The `parse_foo()` function is then called to populate
+the contents of this new struct from the property's inner object value.
+Finally, the length of the array `num_items` is incremented.
+
+```c
+void parse_foo(struct yocton_object *obj, struct foo *item);
+
 struct yocton_prop *p;
 
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_ARRAY(p, "element", x.elements, x.num_elements, {
-    populate_element(yocton_prop_inner(p),
-                     &x.elements[x.num_elements]);
-    x.num_elements++;
+  YOCTON_VAR_ARRAY(p, "item", items, num_items, {
+    parse_foo(yocton_prop_inner(p), &item[num_items]);
+    num_items++;
   });
 }
 ```
