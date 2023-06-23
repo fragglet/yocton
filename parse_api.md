@@ -239,7 +239,7 @@ struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
   YOCTON_VAR_PTR(p, "foo", my_foo, {
     parse_bar(yocton_prop_inner(p), my_foo);
-  })
+  });
 }
 ```
 
