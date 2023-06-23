@@ -145,10 +145,10 @@ variables (and struct fields).
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
-| String                 | @ref YOCTON_VAR_STRING       |
-| Signed integer         | @ref YOCTON_VAR_INT          |
-| Unsigned integer       | @ref YOCTON_VAR_UINT         |
-| Enum                   | @ref YOCTON_VAR_ENUM         |
+| String                 | YOCTON_VAR_STRING()          |
+| Signed integer         | YOCTON_VAR_INT()             |
+| Unsigned integer       | YOCTON_VAR_UINT()            |
+| Enum                   | YOCTON_VAR_ENUM()            |
 
 Consider the following input:
 
@@ -226,11 +226,10 @@ struct foo {
 struct foo *my_foo = NULL;
 ```
 
-In this scenario, we can use `YOCTON_VAR_PTR` to allocate a new `struct foo`.
-In the following example, when `YOCTON_VAR_PTR` matches a property named
-`foo`, a new `struct foo` is allocated, `my_foo` is initialized to point to
-it, and `parse_foo()` is called to populate it from the property's object
-value.
+In this scenario, we can use `YOCTON_VAR_PTR()` to allocate a new `struct foo`.
+In the following example, when `YOCTON_VAR_PTR()` matches a property named
+`foo`, a new `struct foo` is allocated, `my_foo` is initialized to point to it,
+and `parse_foo()` is called to populate it from the property's object value.
 
 ```c
 void parse_foo(struct yocton_object *obj, struct foo *my_foo);
@@ -257,12 +256,12 @@ needed to store the array length.
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
-| String array           | @ref YOCTON_VAR_STRING_ARRAY |
-| Signed integer array   | @ref YOCTON_VAR_INT_ARRAY    |
-| Unsigned integer array | @ref YOCTON_VAR_UINT_ARRAY   |
-| Enum array             | @ref YOCTON_VAR_ENUM_ARRAY   |
-| Array of pointers      | @ref YOCTON_VAR_PTR_ARRAY    |
-| Array of structs       | @ref YOCTON_VAR_ARRAY        |
+| String array           | YOCTON_VAR_STRING_ARRAY()    |
+| Signed integer array   | YOCTON_VAR_INT_ARRAY()       |
+| Unsigned integer array | YOCTON_VAR_UINT_ARRAY()      |
+| Enum array             | YOCTON_VAR_ENUM_ARRAY()      |
+| Array of pointers      | YOCTON_VAR_PTR_ARRAY()       |
+| Array of structs       | YOCTON_VAR_ARRAY()           |
 
 Consider the following input:
 
@@ -314,7 +313,7 @@ while ((p = yocton_next_prop(obj)) != NULL) {
 ## Arrays of structs
 
 While the above macros are convenient for building arrays of base types, often
-it is preferable to construct arrays of structs. The `YOCTON_VAR_ARRAY` macro
+it is preferable to construct arrays of structs. The `YOCTON_VAR_ARRAY()` macro
 can be used to do this (actually, it can be used to construct arrays of any
 type; it is what the previous macros were built upon). It does the following:
 
@@ -343,7 +342,7 @@ struct foo *items = NULL;
 int num_items = 0;
 ```
 
-In the following example, when `YOCTON_VAR_ARRAY` matches a property named
+In the following example, when `YOCTON_VAR_ARRAY()` matches a property named
 `item`, the `items` array is reallocated to allot space for a new element
 (`item[num_items]`). The `parse_foo()` function is then called to populate
 the contents of this new struct from the property's inner object value.
@@ -364,8 +363,8 @@ while ((p = yocton_next_prop(obj)) != NULL) {
 
 ## Arrays of pointers
 
-The previous section covered how to construct an array of structs.  The
-analogous `YOCTON_VAR_PTR_ARRAY` can be used to construct an array of struct
+The previous section covered how to construct an array of structs. The
+analogous `YOCTON_VAR_PTR_ARRAY()` can be used to construct an array of struct
 pointers. Consider the following input (same input as the previous section):
 
 ```js
@@ -387,11 +386,11 @@ struct foo **items = NULL;
 int num_items = 0;
 ```
 
-In the following example, when `YOCTON_VAR_PTR_ARRAY` matches a property named
-`item`, a new `struct foo` is allocated and appended to the `items` array, and
-the `parse_foo()` function is called to populate the struct's contents from the
-property's inner object value. Finally, the length of the array `num_items` is
-incremented.
+In the following example, when `YOCTON_VAR_PTR_ARRAY()` matches a property
+named `item`, a new `struct foo` is allocated and appended to the `items`
+array, and the `parse_foo()` function is called to populate the struct's
+contents from the property's inner object value. Finally, the length of the
+array `num_items` is incremented.
 
 ```c
 void parse_foo(struct yocton_object *obj, struct foo *item);
