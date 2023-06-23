@@ -23,7 +23,7 @@ coverage : yocton.c.gcov
 
 docs: html/index.html
 
-html/index.html: yocton.h yoctonw.h
+html/index.html: $(wildcard *.h *.md) Doxyfile
 	doxygen
 
 yocton_print : yocton_print.o $(LIB_OBJS)
