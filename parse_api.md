@@ -137,7 +137,6 @@ There are convenience functions to help parse values into these types:
 | yocton_prop_int()       | Parse value as a signed integer. Works with all integer types, performs bounds checking, etc. |
 | yocton_prop_uint()      | Parse value as an unsigned integer. Works with all unsigned integer types, performs bounds checking, etc. |
 | yocton_prop_value_dup() | Returns the value as a plain, freshly allocated string, performing the appropriate checking for memory allocation failure.  Useful for populating string fields. |
-| yocton_prop_enum()      | Parse value as an enum value by looking it up in an array of strings. Useful for representing values symbolically rather than just as raw integers. |
 
 While these functions are useful, in most cases it is more convenient to use
 the preprocessor macros which are specifically intended for populating
@@ -145,10 +144,9 @@ variables (and struct fields).
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
-| String                 | YOCTON_VAR_STRING()          |
 | Signed integer         | YOCTON_VAR_INT()             |
 | Unsigned integer       | YOCTON_VAR_UINT()            |
-| Enum                   | YOCTON_VAR_ENUM()            |
+| String                 | YOCTON_VAR_STRING()          |
 
 Consider the following input:
 
@@ -156,18 +154,15 @@ Consider the following input:
 signed_val: -123
 unsigned_val: 999
 string_val: "hello world"
-enum_val: THIRD
 ```
 
 We might want to read this input and populate the following struct type:
 
 ```c
-enum e { FIRST, SECOND, THIRD };
 struct foo {
   int signed_value;
   unsigned int unsigned_value;
   char *string_value;
-  enum e enum_value;
 };
 ```
 
@@ -176,14 +171,12 @@ different `YOCTON_VAR_...` macro is used to match each property name and assign
 a value to a different struct field:
 
 ```c
-const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
 struct foo x = {0, 0, 0, NULL};
 struct yocton_prop *p;
 while ((p = yocton_next_prop(obj)) != NULL) {
-  YOCTON_VAR_INT(p, "signed_val", int, x.signed_value) ;
+  YOCTON_VAR_INT(p, "signed_val", int, x.signed_value);
   YOCTON_VAR_UINT(p, "unsigned_val", unsigned int, x.unsigned_value);
   YOCTON_VAR_STRING(p, "string_val", x.string_value);
-  YOCTON_VAR_ENUM(p, "enum_val", x.enum_value, enum_names);
 }
 ```
 
@@ -203,6 +196,31 @@ It is important to note is that these macros are internally designed to
 provide a simple and convenient API, not for efficiency. If performance is
 essential or becomes a bottleneck, it may be preferable to avoid using these
 macros.
+
+## Enumerations
+
+C provides enumerated types (enums) which allow the programmer to define a
+set of integer values with symbolic names. Yocton provides support for enums
+through the `yocton_prop_enum()` function which will map a property value to an
+integer value through lookup in an array of strings. For example:
+
+```c
+enum e { FIRST, SECOND, THIRD };
+const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
+
+enum e enum_var = yocton_prop_enum(p, enum_names);
+```
+
+The array of strings must be NULL terminated. As with the other functions
+described in the previous section, it is usually simpler to use the
+`YOCTON_VAR_ENUM()` convenience macro:
+
+```c
+struct yocton_prop *p;
+while ((p = yocton_next_prop(obj)) != NULL) {
+  YOCTON_VAR_ENUM(p, "enum_val", enum_var, enum_names);
+}
+```
 
 ## Pointer types
 
