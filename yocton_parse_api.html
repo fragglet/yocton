@@ -135,50 +135,40 @@ Reading properties and populating variables</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#a237f7d7cb6dfbb5fed45c4dc059a46bd" title="Parse the property value as an unsigned integer.">yocton_prop_uint()</a>   </td><td class="markdownTableBodyNone">Parse value as an unsigned integer. Works with all unsigned integer types, performs bounds checking, etc.    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#ad27b4cdfe5358267badf65179f7d52c4" title="Get newly-allocated copy of a property value.">yocton_prop_value_dup()</a>   </td><td class="markdownTableBodyNone">Returns the value as a plain, freshly allocated string, performing the appropriate checking for memory allocation failure. Useful for populating string fields.    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#aefc254d7127fded84698a6159ac4046a" title="Parse the property value as an enumeration.">yocton_prop_enum()</a>   </td><td class="markdownTableBodyNone">Parse value as an enum value by looking it up in an array of strings. Useful for representing values symbolically rather than just as raw integers.   </td></tr>
+<td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#ad27b4cdfe5358267badf65179f7d52c4" title="Get newly-allocated copy of a property value.">yocton_prop_value_dup()</a>   </td><td class="markdownTableBodyNone">Returns the value as a plain, freshly allocated string, performing the appropriate checking for memory allocation failure. Useful for populating string fields.   </td></tr>
 </table>
 <p >While these functions are useful, in most cases it is more convenient to use the preprocessor macros which are specifically intended for populating variables (and struct fields).</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Type   </th><th class="markdownTableHeadNone">Macro    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">String   </td><td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#a81d24bb35ddf399f7208be4bd2ac4fce" title="Set the value of a string variable if appropriate.">YOCTON_VAR_STRING()</a>    </td></tr>
-<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Signed integer   </td><td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#a725f13a3998a76ac25d7aac291b88fc7" title="Set the value of a signed integer variable if appropriate.">YOCTON_VAR_INT()</a>    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Unsigned integer   </td><td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#a04567fe0b000cfe9a0c8419f492125ec" title="Set the value of an unsigned integer variable if appropriate.">YOCTON_VAR_UINT()</a>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Enum   </td><td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#adbd8c3bf1b7d7f94fe1731e9174b6573" title="Set the value of an enum variable if appropriate.">YOCTON_VAR_ENUM()</a>   </td></tr>
+<td class="markdownTableBodyNone">Unsigned integer   </td><td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#a04567fe0b000cfe9a0c8419f492125ec" title="Set the value of an unsigned integer variable if appropriate.">YOCTON_VAR_UINT()</a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">String   </td><td class="markdownTableBodyNone"><a class="el" href="yocton_8h.html#a81d24bb35ddf399f7208be4bd2ac4fce" title="Set the value of a string variable if appropriate.">YOCTON_VAR_STRING()</a>   </td></tr>
 </table>
 <p >Consider the following input:</p>
 <div class="fragment"><div class="line">signed_val: -123</div>
 <div class="line">unsigned_val: 999</div>
 <div class="line">string_val: &quot;hello world&quot;</div>
-<div class="line">enum_val: THIRD</div>
 </div><!-- fragment --><p >We might want to read this input and populate the following struct type:</p>
-<div class="fragment"><div class="line"><span class="keyword">enum</span> e { FIRST, SECOND, THIRD };</div>
-<div class="line"><span class="keyword">struct </span>foo {</div>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>foo {</div>
 <div class="line">  <span class="keywordtype">int</span> signed_value;</div>
 <div class="line">  <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> unsigned_value;</div>
 <div class="line">  <span class="keywordtype">char</span> *string_value;</div>
-<div class="line">  <span class="keyword">enum</span> e enum_value;</div>
 <div class="line">};</div>
 </div><!-- fragment --><p >In the following example, we populate a <code>struct foo</code> variable named <code>x</code>. A different <code>YOCTON_VAR_...</code> macro is used to match each property name and assign a value to a different struct field:</p>
-<div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span> *enum_names[] = {<span class="stringliteral">&quot;FIRST&quot;</span>, <span class="stringliteral">&quot;SECOND&quot;</span>, <span class="stringliteral">&quot;THIRD&quot;</span>, NULL};</div>
-<div class="line"><span class="keyword">struct </span>foo x = {0, 0, 0, NULL};</div>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>foo x = {0, 0, 0, NULL};</div>
 <div class="line"><span class="keyword">struct </span><a class="code hl_typedef" href="yocton_8h.html#aa1688438ce1435782795c9f2a0008807">yocton_prop</a> *p;</div>
 <div class="line"><span class="keywordflow">while</span> ((p = <a class="code hl_function" href="yocton_8h.html#ac69750750bb48baa80600f3daf79447a">yocton_next_prop</a>(obj)) != NULL) {</div>
-<div class="line">  <a class="code hl_define" href="yocton_8h.html#a725f13a3998a76ac25d7aac291b88fc7">YOCTON_VAR_INT</a>(p, <span class="stringliteral">&quot;signed_val&quot;</span>, <span class="keywordtype">int</span>, x.signed_value) ;</div>
+<div class="line">  <a class="code hl_define" href="yocton_8h.html#a725f13a3998a76ac25d7aac291b88fc7">YOCTON_VAR_INT</a>(p, <span class="stringliteral">&quot;signed_val&quot;</span>, <span class="keywordtype">int</span>, x.signed_value);</div>
 <div class="line">  <a class="code hl_define" href="yocton_8h.html#a04567fe0b000cfe9a0c8419f492125ec">YOCTON_VAR_UINT</a>(p, <span class="stringliteral">&quot;unsigned_val&quot;</span>, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>, x.unsigned_value);</div>
 <div class="line">  <a class="code hl_define" href="yocton_8h.html#a81d24bb35ddf399f7208be4bd2ac4fce">YOCTON_VAR_STRING</a>(p, <span class="stringliteral">&quot;string_val&quot;</span>, x.string_value);</div>
-<div class="line">  <a class="code hl_define" href="yocton_8h.html#adbd8c3bf1b7d7f94fe1731e9174b6573">YOCTON_VAR_ENUM</a>(p, <span class="stringliteral">&quot;enum_val&quot;</span>, x.enum_value, enum_names);</div>
 <div class="line">}</div>
 <div class="ttc" id="ayocton_8h_html_a04567fe0b000cfe9a0c8419f492125ec"><div class="ttname"><a href="yocton_8h.html#a04567fe0b000cfe9a0c8419f492125ec">YOCTON_VAR_UINT</a></div><div class="ttdeci">#define YOCTON_VAR_UINT(property, propname, var_type, var)</div><div class="ttdoc">Set the value of an unsigned integer variable if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:527</div></div>
 <div class="ttc" id="ayocton_8h_html_a725f13a3998a76ac25d7aac291b88fc7"><div class="ttname"><a href="yocton_8h.html#a725f13a3998a76ac25d7aac291b88fc7">YOCTON_VAR_INT</a></div><div class="ttdeci">#define YOCTON_VAR_INT(property, propname, var_type, var)</div><div class="ttdoc">Set the value of a signed integer variable if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:443</div></div>
 <div class="ttc" id="ayocton_8h_html_a81d24bb35ddf399f7208be4bd2ac4fce"><div class="ttname"><a href="yocton_8h.html#a81d24bb35ddf399f7208be4bd2ac4fce">YOCTON_VAR_STRING</a></div><div class="ttdeci">#define YOCTON_VAR_STRING(property, propname, var)</div><div class="ttdoc">Set the value of a string variable if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:336</div></div>
-<div class="ttc" id="ayocton_8h_html_adbd8c3bf1b7d7f94fe1731e9174b6573"><div class="ttname"><a href="yocton_8h.html#adbd8c3bf1b7d7f94fe1731e9174b6573">YOCTON_VAR_ENUM</a></div><div class="ttdeci">#define YOCTON_VAR_ENUM(property, propname, var, values)</div><div class="ttdoc">Set the value of an enum variable if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:613</div></div>
 </div><!-- fragment --><p >In the above example the fields of a struct are being populated, but this does not have to be the case; for example the following sets an ordinary variable named <code>string_value</code>:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">char</span> *string_value = NULL;</div>
 <div class="line"><span class="keyword">struct </span><a class="code hl_typedef" href="yocton_8h.html#aa1688438ce1435782795c9f2a0008807">yocton_prop</a> *p;</div>
@@ -187,6 +177,20 @@ Reading properties and populating variables</h1>
 <div class="line">}</div>
 </div><!-- fragment --><p >It is important to note is that these macros are internally designed to provide a simple and convenient API, not for efficiency. If performance is essential or becomes a bottleneck, it may be preferable to avoid using these macros.</p>
 <h1><a class="anchor" id="autotoc_md2"></a>
+Enumerations</h1>
+<p >C provides enumerated types (enums) which allow the programmer to define a set of integer values with symbolic names. Yocton provides support for enums through the <code><a class="el" href="yocton_8h.html#aefc254d7127fded84698a6159ac4046a" title="Parse the property value as an enumeration.">yocton_prop_enum()</a></code> function which will map a property value to an integer value through lookup in an array of strings. For example:</p>
+<div class="fragment"><div class="line"><span class="keyword">enum</span> e { FIRST, SECOND, THIRD };</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span> *enum_names[] = {<span class="stringliteral">&quot;FIRST&quot;</span>, <span class="stringliteral">&quot;SECOND&quot;</span>, <span class="stringliteral">&quot;THIRD&quot;</span>, NULL};</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">enum</span> e enum_var = <a class="code hl_function" href="yocton_8h.html#aefc254d7127fded84698a6159ac4046a">yocton_prop_enum</a>(p, enum_names);</div>
+<div class="ttc" id="ayocton_8h_html_aefc254d7127fded84698a6159ac4046a"><div class="ttname"><a href="yocton_8h.html#aefc254d7127fded84698a6159ac4046a">yocton_prop_enum</a></div><div class="ttdeci">unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)</div><div class="ttdoc">Parse the property value as an enumeration.</div></div>
+</div><!-- fragment --><p >The array of strings must be NULL terminated. As with the other functions described in the previous section, it is usually simpler to use the <code><a class="el" href="yocton_8h.html#adbd8c3bf1b7d7f94fe1731e9174b6573" title="Set the value of an enum variable if appropriate.">YOCTON_VAR_ENUM()</a></code> convenience macro:</p>
+<div class="fragment"><div class="line"><span class="keyword">struct </span><a class="code hl_typedef" href="yocton_8h.html#aa1688438ce1435782795c9f2a0008807">yocton_prop</a> *p;</div>
+<div class="line"><span class="keywordflow">while</span> ((p = <a class="code hl_function" href="yocton_8h.html#ac69750750bb48baa80600f3daf79447a">yocton_next_prop</a>(obj)) != NULL) {</div>
+<div class="line">  <a class="code hl_define" href="yocton_8h.html#adbd8c3bf1b7d7f94fe1731e9174b6573">YOCTON_VAR_ENUM</a>(p, <span class="stringliteral">&quot;enum_val&quot;</span>, enum_var, enum_names);</div>
+<div class="line">}</div>
+<div class="ttc" id="ayocton_8h_html_adbd8c3bf1b7d7f94fe1731e9174b6573"><div class="ttname"><a href="yocton_8h.html#adbd8c3bf1b7d7f94fe1731e9174b6573">YOCTON_VAR_ENUM</a></div><div class="ttdeci">#define YOCTON_VAR_ENUM(property, propname, var, values)</div><div class="ttdoc">Set the value of an enum variable if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:613</div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md3"></a>
 Pointer types</h1>
 <p >Sometimes we might have a pointer variable, and want to initialize that variable when a particular property is read. For example, consider the following input:</p>
 <div class="fragment"><div class="line">foo {</div>
@@ -209,7 +213,7 @@ Pointer types</h1>
 <div class="line">  });</div>
 <div class="line">}</div>
 <div class="ttc" id="ayocton_8h_html_ad43c0b69b6c9e92fab262f6a86934381"><div class="ttname"><a href="yocton_8h.html#ad43c0b69b6c9e92fab262f6a86934381">YOCTON_VAR_PTR</a></div><div class="ttdeci">#define YOCTON_VAR_PTR(property, propname, var, then)</div><div class="ttdoc">Allocate memory and set pointer variable if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:679</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md3"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md4"></a>
 Constructing arrays</h1>
 <p >The Yocton format has no special way of representing lists. Since property names do not have to be unique, it is simple enough to represent a list using multiple properties with the same name.</p>
 <p >As with the previous example that described how to populate variables (and struct fields) with base types, convenience macros also exist for constructing arrays. The main difference is that an extra variable (or struct field) is needed to store the array length.</p>
@@ -268,7 +272,7 @@ Constructing arrays</h1>
 <div class="ttc" id="ayocton_8h_html_acc990574763ffa638453661c2fa8a604"><div class="ttname"><a href="yocton_8h.html#acc990574763ffa638453661c2fa8a604">YOCTON_VAR_ENUM_ARRAY</a></div><div class="ttdeci">#define YOCTON_VAR_ENUM_ARRAY(property, propname, var, len_var, values)</div><div class="ttdoc">Append value to an array of enums if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:643</div></div>
 <div class="ttc" id="ayocton_8h_html_acd9cd470656f4efa8ae7b2d47145a30a"><div class="ttname"><a href="yocton_8h.html#acd9cd470656f4efa8ae7b2d47145a30a">YOCTON_VAR_INT_ARRAY</a></div><div class="ttdeci">#define YOCTON_VAR_INT_ARRAY(property, propname, var_type, var, len_var)</div><div class="ttdoc">Append value to an array of signed integers if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:473</div></div>
 <div class="ttc" id="ayocton_8h_html_aeaae39483f92a26dae863b58871f21a8"><div class="ttname"><a href="yocton_8h.html#aeaae39483f92a26dae863b58871f21a8">YOCTON_VAR_UINT_ARRAY</a></div><div class="ttdeci">#define YOCTON_VAR_UINT_ARRAY(property, propname, var_type, var, len_var)</div><div class="ttdoc">Append value to an array of unsigned integers if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:557</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md4"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md5"></a>
 Arrays of structs</h1>
 <p >While the above macros are convenient for building arrays of base types, often it is preferable to construct arrays of structs. The <code><a class="el" href="yocton_8h.html#a73990a51d0313a83192872ab03c1a619" title="Match a particular property name and allocate array storage.">YOCTON_VAR_ARRAY()</a></code> macro can be used to do this (actually, it can be used to construct arrays of any type; it is what the previous macros were built upon). It does the following:</p>
 <ol type="1">
@@ -299,7 +303,7 @@ Arrays of structs</h1>
 <div class="line">  });</div>
 <div class="line">}</div>
 <div class="ttc" id="ayocton_8h_html_a73990a51d0313a83192872ab03c1a619"><div class="ttname"><a href="yocton_8h.html#a73990a51d0313a83192872ab03c1a619">YOCTON_VAR_ARRAY</a></div><div class="ttdeci">#define YOCTON_VAR_ARRAY(property, propname, var, len_var, then)</div><div class="ttdoc">Match a particular property name and allocate array storage.</div><div class="ttdef"><b>Definition:</b> yocton.h:302</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md5"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
 Arrays of pointers</h1>
 <p >The previous section covered how to construct an array of structs. The analogous <code><a class="el" href="yocton_8h.html#af8ed6fd64bfefb1a8a5db02fb04a7c79" title="Allocate memory and append pointer to it to an array if appropriate.">YOCTON_VAR_PTR_ARRAY()</a></code> can be used to construct an array of struct pointers. Consider the following input (same input as the previous section):</p>
 <div class="fragment"><div class="line">item { val: 1 }</div>
@@ -322,7 +326,7 @@ Arrays of pointers</h1>
 <div class="line">  });</div>
 <div class="line">}</div>
 <div class="ttc" id="ayocton_8h_html_af8ed6fd64bfefb1a8a5db02fb04a7c79"><div class="ttname"><a href="yocton_8h.html#af8ed6fd64bfefb1a8a5db02fb04a7c79">YOCTON_VAR_PTR_ARRAY</a></div><div class="ttdeci">#define YOCTON_VAR_PTR_ARRAY(property, propname, var, len_var, then)</div><div class="ttdoc">Allocate memory and append pointer to it to an array if appropriate.</div><div class="ttdef"><b>Definition:</b> yocton.h:720</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md7"></a>
 Error handling</h1>
 <p >There are many different types of error that can occur while parsing a Yocton file. For example:</p>
 <ul>

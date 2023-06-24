@@ -48,7 +48,7 @@ $(function() {
 <div class="caption">
 Captain Yocton</div></div>
     <p >The mascot for Yocton is Captain Yocton, who is a tiny alien superhero.</p>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 Data model</h2>
 <p >A Yocton document consists of an object. Every object has a number of properties. Each property has a name and either a string value or an inner object. For example: </p><div class="fragment"><div class="line">property_name1: <span class="stringliteral">&quot;hello&quot;</span></div>
 <div class="line">string_property: <span class="stringliteral">&quot;world&quot;</span></div>
@@ -81,7 +81,7 @@ Data model</h2>
 <li>The symbol notation allows a variety of different formats to be concisely represented, including C symbol names, floating-point numbers, IP addresses or even temperatures.</li>
 <li>There is no requirement that an object can only have one property of a particular name; this provides a way of representing lists even though there is no special syntax for them.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 Strings</h2>
 <p >Strings are represented using a subset of the familiar C syntax with the following escape sequences:</p>
 <table class="markdownTable">
@@ -99,15 +99,15 @@ Strings</h2>
 <td class="markdownTableBodyNone">\xDD   </td><td class="markdownTableBodyNone">ASCII control character by hexadecimal number, in range 01h-1Fh (characters outside this range are not valid).   </td></tr>
 </table>
 <p >Control characters are not valid in bare form inside a string and must be escaped. There is no way of representing a NUL character (ASCII 00h); this is a design decision. Strings are intended for storing textual data; binary data can be stored using an encoding like base64 if necessary.</p>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md10"></a>
 Unicode</h2>
 <p >Yocton is "UTF-8 friendly" but does not include special support for Unicode. This is in keeping with its typeless format - strings are really just arbitrary sequences of bytes. The encoding ought to be UTF-8 nowadays, but could also be a different encoding like ISO-8859-1 (although not some multi-byte formats like Shift-JIS unfortunately, for <a href="https://en.wikipedia.org/wiki/Shift_JIS#Description:~:text=0x5C%20byte%20will%20cause%20problems">technical reasons</a>). There isn't any validation of the input encoding that forces you to use UTF-8 or any other format, though UTF-8 is strongly recommended.</p>
 <p >As a result, Yocton does not include any special support for Unicode; most notably it does not include support for the <code>\u</code> or <code>\U</code> escape sequences that JSON has. This is deliberate; simply encode your file as UTF-8 and put the characters that you want in the file. These days it is reasonable to assume UTF-8 as an encoding, all modern text editors support it, and there is no need to encode everything in plain ASCII.</p>
 <p >The one minor piece of special handling for UTF-8 is that Yocton recognizes (and ignores) the UTF-8 <a href="https://en.wikipedia.org/wiki/Byte_order_mark">BOM</a>, ensuring that any valid UTF-8 input file should be parsed correctly.</p>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 API</h2>
 <p >The Yocton API is a "pull parser" that is designed to work nicely for statically compiled languages like C. There is a <a class="el" href="yocton_parse_api.html#md_parse_api">guide</a> to the API that explains how to use it.</p>
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 What Yocton doesn't have</h2>
 <p >Compared with JSON:</p>
 <ul>
@@ -117,7 +117,7 @@ What Yocton doesn't have</h2>
 <li>Booleans: strings can be used to store the word "true" or "false". The symbol format allows a natural representation.</li>
 <li>Null: strings can be used to store the word "null". The symbol format allows a natural representation.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 What's with the name?</h2>
 <p >yocto- is the Si unit prefix for a factor of 10<sup>−24</sup>. The -on suffix is the same as in JSON where it stands for Object Notation. So it's a very small object notation. </p>
 </div></div><!-- PageDoc -->
