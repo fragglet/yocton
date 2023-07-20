@@ -144,9 +144,9 @@ variables (and struct fields).
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
-| Signed integer         | YOCTON_VAR_INT()             |
-| Unsigned integer       | YOCTON_VAR_UINT()            |
-| String                 | YOCTON_VAR_STRING()          |
+| Signed integer         | YOCTON_VAR_INT(property, property_name, type_name, variable) |
+| Unsigned integer       | YOCTON_VAR_UINT(property, property_name, type_name, variable) |
+| String                 | YOCTON_VAR_STRING(property, property_name, variable) |
 
 Consider the following input:
 
@@ -274,12 +274,12 @@ needed to store the array length.
 
 | Type                   | Macro                        |
 |------------------------|------------------------------|
-| String array           | YOCTON_VAR_STRING_ARRAY()    |
-| Signed integer array   | YOCTON_VAR_INT_ARRAY()       |
-| Unsigned integer array | YOCTON_VAR_UINT_ARRAY()      |
-| Enum array             | YOCTON_VAR_ENUM_ARRAY()      |
-| Array of pointers      | YOCTON_VAR_PTR_ARRAY()       |
-| Array of structs       | YOCTON_VAR_ARRAY()           |
+| String array           | YOCTON_VAR_STRING_ARRAY(property, property_name, variable, length_variable) |
+| Signed integer array   | YOCTON_VAR_INT_ARRAY(property, property_name, type_name, variable, length_variable) |
+| Unsigned integer array | YOCTON_VAR_UINT_ARRAY(property, property_name, type_name, variable, length_variable) |
+| Enum array             | YOCTON_VAR_ENUM_ARRAY(property, property_name, variable, length_variable, enum_names) |
+| Array of pointers      | YOCTON_VAR_PTR_ARRAY(property, property_name, variable, length_variable, code_block) |
+| Array of structs       | YOCTON_VAR_ARRAY(property, property_name, variable, length_variable, code_block) |
 
 Consider the following input:
 
