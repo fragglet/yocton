@@ -400,7 +400,8 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	fclose(fstream);
 
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
-	if (alloc_limit != -1 && strstr(error_msg, ERROR_ALLOC) != NULL) {
+	if (alloc_limit != -1 && have_error
+	 && strstr(error_msg, ERROR_ALLOC) != NULL) {
 		// Perfectly normal to get a memory alloc error.
 	} else if (strcmp(output, error_data.expected_output) != 0) {
 		fprintf(stderr, "%s: wrong output, want:\n%s\ngot:\n%s\n",
