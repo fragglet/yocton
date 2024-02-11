@@ -321,6 +321,9 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data being parsed:
+ *   //   foo: "first value"
+ *   //   foo: "replacement value"
  *   char *bar = NULL;
  *   struct yocton_prop *p;
  *
@@ -347,6 +350,9 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data being parsed:
+ *   //   foo: "first string"
+ *   //   foo: "second string"
  *   char **bar = NULL;
  *   size_t bar_len = 0;
  *   struct yocton_prop *p;
@@ -427,6 +433,8 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data being parsed:
+ *   //   foo: -1234
  *   int bar;
  *   struct yocton_prop *p;
  *
@@ -455,6 +463,10 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data being parsed:
+ *   //   foo: 1234
+ *   //   foo: "5678"
+ *   //   foo: -9999
  *   int *bar = NULL;
  *   size_t bar_len = 0;
  *   struct yocton_prop *p;
@@ -511,6 +523,8 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data being parsed:
+ *   //   foo: 12345
  *   unsigned int bar;
  *   struct yocton_prop *p;
  *
@@ -539,6 +553,10 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data being parsed:
+ *   //   foo: 123
+ *   //   foo: "456"
+ *   //   foo: 789
  *   unsigned int *bar = NULL;
  *   size_t bar_len = 0;
  *   struct yocton_prop *p;
@@ -595,6 +613,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data to be parsed:
+ *   //   foo: SECOND
  *   const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
  *   int bar;
  *   struct yocton_prop *p;
@@ -623,6 +643,10 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *   // Example of data to be parsed:
+ *   //   foo: FIRST
+ *   //   foo: "SECOND"
+ *   //   foo: FIRST
  *   const char *enum_names[] = {"FIRST", "SECOND", "THIRD", NULL};
  *   int *bar = NULL;
  *   size_t bar_len = 0;
@@ -661,12 +685,17 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *   struct foo *ptr = NULL;
+ *   // Example of data to be parsed:
+ *   //   coordinate {
+ *   //     x: 123
+ *   //     y: 123
+ *   //   }
+ *   struct coord *ptr = NULL;
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_PTR(p, "foo", ptr, {
- *           parse_foo(yocton_prop_inner(p), ptr);
+ *       YOCTON_VAR_PTR(p, "coordinate", ptr, {
+ *           parse_coord(yocton_prop_inner(p), ptr);
  *       });
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -699,14 +728,18 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  * Example that matches a property named "foo" to populate an array of struct
  * pointers:
  * ~~~~~~~~~~~~~~~~~~~~~~~
- *   struct my_type **elements = NULL;
- *   size_t num_elements;
+ *   // Example of data to be parsed:
+ *   //   coordinate { x: 123 y:456 }
+ *   //   coordinate { x: 999 y:789 }
+ *   //   coordinate { x: 555 y:127 }
+ *   struct coord **coords = NULL;
+ *   size_t num_coords;
  *   struct yocton_prop *p;
  *
  *   while ((p = yocton_next_prop(obj)) != NULL) {
- *       YOCTON_VAR_PTR_ARRAY(p, "foo", elements, num_elements, {
- *           parse_my_type(yocton_prop_inner(obj), elements[num_elements]);
- *           num_elements++;
+ *       YOCTON_VAR_PTR_ARRAY(p, "coordinate", coords, num_coords, {
+ *           parse_coord(yocton_prop_inner(obj), coords[num_coords]);
+ *           num_coords++;
  *       });
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~
