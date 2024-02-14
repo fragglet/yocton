@@ -46,6 +46,7 @@ struct yocton_buffer {
 };
 
 enum token_type {
+	TOKEN_NONE,
 	TOKEN_STRING,
 	TOKEN_COLON,
 	TOKEN_OPEN_BRACE,
@@ -191,6 +192,42 @@ static int read_escape_sequence(struct yocton_instream *s, uint8_t *c)
 	}
 }
 
+// Peek ahead in the input stream. If there are any space characters or
+// comments, skip ahead and ignore them. On success, TOKEN_NONE is returned
+// and the following character is not consumed.
+static enum token_type skip_past_spaces(struct yocton_instream *s, uint8_t *c)
+{
+	uint8_t c2, c3;
+
+	// Skip past any spaces. Reaching EOF is not always an error.
+	while (peek_next_byte(s, c)) {
+		if (*c == '/') {
+			// Skip past comment.
+			CHECK_OR_RETURN(
+			    read_next_byte(s, c) && *c == '/'
+			 && read_next_byte(s, &c2) && c2 == '/',
+			    TOKEN_ERROR);
+			while (peek_next_byte(s, c) && *c != '\n') {
+				CHECK_OR_RETURN(read_next_byte(s, c),
+				                TOKEN_ERROR);
+			}
+		} else if (*c == utf8_bom[0]) {
+			CHECK_OR_RETURN(
+			    read_next_byte(s, c) && *c == utf8_bom[0]
+			 && read_next_byte(s, &c2) && c2 == utf8_bom[1]
+			 && read_next_byte(s, &c3) && c3 == utf8_bom[2],
+			    TOKEN_ERROR);
+		} else if (isspace(*c)) {
+			CHECK_OR_RETURN(read_next_byte(s, c), TOKEN_ERROR);
+		} else {
+			return TOKEN_NONE;
+		}
+	}
+
+	s->token_lineno = s->lineno;
+	return TOKEN_EOF;
+}
+
 // Read quote-delimited "C style" string.
 static enum token_type read_string(struct yocton_instream *s)
 {
@@ -232,33 +269,17 @@ static enum token_type read_symbol(struct yocton_instream *s, uint8_t first)
 
 static enum token_type read_next_token(struct yocton_instream *s)
 {
-	uint8_t c, c2, c3;
+	uint8_t c;
+	enum token_type result;
+
 	if (strlen(s->error_buf) > 0) {
 		return TOKEN_ERROR;
 	}
-	// Skip past any spaces. Reaching EOF is not always an error.
-	do {
-		if (!peek_next_byte(s, &c)) {
-			s->token_lineno = s->lineno;
-			return TOKEN_EOF;
-		}
-		CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
-		// If we encounter a comment we skip past it. Note that
-		// ending with EOF is also okay.
-		if (c == '/' && peek_next_byte(s, &c2) && c2 =='/') {
-			while (peek_next_byte(s, &c) && c != '\n') {
-				CHECK_OR_RETURN(read_next_byte(s, &c),
-				                TOKEN_ERROR);
-			}
-			c = ' ';
-		} else if (c == utf8_bom[0]) {
-			CHECK_OR_RETURN(
-			    read_next_byte(s, &c2) && c2 == utf8_bom[1]
-			 && read_next_byte(s, &c3) && c3 == utf8_bom[2],
-			    TOKEN_ERROR);
-			c = ' ';
-		}
-	} while (isspace(c));
+	result = skip_past_spaces(s, &c);
+	if (result != TOKEN_NONE) {
+		return result;
+	}
+	CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_EOF);
 
 	s->token_lineno = s->lineno;
 	switch (c) {

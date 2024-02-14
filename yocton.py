@@ -29,6 +29,7 @@ TOKEN_COLON = 1
 TOKEN_OPEN_BRACE = 2
 TOKEN_CLOSE_BRACE = 3
 TOKEN_EOF = 4
+TOKEN_NONE = 5
 
 ASCII_X = ord('x')
 ASCII_QUOTES = ord('"')
@@ -155,34 +156,39 @@ class Lexer(object):
 
 		return self.to_string(result_chars)
 
-	def do_read_next_token(self):
-		"""The actual logic of read_next_token()."""
+	def _skip_past_spaces(self):
 		# Skip past spaces, including comments.
 		while True:
-			ok, _ = self.peek_next_char()
+			ok, c = self.peek_next_char()
 			if not ok:
 				return TOKEN_EOF, None
-			c = self.read_next_char()
 			if c == ASCII_SLASH:
 				self.syntax_assert(
+					self.read_next_char() == ASCII_SLASH and
 					self.read_next_char() == ASCII_SLASH)
 				while c != ASCII_NEWLINE:
 					ok, c = self.peek_next_char()
 					if not ok:
 						return TOKEN_EOF, None
 					self.read_next_char()
-				continue
 			elif self.binary and c == UTF8_BOM[0]:
 				self.syntax_assert(
-					self.read_next_char() == UTF8_BOM[1])
-				self.syntax_assert(
+					self.read_next_char() == UTF8_BOM[0] and
+					self.read_next_char() == UTF8_BOM[1] and
 					self.read_next_char() == UTF8_BOM[2])
-				continue
 			elif not self.binary and c == BOM:
-				continue
-			if not ("%c" % c).isspace():
-				break
+				self.read_next_char()
+			elif not ("%c" % c).isspace():
+				return TOKEN_NONE, c
+			else:
+				self.read_next_char()
 
+	def do_read_next_token(self):
+		"""The actual logic of read_next_token()."""
+		tt, cc = self._skip_past_spaces()
+		if tt != TOKEN_NONE:
+			return tt, None
+		c = self.read_next_char()
 		if c == ASCII_COLON:
 			return TOKEN_COLON, None
 		elif c == ASCII_OPEN_BRACE:
