@@ -1,5 +1,5 @@
 //| error_message: "control character not allowed inside string (ASCII char 0x0a)"
-//| error_lineno: 5
+//| error_lineno: 4
 property1: "value"
 property2: "multiline strings
 are not allowed."

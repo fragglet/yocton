@@ -69,6 +69,7 @@ struct yocton_instream {
 	// error_buf is non-empty if an error occurs during parsing.
 	char *error_buf;
 	int lineno;
+	int token_lineno;
 	struct yocton_object *root;
 };
 
@@ -238,6 +239,7 @@ static enum token_type read_next_token(struct yocton_instream *s)
 	// Skip past any spaces. Reaching EOF is not always an error.
 	do {
 		if (!peek_next_byte(s, &c)) {
+			s->token_lineno = s->lineno;
 			return TOKEN_EOF;
 		}
 		CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
@@ -258,6 +260,7 @@ static enum token_type read_next_token(struct yocton_instream *s)
 		}
 	} while (isspace(c));
 
+	s->token_lineno = s->lineno;
 	switch (c) {
 		case ':':  return TOKEN_COLON;
 		case '{':  return TOKEN_OPEN_BRACE;
@@ -387,7 +390,7 @@ int yocton_have_error(struct yocton_object *obj, int *lineno,
 		return 0;
 	}
 	if (lineno != NULL) {
-		*lineno = obj->instream->lineno;
+		*lineno = obj->instream->token_lineno;
 	}
 	if (error_msg != NULL) {
 		*error_msg = obj->instream->error_buf;
