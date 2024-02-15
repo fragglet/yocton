@@ -1,0 +1,3 @@
+//| error_message: "quoted string should follow '&' operator"
+//| error_lineno: 3
+foo: "the second chunk of this string never comes " &

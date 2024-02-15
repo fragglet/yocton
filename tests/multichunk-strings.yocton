@@ -1,0 +1,26 @@
+// This file tests that multichunk strings (joined by &) work.
+//> Here is a basic example
+//> Here is one
+//> split across multiple lines
+//> Here is another
+//> split across multiple lines
+//> Here's one with comments in the space
+//> This one even split up the key name!
+//> An & character is not the same as an & string
+//> &
+output: "Here is " & "a basic" & " example"
+output: "Here is one\n" &
+        "split across " &
+        "multiple lines"
+output: "Here is another\n"
+      & "split across "
+      & "multiple lines"
+output: "Here's one with comments " // First comment
+                                    // Second comment
+                 &                  // Third comment
+                                    // Fourth comment
+        "in the space"              // Fifth comment
+"ou" & "t" & "put": "This one even split up the key name!"
+"output": "An & character is not the same as an " & "&" & " string"
+"output": "&"
+

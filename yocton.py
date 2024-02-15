@@ -39,6 +39,7 @@ ASCII_NEWLINE = ord('\n')
 ASCII_OPEN_BRACE = ord('{')
 ASCII_CLOSE_BRACE = ord('}')
 ASCII_COLON = ord(':')
+ASCII_AMPERSAND = ord('&')
 SIMPLE_ESCAPES = { ord('n'): ASCII_NEWLINE, ord('t'): ord('\t'),
                    ASCII_QUOTES: ASCII_QUOTES,
                    ASCII_BACKSLASH: ASCII_BACKSLASH }
@@ -126,12 +127,32 @@ class Lexer(object):
 		else:
 			return ''.join(chr(c) for c in s)
 
+	def _next_string_chunk(self):
+		tt, c = self._skip_past_spaces()
+		if tt == TOKEN_EOF:
+			return TOKEN_STRING
+		elif tt != TOKEN_NONE:
+			return tt
+		elif c != ASCII_AMPERSAND:
+			return TOKEN_STRING
+		self.read_next_char()
+
+		tt, c = self._skip_past_spaces()
+		self.syntax_assert(tt == TOKEN_NONE and c == ASCII_QUOTES,
+			"quoted string should follow '&' operator")
+		self.read_next_char()
+
+		return TOKEN_NONE
+
 	def read_string(self):
 		result_chars = []
 		while True:
 			c = self.read_next_char()
 			if c == ASCII_QUOTES:
-				break
+				tt = self._next_string_chunk()
+				if tt != TOKEN_NONE:
+					break
+				continue
 			elif c == ASCII_BACKSLASH:
 				c = self.read_escape_sequence()
 			else:
@@ -198,6 +219,8 @@ class Lexer(object):
 		elif c == ASCII_QUOTES:
 			return TOKEN_STRING, self.read_string()
 		else:
+			self.syntax_assert(c != ASCII_AMPERSAND, "'&' operator"
+				" can only be used to join quoted strings")
 			return TOKEN_STRING, self.read_symbol(c)
 
 	def read_next_token(self):

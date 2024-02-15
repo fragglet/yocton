@@ -224,8 +224,37 @@ static enum token_type skip_past_spaces(struct yocton_instream *s, uint8_t *c)
 		}
 	}
 
-	s->token_lineno = s->lineno;
 	return TOKEN_EOF;
+}
+
+// Called at end of a string chunk ('"') to skip forward and see if there is
+// another chunk separated by an '&'. For concatenated/multiline strings.
+static enum token_type next_string_chunk(struct yocton_instream *s)
+{
+	enum token_type tt;
+	uint8_t c;
+
+	tt = skip_past_spaces(s, &c);
+	if (tt == TOKEN_EOF) {
+		return TOKEN_STRING;
+	} else if (tt != TOKEN_NONE) {
+		return tt;
+	} else if (c != '&') {
+		return TOKEN_STRING;
+	}
+	CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
+	s->token_lineno = s->lineno;
+
+	// We have read the '&' joining operator. Skip ahead to the next '"';
+	// it is an error now if we don't reach one.
+	if (skip_past_spaces(s, &c) != TOKEN_NONE || c != '"') {
+		input_error(s, "quoted string should follow '&' operator");
+		return TOKEN_ERROR;
+	}
+	CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
+	s->token_lineno = s->lineno;
+
+	return TOKEN_NONE;
 }
 
 // Read quote-delimited "C style" string.
@@ -236,7 +265,11 @@ static enum token_type read_string(struct yocton_instream *s)
 	for (;;) {
 		CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_ERROR);
 		if (c == '"') {
-			return TOKEN_STRING;
+			enum token_type tt = next_string_chunk(s);
+			if (tt != TOKEN_NONE) {
+				return tt;
+			}
+			continue;
 		} else if (c == '\\') {
 			if (!read_escape_sequence(s, &c)) {
 				return TOKEN_ERROR;
@@ -277,6 +310,8 @@ static enum token_type read_next_token(struct yocton_instream *s)
 	}
 	result = skip_past_spaces(s, &c);
 	if (result != TOKEN_NONE) {
+		// Line number where error/EOF was encountered.
+		s->token_lineno = s->lineno;
 		return result;
 	}
 	CHECK_OR_RETURN(read_next_byte(s, &c), TOKEN_EOF);
@@ -287,6 +322,10 @@ static enum token_type read_next_token(struct yocton_instream *s)
 		case '{':  return TOKEN_OPEN_BRACE;
 		case '}':  return TOKEN_CLOSE_BRACE;
 		case '\"': return read_string(s);
+		case '&':
+			input_error(s, "'&' operator can only be used to "
+			            "join quoted strings");
+			return TOKEN_ERROR;
 		default:   return read_symbol(s, c);
 	}
 }

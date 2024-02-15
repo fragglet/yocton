@@ -76,6 +76,15 @@ escaped. There is no way of representing a NUL character (ASCII 00h); this is a
 design decision. Strings are intended for storing textual data; binary data can
 be stored using an encoding like base64 if necessary.
 
+A special syntax using the '&' character allows strings to be specified in
+multiple "chunks" that get concatenated together. For example:
+```
+special_syntax: "to support " & "strings\n" &
+                "that span " & "multiple lines"
+" you can even\n" &
+"do this with property names": 12345
+```
+
 ## Unicode
 
 Yocton is "UTF-8 friendly" but does not include special support for
