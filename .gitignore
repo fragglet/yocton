@@ -5,3 +5,5 @@
 *.exe
 yocton_print
 yocton_test
+html
+man
