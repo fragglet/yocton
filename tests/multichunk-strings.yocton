@@ -4,6 +4,7 @@
 //> split across multiple lines
 //> Here is another
 //> split across multiple lines
+//> No space around ampersand
 //> Here's one with comments in the space
 //> This one even split up the key name!
 //> An & character is not the same as an & string
@@ -15,6 +16,7 @@ output: "Here is one\n" &
 output: "Here is another\n"
       & "split across "
       & "multiple lines"
+output: "No space"&" around ampersand"
 output: "Here's one with comments " // First comment
                                     // Second comment
                  &                  // Third comment
