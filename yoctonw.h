@@ -35,13 +35,13 @@ extern "C" {
 /**
  * Callback invoked to write more data to the output.
  *
- * @param buf       Buffer containing data to write.
- * @param nbytes    Size of buffer in bytes.
- * @param handle    Arbitrary pointer, passed through from
- *                  @ref yoctonw_write_with.
- * @return          1 for success; 0 for failure. If a failure status
- *                  is returned, the callback will not be invoked
- *                  again.
+ * @param buf     Buffer containing data to write.
+ * @param nbytes  Size of buffer in bytes.
+ * @param handle  Arbitrary pointer, passed through from
+ *                @ref yoctonw_write_with.
+ * @return        1 for success; 0 for failure. If a failure status
+ *                is returned, the callback will not be invoked
+ *                again.
  */
 typedef int (*yoctonw_write)(void *buf, size_t nbytes, void *handle);
 
@@ -69,10 +69,10 @@ typedef struct yoctonw_writer yoctonw_writer;
  *   w = yoctonw_write_with(write_callback, NULL);
  * ~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param callback   Callback function to invoke to write data.
- * @param handle     Arbitrary pointer passed through when callback is
- *                   invoked.
- * @return           A @ref yoctonw_writer that can be used to output data.
+ * @param callback  Callback function to invoke to write data.
+ * @param handle    Arbitrary pointer passed through when callback is
+ *                  invoked.
+ * @return          A @ref yoctonw_writer that can be used to output data.
  */
 struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle);
 
@@ -86,8 +86,8 @@ struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle);
  *   struct yocton_writer *w = yoctonw_write_to(fs);
  * ~~~~~~~~~~~~~~~~~~~~
  *
- * @param fstream    File handle.
- * @return           A @ref yoctonw_writer that can be used to output data.
+ * @param fstream  File handle.
+ * @return         A @ref yoctonw_writer that can be used to output data.
  */
 struct yoctonw_writer *yoctonw_write_to(FILE *fstream);
 
@@ -112,9 +112,9 @@ void yoctonw_free(struct yoctonw_writer *w);
  *   baz: "qux quux"
  * ~~~~~~~~~~~~~~~~~
  *
- * @param w       Writer.
- * @param name    Property name.
- * @param value   Property value.
+ * @param w      Writer.
+ * @param name   Property name.
+ * @param value  Property value.
  */
 void yoctonw_prop(struct yoctonw_writer *w, const char *name,
                    const char *value);
@@ -135,9 +135,9 @@ void yoctonw_prop(struct yoctonw_writer *w, const char *name,
  *   float: "Here is a float: 1234.57"
  * ~~~~~~~~~~~~~~~~~
  *
- * @param w       Writer.
- * @param name    Property name.
- * @param fmt     Format string
+ * @param w     Writer.
+ * @param name  Property name.
+ * @param fmt   Format string
  */
 void yoctonw_printf(struct yoctonw_writer *w, const char *name,
                     const char *fmt, ...);
@@ -160,8 +160,8 @@ void yoctonw_printf(struct yoctonw_writer *w, const char *name,
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param w       Writer.
- * @param name    Property name for subobject.
+ * @param w     Writer.
+ * @param name  Property name for subobject.
  */
 void yoctonw_subobject(struct yoctonw_writer *w, const char *name);
 
@@ -170,15 +170,15 @@ void yoctonw_subobject(struct yoctonw_writer *w, const char *name);
  *
  * See @ref yoctonw_subobject for an example.
  *
- * @param w       Writer.
+ * @param w  Writer.
  */
 void yoctonw_end(struct yoctonw_writer *w);
 
 /**
  * Check if an error occurred.
  *
- * @return    Non-zero if an error occurred during output (ie. the output
- *            callback function returned zero).
+ * @return  Non-zero if an error occurred during output (ie. the output
+ *          callback function returned zero).
  */
 int yoctonw_have_error(struct yoctonw_writer *w);
 
@@ -189,7 +189,7 @@ int yoctonw_have_error(struct yoctonw_writer *w);
  * written, so the main use of this is to force any pending data to be written
  * while writing a subobject.
  *
- * @param w       Writer.
+ * @param w  Writer.
  */
 void yoctonw_flush(struct yoctonw_writer *w);
 

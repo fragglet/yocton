@@ -104,10 +104,10 @@ typedef struct yocton_prop yocton_prop;
  *   obj = yocton_read_with(read_callback, "foo: bar");
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param callback   Callback function to invoke to read more data.
- * @param handle     Arbitrary pointer passed through when callback is
- *                   invoked.
- * @return           A @ref yocton_object representing the top-level object.
+ * @param callback  Callback function to invoke to read more data.
+ * @param handle    Arbitrary pointer passed through when callback is
+ *                  invoked.
+ * @return          A @ref yocton_object representing the top-level object.
  */
 struct yocton_object *yocton_read_with(yocton_read callback, void *handle);
 
@@ -123,8 +123,8 @@ struct yocton_object *yocton_read_with(yocton_read callback, void *handle);
  *   struct yocton_object *obj = yocton_read_from(fs);
  * ~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param fstream    File handle.
- * @return           A @ref yocton_object representing the top-level object.
+ * @param fstream  File handle.
+ * @return         A @ref yocton_object representing the top-level object.
  */
 struct yocton_object *yocton_read_from(FILE *fstream);
 
@@ -150,7 +150,7 @@ int __yocton_prop_have_error(struct yocton_prop *property);
 /**
  * Free the top-level object and stop reading from the input stream.
  *
- * @param obj        Top-level @ref yocton_object.
+ * @param obj  Top-level @ref yocton_object.
  */
 void yocton_free(struct yocton_object *obj);
 
@@ -250,9 +250,9 @@ char *yocton_prop_value_dup(struct yocton_prop *property);
 /**
  * Match a particular property name.
  *
- * @param property     The property.
- * @param name         Name of property to match.
- * @param then         Code to execute if yocton_prop_name(property) == name.
+ * @param property  The property.
+ * @param name      Name of property to match.
+ * @param then      Code to execute if yocton_prop_name(property) == name.
  */
 #define YOCTON_IF_PROP(property, name, then) \
 	do { \
@@ -293,11 +293,11 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     The property.
- * @param propname     The property name to match.
- * @param var          Variable pointing to array data.
- * @param len_var      Variable storing length of array.
- * @param then         Code to evaluate after new element space is allocated.
+ * @param property  The property.
+ * @param propname  The property name to match.
+ * @param var       Variable pointing to array data.
+ * @param len_var   Variable storing length of array.
+ * @param then      Code to evaluate after new element space is allocated.
  */
 #define YOCTON_VAR_ARRAY(property, propname, var, len_var, then) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -332,9 +332,9 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property   Property.
- * @param propname   Name of property to match.
- * @param var        Variable to initialize.
+ * @param property  Property.
+ * @param propname  Name of property to match.
+ * @param var       Variable to initialize.
  */
 #define YOCTON_VAR_STRING(property, propname, var) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -362,10 +362,10 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     Property.
- * @param propname     Name of property to match.
- * @param var          Variable pointing to array data.
- * @param len_var      Variable containing length of array.
+ * @param property  Property.
+ * @param propname  Name of property to match.
+ * @param var       Variable pointing to array data.
+ * @param len_var   Variable containing length of array.
  */
 #define YOCTON_VAR_STRING_ARRAY(property, propname, var, len_var) \
 	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
@@ -410,13 +410,13 @@ struct yocton_object *yocton_prop_inner(struct yocton_prop *property);
  * It may be more convenient to use @ref YOCTON_VAR_INT which is a wrapper
  * around this function.
  *
- * @param property   The property.
- * @param n          Size of the expected property in bytes,
- *                   eg. sizeof(uint16_t).
- * @return           The integer value, or zero if it cannot be parsed as an
- *                   integer of that size. Although the return value is a long
- *                   long type, it will always be in the range of an integer
- *                   of the given size and can be safely cast to one.
+ * @param property  The property.
+ * @param n         Size of the expected property in bytes,
+ *                  eg. sizeof(uint16_t).
+ * @return          The integer value, or zero if it cannot be parsed as an
+ *                  integer of that size. Although the return value is a long
+ *                  long type, it will always be in the range of an integer
+ *                  of the given size and can be safely cast to one.
  */
 signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
 
@@ -443,10 +443,10 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     Property.
- * @param propname     Name of the property to match.
- * @param var_type     Type of the variable, eg. `int` or `ssize_t`.
- * @param var          Variable to set.
+ * @param property  Property.
+ * @param propname  Name of the property to match.
+ * @param var_type  Type of the variable, eg. `int` or `ssize_t`.
+ * @param var       Variable to set.
  */
 #define YOCTON_VAR_INT(property, propname, var_type, var) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -476,11 +476,11 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     Property.
- * @param propname     Name of property to match.
- * @param var_type     Type of array element.
- * @param var          Variable pointing to array data.
- * @param len_var      Variable containing length of array.
+ * @param property  Property.
+ * @param propname  Name of property to match.
+ * @param var_type  Type of array element.
+ * @param var       Variable pointing to array data.
+ * @param len_var   Variable containing length of array.
  */
 #define YOCTON_VAR_INT_ARRAY(property, propname, var_type, var, len_var) \
 	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
@@ -500,13 +500,13 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  * It may be more convenient to use @ref YOCTON_VAR_UINT which is a wrapper
  * around this function.
  *
- * @param property   The property.
- * @param n          Size of the expected property in bytes,
- *                   eg. sizeof(uint16_t).
- * @return           The integer value, or zero if it cannot be parsed as an
- *                   signed integer of that size. Although the return value is
- *                   a long long type, it will always be in the range of an
- *                   integer of the given size and can be safely cast to one.
+ * @param property  The property.
+ * @param n         Size of the expected property in bytes,
+ *                  eg. sizeof(uint16_t).
+ * @return          The integer value, or zero if it cannot be parsed as an
+ *                  signed integer of that size. Although the return value is
+ *                  a long long type, it will always be in the range of an
+ *                  integer of the given size and can be safely cast to one.
  */
 unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
 
@@ -533,10 +533,10 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     Property.
- * @param propname     Name of the property to match.
- * @param var_type     Type of the variable, eg. `uint32_t` or `size_t`.
- * @param var          Variable to set.
+ * @param property  Property.
+ * @param propname  Name of the property to match.
+ * @param var_type  Type of the variable, eg. `uint32_t` or `size_t`.
+ * @param var       Variable to set.
  */
 #define YOCTON_VAR_UINT(property, propname, var_type, var) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -566,11 +566,11 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     Property.
- * @param propname     Name of property to match.
- * @param var_type     Type of array element.
- * @param var          Variable pointing to array data.
- * @param len_var      Variable containing length of array.
+ * @param property  Property.
+ * @param propname  Name of property to match.
+ * @param var_type  Type of array element.
+ * @param var       Variable pointing to array data.
+ * @param len_var   Variable containing length of array.
  */
 #define YOCTON_VAR_UINT_ARRAY(property, propname, var_type, var, len_var) \
 	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
@@ -624,11 +624,11 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property   Property.
- * @param propname   Name of the property to match.
- * @param var        Variable to initialize.
- * @param values     NULL-terminated array of strings representing enum values
- *                   (same as values parameter to @ref yocton_prop_enum).
+ * @param property  Property.
+ * @param propname  Name of the property to match.
+ * @param var       Variable to initialize.
+ * @param values    NULL-terminated array of strings representing enum values
+ *                  (same as values parameter to @ref yocton_prop_enum).
  */
 #define YOCTON_VAR_ENUM(property, propname, var, values) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -657,12 +657,12 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     Property.
- * @param propname     Name of property to match.
- * @param var          Variable pointing to array data.
- * @param len_var      Variable containing length of array.
- * @param values       NULL-terminated array of strings representing enum values
- *                     (same as values parameter to @ref yocton_prop_enum).
+ * @param property  Property.
+ * @param propname  Name of property to match.
+ * @param var       Variable pointing to array data.
+ * @param len_var   Variable containing length of array.
+ * @param values    NULL-terminated array of strings representing enum values
+ *                  (same as values parameter to @ref yocton_prop_enum).
  */
 #define YOCTON_VAR_ENUM_ARRAY(property, propname, var, len_var, values) \
 	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
@@ -700,10 +700,10 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property   Property.
- * @param propname   Name of the property to match.
- * @param var        Pointer variable to initialize.
- * @param then       Block of code to execute if the property is matched.
+ * @param property  Property.
+ * @param propname  Name of the property to match.
+ * @param var       Pointer variable to initialize.
+ * @param then      Block of code to execute if the property is matched.
  */
 #define YOCTON_VAR_PTR(property, propname, var, then) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -744,11 +744,11 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~
  *
- * @param property     The property.
- * @param propname     The property name to match.
- * @param var          Variable pointing to array of pointers.
- * @param len_var      Variable storing length of array.
- * @param then         Code to evaluate after new property is matched.
+ * @param property  The property.
+ * @param propname  The property name to match.
+ * @param var       Variable pointing to array of pointers.
+ * @param len_var   Variable storing length of array.
+ * @param then      Code to evaluate after new property is matched.
  */
 #define YOCTON_VAR_PTR_ARRAY(property, propname, var, len_var, then) \
 	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
