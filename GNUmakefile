@@ -61,3 +61,4 @@ clean:
 	          $(subst .gcov.o,.c.gcov,$(GCOV_OBJS)) \
 	          $(subst .gcov.o,.gcov.gcda,$(GCOV_OBJS))
 
+.PHONY: clean fixincludes docs all check coverage
