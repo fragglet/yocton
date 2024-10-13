@@ -16,13 +16,14 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#include "yoctonw.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
-
-#include "yoctonw.h"
+#include <inttypes.h>
 
 struct yoctonw_writer {
 	yoctonw_write callback;

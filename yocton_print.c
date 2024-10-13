@@ -25,6 +25,8 @@
 
 #include "yocton.h"
 
+struct yocton_object;
+
 void print_indent(int indent)
 {
 	int i;

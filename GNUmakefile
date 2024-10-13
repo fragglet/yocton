@@ -6,6 +6,10 @@ CFLAGS = -Wall -Wc++-compat
 TEST_CFLAGS = $(CFLAGS) -g -DALLOC_TESTING
 GCOV_CFLAGS = $(TEST_CFLAGS) -fprofile-arcs -ftest-coverage
 
+IWYU = iwyu
+IWYU_FLAGS = --error --mapping_file=.iwyu-overrides.imp
+IWYU_TRANSFORMED_FLAGS = $(patsubst %,-Xiwyu %,$(IWYU_FLAGS)) $(CFLAGS)
+
 all: yocton_print yocton_test
 
 check: yocton_test
@@ -43,6 +47,11 @@ yocton_test_gcov : $(GCOV_OBJS)
 
 %.test.o : %.c
 	$(CC) -c $(TEST_CFLAGS) $< -o $@
+
+fixincludes:
+	for d in *.c; do \
+		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
+	done
 
 clean:
 	rm -f yocton_print $(LIB_OBJS) \

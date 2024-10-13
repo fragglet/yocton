@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 #include <inttypes.h>
+#include <stdio.h>
 
 /**
  * @file yoctonw.h
