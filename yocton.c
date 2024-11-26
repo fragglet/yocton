@@ -75,6 +75,8 @@ struct yocton_instream {
 
 static const uint8_t utf8_bom[] = { 0xef, 0xbb, 0xbf };
 
+const char yocton_enum_allow_integers = 0;
+
 static void input_error(struct yocton_instream *s, char *fmt, ...)
 {
 	va_list args;
@@ -699,12 +701,39 @@ unsigned long long yocton_prop_uint(struct yocton_prop *p, size_t n)
 	return result;
 }
 
+static unsigned int yocton_enum_try_index(struct yocton_prop *p,
+                                          unsigned int num_values)
+{
+	const char *value = yocton_prop_value(p);
+	unsigned long parsed;
+	char *endptr;
+
+	errno = 0;
+	parsed = strtoul(value, &endptr, 10);
+	if (*value == '\0' || isspace(*value) || *endptr != '\0') {
+		input_error(p->parent->instream, "not a valid enum "
+		            "value (or integer index): '%s'", value);
+		return 0;
+	}
+	if (parsed >= num_values) {
+		input_error(p->parent->instream, "index out of range for "
+		            "enum: %s > %d (maximum value)", value,
+		            num_values - 1);
+		return 0;
+	}
+
+	return (unsigned int) parsed;
+}
+
 unsigned int yocton_prop_enum(struct yocton_prop *p, const char **values)
 {
 	const char *value = yocton_prop_value(p);
 	int i;
 
 	for (i = 0; values[i] != NULL; ++i) {
+		if (values[i] == YOCTON_ENUM_TRY_INDEX) {
+			return yocton_enum_try_index(p, i);
+		}
 		if (!strcmp(values[i], value)) {
 			return i;
 		}

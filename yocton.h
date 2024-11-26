@@ -608,6 +608,14 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
 unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values);
 
 /**
+ * Magic constant that can be used as an alternative terminating value for
+ * the arrays of strings passed to either @ref YOCTON_VAR_ENUM or
+ * @ref YOCTON_VAR_ENUM_ARRAY. If used instead of NULL, raw integer values
+ * will be accepted in addition to the symbolic names.
+ */
+#define YOCTON_ENUM_TRY_INDEX (&yocton_enum_allow_integers)
+
+/**
  * Set the value of an enum variable if appropriate.
  *
  * If the name of `property` is equal to `propname`, the variable `var`
@@ -632,6 +640,9 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  * @param var       Variable to initialize.
  * @param values    NULL-terminated array of strings representing enum values
  *                  (same as values parameter to @ref yocton_prop_enum).
+ *                  Alternatively, the array can be terminated with the magic
+ *                  value @ref YOCTON_ENUM_TRY_INDEX, which will allow an
+ *                  integer index value to be used.
  */
 #define YOCTON_VAR_ENUM(property, propname, var, values) \
 	YOCTON_IF_PROP(property, propname, { \
@@ -666,6 +677,9 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  * @param len_var   Variable containing length of array.
  * @param values    NULL-terminated array of strings representing enum values
  *                  (same as values parameter to @ref yocton_prop_enum).
+ *                  Alternatively, the array can be terminated with the magic
+ *                  value @ref YOCTON_ENUM_TRY_INDEX, which will allow an
+ *                  integer index value to be used.
  */
 #define YOCTON_VAR_ENUM_ARRAY(property, propname, var, len_var, values) \
 	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
@@ -767,6 +781,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
 			} \
 		} \
 	})
+
+extern const char yocton_enum_allow_integers;
 
 #ifdef __cplusplus
 }

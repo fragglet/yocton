@@ -1,0 +1,10 @@
+//| error_message: "index out of range for enum: 99 > 2 (maximum value)"
+//| error_lineno: 8
+//| c_only: true
+
+// The enum value has to be in range:
+special.enum2 {
+	expected: 99
+	value: 99
+}
+

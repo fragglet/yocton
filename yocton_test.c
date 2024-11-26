@@ -26,6 +26,9 @@
 
 enum { FIRST, SECOND, THIRD };
 static const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
+static const char *enum2_values[] = {
+	"FIRST", "SECOND", "THIRD", YOCTON_ENUM_TRY_INDEX,
+};
 
 struct error_data {
 	char *error_message;
@@ -152,6 +155,20 @@ static void enum_value(struct yocton_object *obj)
 	yocton_check(obj, "wrong enum value matched", expected == value);
 }
 
+static void enum2_value(struct yocton_object *obj)
+{
+	unsigned int expected = -1, value = -2;
+	for (;;) {
+		struct yocton_prop *property = yocton_next_prop(obj);
+		if (property == NULL) {
+			break;
+		}
+		YOCTON_VAR_UINT(property, "expected", unsigned int, expected);
+		YOCTON_VAR_ENUM(property, "value", value, enum2_values);
+	}
+	yocton_check(obj, "wrong enum value matched", expected == value);
+}
+
 static void ptr_value(struct yocton_object *obj)
 {
 	unsigned int expected = -1, *value = NULL;
@@ -209,6 +226,8 @@ static void array_values(struct yocton_object *obj, char **output)
 	size_t strings_count = 0;
 	int *enums = NULL;
 	size_t enums_count = 0;
+	int *enum2s = NULL;
+	size_t enum2s_count = 0;
 	struct array_data_item *items = NULL;
 	size_t items_count = 0;
 	struct array_data_item **ptr_items = NULL;
@@ -224,6 +243,8 @@ static void array_values(struct yocton_object *obj, char **output)
 		YOCTON_VAR_INT_ARRAY(p, "signeds", int, signeds, signeds_count);
 		YOCTON_VAR_STRING_ARRAY(p, "strings", strings, strings_count);
 		YOCTON_VAR_ENUM_ARRAY(p, "enums", enums, enums_count, enum_values);
+		YOCTON_VAR_ENUM_ARRAY(p, "enum2s", enum2s, enum2s_count,
+		                      enum2_values);
 		YOCTON_VAR_ARRAY(p, "items", items, items_count, {
 			parse_array_item(yocton_prop_inner(p),
 			                 &items[items_count]);
@@ -258,6 +279,11 @@ static void array_values(struct yocton_object *obj, char **output)
 		add_output(obj, output, buf);
 	}
 	free(enums);
+	for (i = 0; i < enum2s_count; ++i) {
+		snprintf(buf, sizeof(buf), "%i\n", enum2s[i]);
+		add_output(obj, output, buf);
+	}
+	free(enum2s);
 	for (i = 0; i < items_count; ++i) {
 		snprintf(buf, sizeof(buf), "{ id %u: value %d }\n",
 		         items[i].id, items[i].value);
@@ -343,6 +369,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 			uinteger_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.enum")) {
 			enum_value(yocton_prop_inner(property));
+		} else if (!strcmp(name, "special.enum2")) {
+			enum2_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.ptr")) {
 			ptr_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.arrays")) {

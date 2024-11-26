@@ -1,0 +1,10 @@
+//| error_message: "not a valid enum value (or integer index): '2asdf'"
+//| error_lineno: 8
+//| c_only: true
+
+// The enum value has to be in range:
+special.enum2 {
+	expected: 99
+	value: "2asdf"
+}
+

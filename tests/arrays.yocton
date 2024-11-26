@@ -20,6 +20,11 @@
 //> 0
 //> 2
 
+// enum2s:
+//> 1
+//> 0
+//> 2
+
 // items:
 //> { id 1234: value 5678 }
 //> { id 867: value 5309 }
@@ -43,6 +48,9 @@ special.arrays {
 	enums: SECOND
 	enums: FIRST
 	enums: THIRD
+	enum2s: 1
+	enum2s: FIRST
+	enum2s: THIRD
 
 	items {
 		id: 1234

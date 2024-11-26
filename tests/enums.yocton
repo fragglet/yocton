@@ -1,13 +1,25 @@
-special.enum {
+special.enum2 {
 	expected: 0
 	value: FIRST
 }
-special.enum {
+special.enum2 {
 	expected: 1
 	value: SECOND
 }
-special.enum {
+special.enum2 {
 	expected: 2
 	value: THIRD
 }
-
+// This type of enum allows integer index values as well:
+special.enum2 {
+	expected: 0
+	value: 0
+}
+special.enum2 {
+	expected: 1
+	value: 1
+}
+special.enum2 {
+	expected: 2
+	value: 2
+}
