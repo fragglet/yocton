@@ -7,3 +7,4 @@ yocton_print
 yocton_test
 html
 man
+__pycache__
