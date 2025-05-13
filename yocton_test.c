@@ -16,18 +16,25 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "alloc-testing.h"
 #include "yocton.h"
 
-enum { FIRST, SECOND, THIRD };
+enum {
+	FIRST,
+	SECOND,
+	THIRD
+};
 static const char *enum_values[] = {"FIRST", "SECOND", "THIRD", NULL};
 static const char *enum2_values[] = {
-	"FIRST", "SECOND", "THIRD", YOCTON_ENUM_TRY_INDEX,
+    "FIRST",
+    "SECOND",
+    "THIRD",
+    YOCTON_ENUM_TRY_INDEX,
 };
 
 struct error_data {
@@ -71,8 +78,8 @@ void read_error_data(struct error_data *data, struct yocton_object *obj)
 		}
 		YOCTON_VAR_STRING(property, "error_message",
 		                  data->error_message);
-		YOCTON_VAR_INT(property, "error_lineno",
-		               int, data->error_lineno);
+		YOCTON_VAR_INT(property, "error_lineno", int,
+		               data->error_lineno);
 	}
 }
 
@@ -85,7 +92,8 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 	obj = yocton_read_with(read_from_comment, fstream);
 	read_error_data(data, obj);
 	if (yocton_have_error(obj, NULL, &error_msg)) {
-		fprintf(stderr, "%s: error in test data: %s\n", filename, error_msg);
+		fprintf(stderr, "%s: error in test data: %s\n", filename,
+		        error_msg);
 		success = 0;
 	}
 	yocton_free(obj);
@@ -97,10 +105,10 @@ int read_error_data_from(char *filename, FILE *fstream, struct error_data *data)
 		char buf[128];
 		fgets(buf, sizeof(buf), fstream);
 		if (!strncmp(buf, "//> ", 4)) {
-			data->expected_output = (char *) realloc(
-				data->expected_output,
-				strlen(data->expected_output)
-				+ strlen(buf + 4) + 1);
+			data->expected_output =
+			    (char *) realloc(data->expected_output,
+			                     strlen(data->expected_output) +
+			                         strlen(buf + 4) + 1);
 			strcat(data->expected_output, buf + 4);
 		}
 	}
@@ -190,8 +198,7 @@ static void ptr_value(struct yocton_object *obj)
 static void add_output(struct yocton_object *obj, char **output, const char *s)
 {
 	char *new_output;
-	new_output = (char *) realloc(
-		*output, strlen(*output) + strlen(s) + 2);
+	new_output = (char *) realloc(*output, strlen(*output) + strlen(s) + 2);
 	if (new_output == NULL) {
 		yocton_check(obj, ERROR_ALLOC, 0);
 		return;
@@ -238,11 +245,12 @@ static void array_values(struct yocton_object *obj, char **output)
 	int i;
 
 	while ((p = yocton_next_prop(obj)) != NULL) {
-		YOCTON_VAR_UINT_ARRAY(p, "unsigneds", unsigned int,
-		                      unsigneds, unsigneds_count);
+		YOCTON_VAR_UINT_ARRAY(p, "unsigneds", unsigned int, unsigneds,
+		                      unsigneds_count);
 		YOCTON_VAR_INT_ARRAY(p, "signeds", int, signeds, signeds_count);
 		YOCTON_VAR_STRING_ARRAY(p, "strings", strings, strings_count);
-		YOCTON_VAR_ENUM_ARRAY(p, "enums", enums, enums_count, enum_values);
+		YOCTON_VAR_ENUM_ARRAY(p, "enums", enums, enums_count,
+		                      enum_values);
 		YOCTON_VAR_ENUM_ARRAY(p, "enum2s", enum2s, enum2s_count,
 		                      enum2_values);
 		YOCTON_VAR_ARRAY(p, "items", items, items_count, {
@@ -250,12 +258,12 @@ static void array_values(struct yocton_object *obj, char **output)
 			                 &items[items_count]);
 			++items_count;
 		});
-		YOCTON_VAR_PTR_ARRAY(p, "ptr_items",
-		                     ptr_items, ptr_items_count, {
-			parse_array_item(yocton_prop_inner(p),
-			                 ptr_items[ptr_items_count]);
-			++ptr_items_count;
-		});
+		YOCTON_VAR_PTR_ARRAY(
+		    p, "ptr_items", ptr_items, ptr_items_count, {
+			    parse_array_item(yocton_prop_inner(p),
+			                     ptr_items[ptr_items_count]);
+			    ++ptr_items_count;
+		    });
 	}
 
 	for (i = 0; i < unsigneds_count; ++i) {
@@ -285,8 +293,8 @@ static void array_values(struct yocton_object *obj, char **output)
 	}
 	free(enum2s);
 	for (i = 0; i < items_count; ++i) {
-		snprintf(buf, sizeof(buf), "{ id %u: value %d }\n",
-		         items[i].id, items[i].value);
+		snprintf(buf, sizeof(buf), "{ id %u: value %d }\n", items[i].id,
+		         items[i].value);
 		add_output(obj, output, buf);
 	}
 	free(items);
@@ -351,8 +359,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 		} else if (!strcmp(name, "special.parse_as_int")) {
 			int throwaway;
 			yocton_check(obj, "failed to parse as integer",
-			    1 == sscanf(yocton_prop_value(property), "%d",
-			                &throwaway));
+			             1 == sscanf(yocton_prop_value(property),
+			                         "%d", &throwaway));
 		}
 		pt = yocton_prop_type(property);
 		if (!strcmp(name, "special.read_as_object")) {
@@ -361,7 +369,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 			pt = YOCTON_PROP_STRING;
 		}
 		if (!strcmp(name, "special.is_equal")) {
-			yocton_check(obj, "values not equal",
+			yocton_check(
+			    obj, "values not equal",
 			    evaluate_is_equal(yocton_prop_inner(property)));
 		} else if (!strcmp(name, "special.integer")) {
 			integer_value(yocton_prop_inner(property));
@@ -428,34 +437,35 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	fclose(fstream);
 
 	have_error = yocton_have_error(obj, &lineno, &error_msg);
-	if (alloc_limit != -1 && have_error
-	 && strstr(error_msg, ERROR_ALLOC) != NULL) {
+	if (alloc_limit != -1 && have_error &&
+	    strstr(error_msg, ERROR_ALLOC) != NULL) {
 		// Perfectly normal to get a memory alloc error.
 	} else if (strcmp(output, error_data.expected_output) != 0) {
 		fprintf(stderr, "%s: wrong output, want:\n%s\ngot:\n%s\n",
-			filename, error_data.expected_output, output);
+		        filename, error_data.expected_output, output);
 		success = 0;
 	} else if (error_data.error_message == NULL) {
 		if (have_error) {
 			fprintf(stderr, "%s:%d: error when parsing: %s\n",
-				filename, lineno, error_msg);
+			        filename, lineno, error_msg);
 			success = 0;
 		}
 	} else if (!have_error) {
-		fprintf(stderr, "%s: expected error '%s', got none\n",
-		        filename, error_data.error_message);
+		fprintf(stderr, "%s: expected error '%s', got none\n", filename,
+		        error_data.error_message);
 		success = 0;
 	} else {
 		if (strcmp(error_msg, error_data.error_message) != 0) {
-			fprintf(stderr, "%s: wrong error message, want '%s', "
-			        "got '%s'\n", filename,
-			        error_data.error_message, error_msg);
+			fprintf(
+			    stderr,
+			    "%s: wrong error message, want '%s', got '%s'\n",
+			    filename, error_data.error_message, error_msg);
 			success = 0;
 		}
 		if (lineno != error_data.error_lineno) {
-			fprintf(stderr, "%s: wrong error lineno, want %d, "
-			        "got %d\n", filename, error_data.error_lineno,
-			        lineno);
+			fprintf(stderr,
+			        "%s: wrong error lineno, want %d, got %d\n",
+			        filename, error_data.error_lineno, lineno);
 			success = 0;
 		}
 	}
@@ -505,4 +515,3 @@ int main(int argc, char *argv[])
 	exit(!success);
 	return 0;
 }
-

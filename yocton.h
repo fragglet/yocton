@@ -257,16 +257,16 @@ char *yocton_prop_value_dup(struct yocton_prop *property);
  * @param name      Name of property to match.
  * @param then      Code to execute if yocton_prop_name(property) == name.
  */
-#define YOCTON_IF_PROP(property, name, then) \
-	do { \
-		if (!strcmp(yocton_prop_name(property), name)) { \
-			then \
-		} \
+#define YOCTON_IF_PROP(property, name, then)                                   \
+	do {                                                                   \
+		if (!strcmp(yocton_prop_name(property), name)) {               \
+			then                                                   \
+		}                                                              \
 	} while (0)
 
 /* Helper function used by YOCTON_VAR_ARRAY() */
-int __yocton_reserve_array(struct yocton_prop *p, void **array,
-                           size_t nmemb, size_t size);
+int __yocton_reserve_array(struct yocton_prop *p, void **array, size_t nmemb,
+                           size_t size);
 
 /* Helper function used by YOCTON_VAR_PTR() */
 int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
@@ -302,13 +302,12 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  * @param len_var   Variable storing length of array.
  * @param then      Code to evaluate after new element space is allocated.
  */
-#define YOCTON_VAR_ARRAY(property, propname, var, len_var, then) \
-	YOCTON_IF_PROP(property, propname, { \
-		if (__yocton_reserve_array(property, (void **) &(var), \
-		                           len_var, \
-		                           sizeof(*(var)))) { \
-			then \
-		} \
+#define YOCTON_VAR_ARRAY(property, propname, var, len_var, then)               \
+	YOCTON_IF_PROP(property, propname, {                                   \
+		if (__yocton_reserve_array(property, (void **) &(var),         \
+		                           len_var, sizeof(*(var)))) {         \
+			then                                                   \
+		}                                                              \
 	})
 
 /**
@@ -339,10 +338,10 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  * @param propname  Name of property to match.
  * @param var       Variable to initialize.
  */
-#define YOCTON_VAR_STRING(property, propname, var) \
-	YOCTON_IF_PROP(property, propname, { \
-		free(var); \
-		var = yocton_prop_value_dup(property); \
+#define YOCTON_VAR_STRING(property, propname, var)                             \
+	YOCTON_IF_PROP(property, propname, {                                   \
+		free(var);                                                     \
+		var = yocton_prop_value_dup(property);                         \
 	})
 
 /**
@@ -370,13 +369,13 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  * @param var       Variable pointing to array data.
  * @param len_var   Variable containing length of array.
  */
-#define YOCTON_VAR_STRING_ARRAY(property, propname, var, len_var) \
-	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
-		char *__v = yocton_prop_value_dup(property); \
-		if (__v) { \
-			(var)[len_var] = __v; \
-			++(len_var); \
-		} \
+#define YOCTON_VAR_STRING_ARRAY(property, propname, var, len_var)              \
+	YOCTON_VAR_ARRAY(property, propname, var, len_var, {                   \
+		char *__v = yocton_prop_value_dup(property);                   \
+		if (__v) {                                                     \
+			(var)[len_var] = __v;                                  \
+			++(len_var);                                           \
+		}                                                              \
 	})
 
 /**
@@ -451,10 +450,9 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  * @param var_type  Type of the variable, eg. `int` or `ssize_t`.
  * @param var       Variable to set.
  */
-#define YOCTON_VAR_INT(property, propname, var_type, var) \
-	YOCTON_IF_PROP(property, propname, { \
-		var = (var_type) yocton_prop_int(property, \
-		                                 sizeof(var_type)); \
+#define YOCTON_VAR_INT(property, propname, var_type, var)                      \
+	YOCTON_IF_PROP(property, propname, {                                   \
+		var = (var_type) yocton_prop_int(property, sizeof(var_type));  \
 	})
 
 /**
@@ -485,13 +483,13 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  * @param var       Variable pointing to array data.
  * @param len_var   Variable containing length of array.
  */
-#define YOCTON_VAR_INT_ARRAY(property, propname, var_type, var, len_var) \
-	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
-		(var)[len_var] = (var_type) \
-			yocton_prop_int(property, sizeof(var_type)); \
-		if (!__yocton_prop_have_error(property)) { \
-			++(len_var); \
-		} \
+#define YOCTON_VAR_INT_ARRAY(property, propname, var_type, var, len_var)       \
+	YOCTON_VAR_ARRAY(property, propname, var, len_var, {                   \
+		(var)[len_var] =                                               \
+		    (var_type) yocton_prop_int(property, sizeof(var_type));    \
+		if (!__yocton_prop_have_error(property)) {                     \
+			++(len_var);                                           \
+		}                                                              \
 	})
 
 /**
@@ -541,10 +539,9 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  * @param var_type  Type of the variable, eg. `uint32_t` or `size_t`.
  * @param var       Variable to set.
  */
-#define YOCTON_VAR_UINT(property, propname, var_type, var) \
-	YOCTON_IF_PROP(property, propname, { \
-		var = (var_type) \
-			yocton_prop_uint(property, sizeof(var_type)); \
+#define YOCTON_VAR_UINT(property, propname, var_type, var)                     \
+	YOCTON_IF_PROP(property, propname, {                                   \
+		var = (var_type) yocton_prop_uint(property, sizeof(var_type)); \
 	})
 
 /**
@@ -575,13 +572,13 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  * @param var       Variable pointing to array data.
  * @param len_var   Variable containing length of array.
  */
-#define YOCTON_VAR_UINT_ARRAY(property, propname, var_type, var, len_var) \
-	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
-		(var)[len_var] = (var_type) \
-			yocton_prop_uint(property, sizeof(var_type)); \
-		if (!__yocton_prop_have_error(property)) { \
-			++(len_var); \
-		} \
+#define YOCTON_VAR_UINT_ARRAY(property, propname, var_type, var, len_var)      \
+	YOCTON_VAR_ARRAY(property, propname, var, len_var, {                   \
+		(var)[len_var] =                                               \
+		    (var_type) yocton_prop_uint(property, sizeof(var_type));   \
+		if (!__yocton_prop_have_error(property)) {                     \
+			++(len_var);                                           \
+		}                                                              \
 	})
 
 /**
@@ -605,7 +602,8 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  * @return          The identified enum value. If not found, an error is set
  *                  and zero is returned.
  */
-unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values);
+unsigned int yocton_prop_enum(struct yocton_prop *property,
+                              const char **values);
 
 /**
  * Magic constant that can be used as an alternative terminating value for
@@ -644,10 +642,9 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *                  value @ref YOCTON_ENUM_TRY_INDEX, which will allow an
  *                  integer index value to be used.
  */
-#define YOCTON_VAR_ENUM(property, propname, var, values) \
-	YOCTON_IF_PROP(property, propname, { \
-		(var) = yocton_prop_enum(property, values); \
-	})
+#define YOCTON_VAR_ENUM(property, propname, var, values)                       \
+	YOCTON_IF_PROP(property, propname,                                     \
+	               { (var) = yocton_prop_enum(property, values); })
 
 /**
  * Append value to an array of enums if appropriate.
@@ -681,12 +678,12 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  *                  value @ref YOCTON_ENUM_TRY_INDEX, which will allow an
  *                  integer index value to be used.
  */
-#define YOCTON_VAR_ENUM_ARRAY(property, propname, var, len_var, values) \
-	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
-		(var)[len_var] = yocton_prop_enum(property, values); \
-		if (!__yocton_prop_have_error(property)) { \
-			++(len_var); \
-		} \
+#define YOCTON_VAR_ENUM_ARRAY(property, propname, var, len_var, values)        \
+	YOCTON_VAR_ARRAY(property, propname, var, len_var, {                   \
+		(var)[len_var] = yocton_prop_enum(property, values);           \
+		if (!__yocton_prop_have_error(property)) {                     \
+			++(len_var);                                           \
+		}                                                              \
 	})
 
 /**
@@ -722,12 +719,12 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  * @param var       Pointer variable to initialize.
  * @param then      Block of code to execute if the property is matched.
  */
-#define YOCTON_VAR_PTR(property, propname, var, then) \
-	YOCTON_IF_PROP(property, propname, { \
-		if (__yocton_prop_alloc(property, (void **) &(var), \
-		                        sizeof(*(var)))) { \
-			then \
-		} \
+#define YOCTON_VAR_PTR(property, propname, var, then)                          \
+	YOCTON_IF_PROP(property, propname, {                                   \
+		if (__yocton_prop_alloc(property, (void **) &(var),            \
+		                        sizeof(*(var)))) {                     \
+			then                                                   \
+		}                                                              \
 	})
 
 /**
@@ -767,19 +764,18 @@ unsigned int yocton_prop_enum(struct yocton_prop *property, const char **values)
  * @param len_var   Variable storing length of array.
  * @param then      Code to evaluate after new property is matched.
  */
-#define YOCTON_VAR_PTR_ARRAY(property, propname, var, len_var, then) \
-	YOCTON_VAR_ARRAY(property, propname, var, len_var, { \
-		(var)[len_var] = NULL; \
-		if (__yocton_prop_alloc(property, \
-		                        (void **) &((var)[len_var]), \
-		                        sizeof(**(var)))) { \
-			long old_len = len_var; \
-			then \
-			if ((len_var) == old_len) { \
-				free(var); \
-				(var)[len_var] = NULL; \
-			} \
-		} \
+#define YOCTON_VAR_PTR_ARRAY(property, propname, var, len_var, then)           \
+	YOCTON_VAR_ARRAY(property, propname, var, len_var, {                   \
+		(var)[len_var] = NULL;                                         \
+		if (__yocton_prop_alloc(property, (void **) &((var)[len_var]), \
+		                        sizeof(**(var)))) {                    \
+			long old_len = len_var;                                \
+			then if ((len_var) == old_len)                         \
+			{                                                      \
+				free(var);                                     \
+				(var)[len_var] = NULL;                         \
+			}                                                      \
+		}                                                              \
 	})
 
 extern const char yocton_enum_allow_integers;
@@ -789,4 +785,3 @@ extern const char yocton_enum_allow_integers;
 #endif
 
 #endif /* #ifndef YOCTON_H */
-

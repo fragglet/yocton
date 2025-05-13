@@ -18,10 +18,10 @@
 
 // Basic example program that reads a .yocton file and prints the contents.
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 #include "yocton.h"
 
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
 	}
 	fstream = fopen(argv[1], "r");
 	if (fstream == NULL) {
-		fprintf(stderr, "Error opening %s: %s\n",
-		        argv[1], strerror(errno));
+		fprintf(stderr, "Error opening %s: %s\n", argv[1],
+		        strerror(errno));
 		exit(1);
 	}
 	obj = yocton_read_from(fstream);
@@ -79,4 +79,3 @@ int main(int argc, char *argv[])
 	yocton_free(obj);
 	fclose(fstream);
 }
-

@@ -18,12 +18,12 @@
 
 #include "yoctonw.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
 #include <ctype.h>
 #include <inttypes.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct yoctonw_writer {
 	yoctonw_write callback;
@@ -40,8 +40,8 @@ struct yoctonw_writer *yoctonw_write_with(yoctonw_write callback, void *handle)
 {
 	struct yoctonw_writer *writer = NULL;
 
-	writer = (struct yoctonw_writer *) calloc(
-		1, sizeof(struct yoctonw_writer));
+	writer =
+	    (struct yoctonw_writer *) calloc(1, sizeof(struct yoctonw_writer));
 	if (writer == NULL) {
 		return NULL;
 	}
@@ -136,10 +136,22 @@ static void write_string(struct yoctonw_writer *w, const char *s)
 	for (i = 0; s[i] != '\0'; i++) {
 		c = s[i];
 		switch (c) {
-		case '\n': insert_char(w, '\\'); insert_char(w, 'n'); break;
-		case '\t': insert_char(w, '\\'); insert_char(w, 't'); break;
-		case '\\': insert_char(w, '\\'); insert_char(w, '\\'); break;
-		case '\"': insert_char(w, '\\'); insert_char(w, '\"'); break;
+		case '\n':
+			insert_char(w, '\\');
+			insert_char(w, 'n');
+			break;
+		case '\t':
+			insert_char(w, '\\');
+			insert_char(w, 't');
+			break;
+		case '\\':
+			insert_char(w, '\\');
+			insert_char(w, '\\');
+			break;
+		case '\"':
+			insert_char(w, '\\');
+			insert_char(w, '\"');
+			break;
 		default:
 			if (c >= 0x20) {
 				insert_char(w, c);
@@ -164,8 +176,7 @@ static void write_indent(struct yoctonw_writer *w)
 	}
 }
 
-void yoctonw_prop(struct yoctonw_writer *w, const char *name,
-                   const char *value)
+void yoctonw_prop(struct yoctonw_writer *w, const char *name, const char *value)
 {
 	if (w->error) {
 		return;
@@ -240,8 +251,8 @@ static int increase_buffer(struct yoctonw_writer *w, size_t min_size)
 	return 1;
 }
 
-void yoctonw_printf(struct yoctonw_writer *w, const char *name,
-                    const char *fmt, ...)
+void yoctonw_printf(struct yoctonw_writer *w, const char *name, const char *fmt,
+                    ...)
 {
 	va_list args;
 	int attempt, sz;

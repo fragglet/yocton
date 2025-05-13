@@ -118,7 +118,7 @@ void yoctonw_free(struct yoctonw_writer *w);
  * @param value  Property value.
  */
 void yoctonw_prop(struct yoctonw_writer *w, const char *name,
-                   const char *value);
+                  const char *value);
 
 /**
  * Write a new property with the value constructed printf-style.
@@ -140,8 +140,8 @@ void yoctonw_prop(struct yoctonw_writer *w, const char *name,
  * @param name  Property name.
  * @param fmt   Format string
  */
-void yoctonw_printf(struct yoctonw_writer *w, const char *name,
-                    const char *fmt, ...);
+void yoctonw_printf(struct yoctonw_writer *w, const char *name, const char *fmt,
+                    ...);
 
 /**
  * Start writing a new subobject.
@@ -199,4 +199,3 @@ void yoctonw_flush(struct yoctonw_writer *w);
 #endif
 
 #endif /* #ifndef YOCTONW_H */
-

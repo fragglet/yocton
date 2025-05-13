@@ -18,9 +18,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #define ALLOC_TESTING_C
 
@@ -80,8 +80,7 @@ static BlockHeader *alloc_test_get_header(void *ptr)
 
 /* Overwrite a block of memory with a repeated pattern. */
 
-static void alloc_test_overwrite(void *ptr, size_t length,
-                                 unsigned int pattern)
+static void alloc_test_overwrite(void *ptr, size_t length, unsigned int pattern)
 {
 	unsigned char *byte_ptr;
 	int pattern_seq;
@@ -90,7 +89,7 @@ static void alloc_test_overwrite(void *ptr, size_t length,
 
 	byte_ptr = (unsigned char *) ptr;
 
-	for (i=0; i<length; ++i) {
+	for (i = 0; i < length; ++i) {
 		pattern_seq = (int) (i & 3);
 		b = (unsigned char) ((pattern >> (8 * pattern_seq)) & 0xff);
 		byte_ptr[i] = b;
@@ -258,4 +257,3 @@ size_t alloc_test_get_allocated(void)
 {
 	return allocated_bytes;
 }
-
