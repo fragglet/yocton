@@ -53,6 +53,9 @@ fixincludes:
 		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
 	done
 
+format:
+	clang-format -i *.[ch]
+
 clean:
 	rm -f yocton_print $(LIB_OBJS) \
 	      yocton_test $(TEST_OBJS) \
