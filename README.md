@@ -1,5 +1,9 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fragglet/yocton/c-cpp.yml)
+![GitHub License](https://img.shields.io/github/license/fragglet/yocton)
+![GitHub repo size](https://img.shields.io/github/repo-size/fragglet/yocton)
+![GitHub Repo stars](https://img.shields.io/github/stars/fragglet/yocton)
 
-Yocton is a minimalist, typeless object notation, intended to fit nicely
+**Yocton** is a minimalist, typeless object notation, intended to fit nicely
 with the C programming language and intended for situations where the features
 of other formats such as JSON or protocol buffers are not necessary.
 
