@@ -92,14 +92,12 @@ special_syntax: "to support " & "strings\n" &
 
 ## Unicode
 
-Yocton is "UTF-8 friendly" but does not include special support for
-Unicode. This is in keeping with its typeless format - strings are really
-just arbitrary sequences of bytes. The encoding ought to be UTF-8 nowadays,
-but could also be a different encoding like ISO-8859-1 (although not
-some multi-byte formats like Shift-JIS unfortunately, for
-[technical reasons](https://en.wikipedia.org/wiki/Shift_JIS#Description:~:text=0x5C%20byte%20will%20cause%20problems)).
-There isn't any validation of the input encoding that forces you to use UTF-8
-or any other format, though UTF-8 is strongly recommended.
+Yocton is "UTF-8 friendly" but does not include special support for Unicode.
+This is in keeping with its typeless format - strings are really just arbitrary
+sequences of bytes. Using UTF-8 is highly recommended, but there isn't any
+validation of the input encoding that forces you to use UTF-8 or any other
+format. As a result, you can get away with using some other encodings as well
+(see table below).
 
 As a result, Yocton does not include any special support for Unicode; most
 notably it does not include support for the `\u` or `\U` escape sequences that
@@ -112,6 +110,22 @@ The one minor piece of special handling for UTF-8 is that Yocton recognizes
 (and ignores) the UTF-8
 [BOM](https://en.wikipedia.org/wiki/Byte_order_mark), ensuring that any
 valid UTF-8 input file should be parsed correctly.
+
+### Support for other encodings
+
+In general you can get away with using extensions of ASCII, so long as they're
+single byte encodings that don't encode any extended characters to sequences
+that include the '\' or '"' characters:
+
+| Encoding                              | Status                                                                                |
+|---------------------------------------|---------------------------------------------------------------------------------------|
+| UTF-8                                 | Works (**recommended encoding**)                                                      |
+| 7-bit ASCII                           | Works                                                                                 |
+| Extended ASCII (CP437, Latin-1, etc.) | Most single-byte encodings are okay; some multi-byte encodings such as CP950 are not. |
+| Extended Unix Code (EUC-JP, EUC-KR, etc.) | Mostly works, except that EUC-JP maps the '\' character to the Yen symbol (¥).    |
+| UTF-16, UTF-32                        | Not supported (multi-byte encodings)                                                  |
+| Big-5, GBK, GB18030                   | Not supported; some characters encode to sequences including the '\' character.       |
+| Shift-JIS                             | Not supported; some characters encode to sequences including the '\' character.       |
 
 ## API
 
