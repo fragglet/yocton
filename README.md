@@ -115,17 +115,17 @@ valid UTF-8 input file should be parsed correctly.
 
 In general you can get away with using extensions of ASCII, so long as they're
 single byte encodings that don't encode any extended characters to sequences
-that include the '\' or '"' characters:
+that include the \ or " characters:
 
 | Encoding                              | Status                                                                                |
 |---------------------------------------|---------------------------------------------------------------------------------------|
 | UTF-8                                 | Works (**recommended encoding**)                                                      |
 | 7-bit ASCII                           | Works                                                                                 |
 | Extended ASCII (CP437, Latin-1, etc.) | Most single-byte encodings are okay; some multi-byte encodings such as CP950 are not. |
-| Extended Unix Code (EUC-JP, EUC-KR, etc.) | Mostly works, except that EUC-JP maps the '\' character to the Yen symbol (¥).    |
+| Extended Unix Code (EUC-JP, EUC-KR, etc.) | Mostly works, except that EUC-JP maps the \ character to the Yen symbol (¥).      |
 | UTF-16, UTF-32                        | Not supported (multi-byte encodings)                                                  |
-| Big-5, GBK, GB18030                   | Not supported; some characters encode to sequences including the '\' character.       |
-| Shift-JIS                             | Not supported; some characters encode to sequences including the '\' character.       |
+| Big-5, GBK, GB18030                   | Not supported; some characters encode to sequences including the \ character.         |
+| Shift-JIS                             | Not supported; some characters encode to sequences including the \ character.         |
 
 ## API
 
