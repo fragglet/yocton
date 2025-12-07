@@ -12,10 +12,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install doxygen
     - name: make
       run: make
     - name: make check
@@ -23,4 +19,8 @@ jobs:
     - name: make coverage
       run: make coverage
     - name: make docs
-      run: make docs
+      if: ${{ matrix.target == 'ubuntu-latest' }}
+      run: |
+        sudo apt update
+        sudo apt install doxygen
+        make docs
