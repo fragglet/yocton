@@ -430,6 +430,7 @@ int run_test_with_limit(char *filename, int alloc_limit)
 		free(error_data.error_message);
 		free(error_data.expected_output);
 		free(output);
+		fclose(fstream);
 		return success;
 	}
 
