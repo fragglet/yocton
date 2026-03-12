@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.target }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: make
       run: make
     - name: make check
