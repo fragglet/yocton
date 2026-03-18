@@ -1,6 +1,11 @@
 name: C/C++ CI
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:  # Nightly build
+    - cron: "30 0 * * *"
 
 jobs:
   build:
