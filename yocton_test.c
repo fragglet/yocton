@@ -160,7 +160,7 @@ static void enum_value(struct yocton_object *obj)
 		YOCTON_VAR_UINT(property, "expected", unsigned int, expected);
 		YOCTON_VAR_ENUM(property, "value", value, enum_values);
 	}
-	yocton_check(obj, "wrong enum value matched", expected == value);
+	yocton_check(obj, expected == value, "wrong enum value matched");
 }
 
 static void enum2_value(struct yocton_object *obj)
@@ -174,7 +174,7 @@ static void enum2_value(struct yocton_object *obj)
 		YOCTON_VAR_UINT(property, "expected", unsigned int, expected);
 		YOCTON_VAR_ENUM(property, "value", value, enum2_values);
 	}
-	yocton_check(obj, "wrong enum value matched", expected == value);
+	yocton_check(obj, expected == value, "wrong enum value matched");
 }
 
 static void ptr_value(struct yocton_object *obj)
@@ -190,8 +190,8 @@ static void ptr_value(struct yocton_object *obj)
 			*value = yocton_prop_uint(property, sizeof(int));
 		});
 	}
-	yocton_check(obj, "wrong enum value matched",
-	             value != NULL && *value == expected);
+	yocton_check(obj, value != NULL && *value == expected,
+	             "wrong enum value matched");
 	free(value);
 }
 
@@ -200,7 +200,7 @@ static void add_output(struct yocton_object *obj, char **output, const char *s)
 	char *new_output;
 	new_output = (char *) realloc(*output, strlen(*output) + strlen(s) + 2);
 	if (new_output == NULL) {
-		yocton_check(obj, ERROR_ALLOC, 0);
+		yocton_check(obj, 0, ERROR_ALLOC);
 		return;
 	}
 	*output = new_output;
@@ -310,7 +310,7 @@ static void array_values(struct yocton_object *obj, char **output)
 static char *string_dup(struct yocton_object *obj, const char *value)
 {
 	char *result = strdup(value);
-	yocton_check(obj, ERROR_ALLOC, result != NULL);
+	yocton_check(obj, result != NULL, ERROR_ALLOC);
 	return result;
 }
 
@@ -355,12 +355,12 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 		assert(name != NULL);
 		if (!strcmp(name, "special.fail_before_any_property")) {
 			yocton_check(yocton_prop_inner(property),
-			             "failed before any property was read", 0);
+			             0, "failed before any property was read");
 		} else if (!strcmp(name, "special.parse_as_int")) {
 			int throwaway;
-			yocton_check(obj, "failed to parse as integer",
-			             1 == sscanf(yocton_prop_value(property),
-			                         "%d", &throwaway));
+			yocton_check(obj, 1 == sscanf(yocton_prop_value(property),
+			                              "%d", &throwaway),
+			             "failed to parse as integer");
 		}
 		pt = yocton_prop_type(property);
 		if (!strcmp(name, "special.read_as_object")) {
@@ -370,8 +370,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 		}
 		if (!strcmp(name, "special.is_equal")) {
 			yocton_check(
-			    obj, "values not equal",
-			    evaluate_is_equal(yocton_prop_inner(property)));
+			    obj, evaluate_is_equal(yocton_prop_inner(property)),
+			    "values not equal");
 		} else if (!strcmp(name, "special.integer")) {
 			integer_value(yocton_prop_inner(property));
 		} else if (!strcmp(name, "special.uinteger")) {
@@ -391,7 +391,7 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 		}
 		if (!strcmp(name, "special.fail_after_last_property")) {
 			yocton_check(yocton_prop_inner(property),
-			             "failed after last property was read", 0);
+			             0, "failed after last property was read");
 		}
 		if (!strcmp(name, "output")) {
 			add_output(obj, output, yocton_prop_value(property));

@@ -479,8 +479,8 @@ int __yocton_prop_have_error(struct yocton_prop *p)
 	return yocton_have_error(p->parent, NULL, NULL);
 }
 
-void yocton_check(struct yocton_object *obj, const char *error_msg,
-                  int normally_true)
+void yocton_check(struct yocton_object *obj, int normally_true,
+                  const char *error_msg)
 {
 	if (!normally_true) {
 		if (obj->property != NULL) {
@@ -635,7 +635,7 @@ char *yocton_prop_value_dup(struct yocton_prop *p)
 		return NULL;
 	}
 	result = strdup(value);
-	yocton_check(p->parent, ERROR_ALLOC, result != NULL);
+	yocton_check(p->parent, result != NULL, ERROR_ALLOC);
 	return result;
 }
 
