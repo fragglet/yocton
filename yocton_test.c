@@ -354,12 +354,13 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 		name = yocton_prop_name(property);
 		assert(name != NULL);
 		if (!strcmp(name, "special.fail_before_any_property")) {
-			yocton_check(yocton_prop_inner(property),
-			             0, "failed before any property was read");
+			yocton_check(yocton_prop_inner(property), 0,
+			             "failed before any property was read");
 		} else if (!strcmp(name, "special.parse_as_int")) {
 			int throwaway;
-			yocton_check(obj, 1 == sscanf(yocton_prop_value(property),
-			                              "%d", &throwaway),
+			yocton_check(obj,
+			             1 == sscanf(yocton_prop_value(property),
+			                         "%d", &throwaway),
 			             "failed to parse as integer");
 		}
 		pt = yocton_prop_type(property);
@@ -390,8 +391,8 @@ void evaluate_obj(struct yocton_object *obj, char **output)
 			assert(yocton_prop_value(property) != NULL);
 		}
 		if (!strcmp(name, "special.fail_after_last_property")) {
-			yocton_check(yocton_prop_inner(property),
-			             0, "failed after last property was read");
+			yocton_check(yocton_prop_inner(property), 0,
+			             "failed after last property was read");
 		}
 		if (!strcmp(name, "output")) {
 			add_output(obj, output, yocton_prop_value(property));

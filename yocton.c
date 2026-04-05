@@ -80,7 +80,7 @@ static const uint8_t utf8_bom[] = {0xef, 0xbb, 0xbf};
 const char yocton_enum_allow_integers = 0;
 
 static void input_error_append(struct yocton_instream *s, const char *fmt,
-                                va_list args)
+                               va_list args)
 {
 	size_t len = strlen(s->error_buf);
 	vsnprintf(s->error_buf + len, ERROR_BUF_SIZE - len, fmt, args);
@@ -498,8 +498,8 @@ void yocton_check(struct yocton_object *obj, int normally_true,
 
 	// We include the property name in the error message, if we have one:
 	if (obj->property != NULL) {
-		input_error(obj->instream, "property '%s': ",
-		            obj->property->name.data);
+		input_error(obj->instream,
+		            "property '%s': ", obj->property->name.data);
 	}
 
 	va_start(args, error_fmt);
