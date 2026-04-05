@@ -163,10 +163,11 @@ void yocton_free(struct yocton_object *obj);
  * @param obj            @ref yocton_object; may or may not be the top-level
  *                       object.
  * @param normally_true  If this is zero, an error is logged.
- * @param error_msg      The error message to log if normally_true is zero.
+ * @param error_fmt      printf-style format string for error message to log if
+ *                       `normally_true` is zero.
  */
 void yocton_check(struct yocton_object *obj, int normally_true,
-                  const char *error_msg);
+                  const char *error_fmt, ...);
 
 /**
  * Read the next property of an object.
