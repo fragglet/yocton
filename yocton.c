@@ -363,6 +363,7 @@ struct yocton_object {
 
 struct yocton_prop {
 	enum yocton_prop_type type;
+	int matched;
 	struct yocton_buffer name, value;
 	struct yocton_object *parent, *child;
 };
@@ -629,6 +630,15 @@ enum yocton_prop_type yocton_prop_type(struct yocton_prop *p)
 const char *yocton_prop_name(struct yocton_prop *p)
 {
 	return (const char *) p->name.data;
+}
+
+int yocton_prop_match(struct yocton_prop *p, const char *name)
+{
+	if (p->matched) {
+		return 0;
+	}
+	p->matched = !strcmp((const char *) p->name.data, name);
+	return p->matched;
 }
 
 const char *yocton_prop_value(struct yocton_prop *p)

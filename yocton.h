@@ -26,7 +26,6 @@ extern "C" {
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 /**
  * @file yocton.h
@@ -216,6 +215,27 @@ enum yocton_prop_type yocton_prop_type(struct yocton_prop *property);
 const char *yocton_prop_name(struct yocton_prop *property);
 
 /**
+ * Check if the name of a @ref yocton_prop matches the given name.
+ *
+ * If the strings match, then 1 is returned; however, this function will
+ * only ever return 1 once for a given property. Subsequent calls will
+ * return 0.
+ *
+ * This is used to build the @ref YOCTON_IF_PROP macro and other property
+ * matching macros. This allows string matching to be skipped for subsequent
+ * checks after a property name has been matched. However, it does mean that if
+ * two such macros try to match the same property name, only the first will
+ * ever match.
+ *
+ * @param property  The property.
+ * @param name      The name to match.
+ * @return          1 if the property's name matches the name parameter, and
+ *                  this property has not previously matched a name. Otherwise
+ *                  0 is returned.
+ */
+int yocton_prop_match(struct yocton_prop *property, const char *name);
+
+/**
  * Get the string value of a @ref yocton_prop of type
  * @ref YOCTON_PROP_STRING. It is an error to call this for a property that
  * is not of this type. Encoding of the string depends on the input file.
@@ -254,13 +274,15 @@ char *yocton_prop_value_dup(struct yocton_prop *property);
 /**
  * Match a particular property name.
  *
+ * This will only match once for a given property; see @ref yocton_prop_match.
+ *
  * @param property  The property.
  * @param name      Name of property to match.
  * @param then      Code to execute if yocton_prop_name(property) == name.
  */
 #define YOCTON_IF_PROP(property, name, then)                                   \
 	do {                                                                   \
-		if (!strcmp(yocton_prop_name(property), name)) {               \
+		if (yocton_prop_match(property, name)) {                       \
 			then                                                   \
 		}                                                              \
 	} while (0)
@@ -281,6 +303,8 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  * (a pointer to array data) will be reallocated so that enough space is
  * available in the array to append a new element. The argument `then` is then
  * evaluated to (conditionally) append the new element.
+ *
+ * This will only match once for a given property; see @ref yocton_prop_match.
  *
  * Example that matches a property named "foo" to populate an array of structs:
  * ~~~~~~~~~~~~~~~~~~~~~~~
@@ -322,6 +346,8 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  * important that the variable is initialized to NULL before the first time
  * this macro is used to set it.
  *
+ * This will only match once for a given property; see @ref yocton_prop_match.
+ *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   // Example of data being parsed:
@@ -350,6 +376,8 @@ int __yocton_prop_alloc(struct yocton_prop *p, void **ptr, size_t size);
  *
  * If the name of `property` is equal to `propname`, the property value will be
  * appended to the string array pointed at by `var`.
+ *
+ * This will only match once for a given property; see @ref yocton_prop_match.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -434,6 +462,8 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  * This will work with any kind of signed integer variable, but the type of the
  * variable must be provided.
  *
+ * This will only match once for a given property; see @ref yocton_prop_match.
+ *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   // Example of data being parsed:
@@ -462,6 +492,8 @@ signed long long yocton_prop_int(struct yocton_prop *property, size_t n);
  * If the name of `property` is equal to `propname`, the property value will be
  * parsed as a signed integer and appended to the array pointed at by
  * `var`.
+ *
+ * This will only match once for a given property; see @ref yocton_prop_match.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -523,6 +555,8 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  * This will work with any kind of unssigned integer variable, but the type of
  * the variable must be provided.
  *
+ * This will only match once for a given property; see @ref yocton_prop_match.
+ *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   // Example of data being parsed:
@@ -551,6 +585,8 @@ unsigned long long yocton_prop_uint(struct yocton_prop *property, size_t n);
  * If the name of `property` is equal to `propname`, the property value will be
  * parsed as an unsigned integer and appended to the array pointed at by
  * `var`.
+ *
+ * This will only match once for a given property; see @ref yocton_prop_match.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -621,6 +657,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *property,
  * will be initialized to an enum value that matches a name from the given
  * list.
  *
+ * This will only match once for a given property; see @ref yocton_prop_match.
+ *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   // Example of data to be parsed:
@@ -652,6 +690,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *property,
  *
  * If the name of `property` is equal to `propname`, the property value will be
  * parsed as an enum and then appended to the array pointed at by `var`.
+ *
+ * This will only match once for a given property; see @ref yocton_prop_match.
  *
  * Example to populate an array "bar" from a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -698,6 +738,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *property,
  * be set. This usually means that the property must be unique in the input.
  * This is to prevent a memory leak if the pointer is allocated twice.
  *
+ * This will only match once for a given property; see @ref yocton_prop_match.
+ *
  * Example to match a property named "foo":
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *   // Example of data to be parsed:
@@ -739,6 +781,8 @@ unsigned int yocton_prop_enum(struct yocton_prop *property,
  * `var[len_var]`, and then increment `len_var`. If `len_var`
  * is not incremented, the memory block that was allocated will be freed, the
  * assumption being that it was not needed after all.
+ *
+ * This will only match once for a given property; see @ref yocton_prop_match.
  *
  * Example that matches a property named "foo" to populate an array of struct
  * pointers:
