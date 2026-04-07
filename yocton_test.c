@@ -477,8 +477,8 @@ int run_test_with_limit(char *filename, int alloc_limit)
 	free(output);
 
 	if (alloc_test_get_allocated() != 0) {
-		fprintf(stderr, "%s: %d bytes still allocated after test\n",
-		        filename, alloc_test_get_allocated());
+		fprintf(stderr, "%s: %ld bytes still allocated after test\n",
+		        filename, (long) alloc_test_get_allocated());
 		success = 0;
 	}
 
